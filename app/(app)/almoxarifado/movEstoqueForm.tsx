@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Terminal } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -57,7 +57,7 @@ export default function MoviEstoque() {
     });
   }, [allPecas, valueItem]);
 
-  const form = useForm({
+  const form = useForm<movEstoque>({
     resolver: zodResolver(formSchema),
   });
 
@@ -74,7 +74,7 @@ export default function MoviEstoque() {
     },
   });
 
-  function onSubmit(values: any) {
+  function onSubmit(values: movEstoque) {
     if (qtd < Number(values.quantidade) && movEstoque === "sub") {
       console.log("teste");
       setAlert(true);
