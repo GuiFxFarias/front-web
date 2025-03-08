@@ -36,7 +36,7 @@ export default function RootLayout({
 
   return (
     <Query>
-      <html lang="en">
+      <html lang="en" className="overflow-y-hidden h-[100vh]">
         <body className={` antialiased flex flex-row min-h-screen w-full`}>
           {noSidebarRoutes.includes(pathname) ? null : (
             <aside className="w-64 bg-white shadow-lg">
@@ -84,7 +84,7 @@ export default function RootLayout({
             </aside>
           )}
 
-          <main className="w-full">{children}</main>
+          <main className="w-full overflow-y-hidden">{children}</main>
         </body>
       </html>
     </Query>

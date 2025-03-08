@@ -61,7 +61,7 @@ export default function MoviEstoque() {
     resolver: zodResolver(formSchema),
   });
 
-  const mutatePutService = useMutation({
+  const mutatePutPecaQtd = useMutation({
     mutationFn: ({
       id,
       body,
@@ -81,7 +81,7 @@ export default function MoviEstoque() {
     }
 
     if (movEstoque === "add") {
-      mutatePutService.mutate({
+      mutatePutPecaQtd.mutate({
         id: values.descProduto,
         body: {
           ID: Number(values.descProduto),
@@ -90,7 +90,7 @@ export default function MoviEstoque() {
       });
       setAlert(false);
     } else if (qtd > Number(values.quantidade) && movEstoque === "sub") {
-      mutatePutService.mutate({
+      mutatePutPecaQtd.mutate({
         id: values.descProduto,
         body: {
           ID: Number(values.descProduto),

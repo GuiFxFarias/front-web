@@ -4,60 +4,31 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { NewServiceDialog } from "./newServiceDialog";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useQuery } from "react-query";
 import { getEquipamentos } from "./api/getEquipamentos";
 import { IEquipamento } from "@/lib/interface/Iequipamento";
 import { IService } from "@/lib/interface/IService";
 import { DialogVerProposta } from "@/app/(app)/servicos/dialogVerProposta";
 import { getServices } from "./novoServico/api/getService";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { putCodService } from "./novoServico/api/putService";
 
-const formSchema = z.object({
-  status: z.string(),
-});
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export default function ServicesItens() {
   const [search, setSearch] = useState<string>("");
-
-  const queryClient = useQueryClient();
-
-  const statusService = ["Não iniciado", "Em progresso", "Concluído"];
+  const [sStatus, setSstatus] = useState("");
 
   const { data: services = [], isLoading } = useQuery(
     ["services"],
     getServices
   );
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-  });
-
-  const mutatePutService = useMutation({
-    mutationFn: ({ id, body }: { id: string; body: { status: string } }) =>
-      putCodService(id, body),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["services"]);
-    },
-  });
 
   const { data: equipamentos } = useQuery(["equipamentos"], getEquipamentos);
 
@@ -101,45 +72,6 @@ export default function ServicesItens() {
                         descCliente={data.descCliente}
                         descEquipamento={data.equipamentoDescricao}
                       />
-                      <Form {...form}>
-                        <form className="flex space-x-2">
-                          <FormField
-                            control={form.control}
-                            name="status"
-                            render={({ field }) => (
-                              <FormItem>
-                                <Select
-                                  onValueChange={(value) => {
-                                    const status = { status: value };
-                                    mutatePutService.mutate({
-                                      body: status,
-                                      id: data.codService as string,
-                                    });
-                                  }}
-                                  defaultValue={data.status}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger className="w-[180px]">
-                                      <SelectValue placeholder="Status do projeto" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectGroup>
-                                      <SelectLabel>Status</SelectLabel>
-                                      {statusService.map((status, index) => (
-                                        <SelectItem value={status} key={index}>
-                                          {status}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectGroup>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </form>
-                      </Form>
                     </div>
                   </CardHeader>
                   <CardContent>
