@@ -154,7 +154,7 @@ export default function AlmoxarifadoItens() {
                         .toLocaleString("pt-BR")
                         .slice(0, -3)}
                     </p>
-                    {equipamentos.map((equip: IEquipamento) => {
+                    {equipamentos?.map((equip: IEquipamento) => {
                       return (
                         <div key={equip.ID}>
                           <p>

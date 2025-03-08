@@ -14,47 +14,117 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { postPecas } from "./api/postAlmoxarife";
+import { useMutation, useQueryClient } from "react-query";
 
-// Definição do schema de validação
-const formSchema = z.object({
-  itemID: z.string(),
-  carcaca: z.string(),
-  visor: z.string(),
-  numeroItem: z.number(), // ! Se for transmissor ou posicionador
-  quantidade: z.number(),
-  descricao: z.string(),
-  codigo: z.string(),
-  observacao: z.string(),
-  dataCadastro: z.string(),
-  valorPeca: z.string(),
-  nSerieSensor: z.string(),
-  faixaSensor: z.string(),
-  dataFabricacao: z.string(),
-  protocolo: z.string(),
+interface ItemFormData {
+  itemID: string;
+  carcaca: "1" | "0"; // Checkbox selection
+  visor: "1" | "0"; // Checkbox selection
+  numeroItem: number;
+  descricao: string;
+  codigo: string;
+  observacao: string;
+  valorPeca: string;
+  nSerieSensor: string;
+  nSeriePlaca: string;
+  faixaSensor: string;
+  dataFabricacao: string;
+  protocolo: string;
+  modeloPlaca: string;
+}
+
+interface IModel {
+  id: number;
+  value: string;
+}
+
+export const formSchema = z.object({
+  itemID: z.enum(["1", "2"], {
+    required_error: "Selecione um tipo de equipamento.",
+  }),
+  carcaca: z.string().min(1, "Carcaça é obrigatória."),
+  visor: z.string().min(1, "Visor é obrigatório."),
+  numeroItem: z.number().min(1, "Número do item deve ser maior que zero."),
+  // quantidade: vou enviar 1 por padrao
+  descricao: z.string().min(1, "Descrição é obrigatória."),
+  codigo: z.string().optional(),
+  observacao: z.string().optional(),
+  // dataCadastro: timestamp
+  valorPeca: z.string().min(1, "Valor da peça é obrigatório."),
+  nSerieSensor: z.string().optional(),
+  nSeriePlaca: z.string().optional(),
+  faixaSensor: z.string().optional(),
+  dataFabricacao: z.string().optional(),
+  protocolo: z.string().optional(),
+  modeloPlaca: z.string().optional(),
 });
 
 export function RegisterPecasForm() {
-  const form = useForm({
+  const form = useForm<ItemFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      carcaca: "",
-      visor: "",
-      numeroItem: "",
-      quantidade: "",
+      itemID: "1",
+      carcaca: "1",
+      visor: "0",
+      numeroItem: 1,
       descricao: "",
       codigo: "",
       observacao: "",
-      dataCadastro: "",
       valorPeca: "",
       nSerieSensor: "",
+      nSeriePlaca: "",
       faixaSensor: "",
       dataFabricacao: "",
       protocolo: "",
+      modeloPlaca: "",
     },
   });
 
-  function onSubmit(values: any) {
-    console.log(values);
+  const [equipamento, setEquipamento] = useState<string>();
+  const [carcaca, setCarcaca] = useState<string>();
+  const [modelo, setModelo] = useState<string>();
+
+  const modelos = [
+    { id: 1, value: "SMAR" },
+    { id: 2, value: "FOXBORO" },
+    { id: 3, value: "SIEMENS/BRAY" },
+    { id: 4, value: "UNIÃO BRASIL" },
+    { id: 5, value: "SPIRAX SARCO" },
+    { id: 6, value: "SANSOM" },
+    { id: 7, value: "METSO" },
+  ];
+
+  const protocolo = [
+    { id: 1, value: "HART" },
+    { id: 2, value: "PROFIBUS" },
+  ];
+
+  const queryClient = useQueryClient();
+
+  const mutatePecas = useMutation({
+    mutationFn: postPecas,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["produtos_transmissor"]);
+    },
+  });
+
+  function onSubmit(values: ItemFormData) {
+    const newValue = {
+      ...values,
+      Quantidade: 1,
+    };
+
+    // console.log(newValue);
+    mutatePecas.mutate(newValue);
   }
 
   return (
@@ -63,7 +133,50 @@ export function RegisterPecasForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 rounded-md w-[65vw] h-[60vh] overflow-y-auto px-2"
       >
-        {/* Campo: Carcaça */}
+        {/* Campo: Tipo de Equipamento (Radio Buttons) */}
+        <FormField
+          control={form.control}
+          name="itemID"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de peça</FormLabel>
+              <FormControl>
+                <div className="flex space-x-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      value="1"
+                      checked={field.value === "1"}
+                      onChange={() => {
+                        field.onChange("1");
+                        setEquipamento("1");
+                      }}
+                      className="w-5 h-5"
+                    />
+                    <span>Transmissor</span>
+                  </label>
+
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      value="2"
+                      checked={field.value === "2"}
+                      onChange={() => {
+                        field.onChange("2");
+                        setEquipamento("2");
+                      }}
+                      className="w-5 h-5"
+                    />
+                    <span>Posicionador</span>
+                  </label>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Campo: Carcaça (Checkboxes) */}
         <FormField
           control={form.control}
           name="carcaca"
@@ -71,14 +184,42 @@ export function RegisterPecasForm() {
             <FormItem>
               <FormLabel>Carcaça</FormLabel>
               <FormControl>
-                <Input placeholder="Digite a Carcaça" {...field} />
+                <div className="flex space-x-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      value="1"
+                      checked={field.value === "1"}
+                      onChange={() => {
+                        field.onChange("1");
+                        setCarcaca("1");
+                      }}
+                      className="w-5 h-5"
+                    />
+                    <span>Sim</span>
+                  </label>
+
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      value="0"
+                      checked={field.value === "0"}
+                      onChange={() => {
+                        setCarcaca("0");
+                        field.onChange("0");
+                      }}
+                      className="w-5 h-5"
+                    />
+                    <span>Não</span>
+                  </label>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Campo: Visor */}
+        {/* Campo: Visor (Checkboxes) */}
         <FormField
           control={form.control}
           name="visor"
@@ -86,7 +227,29 @@ export function RegisterPecasForm() {
             <FormItem>
               <FormLabel>Visor</FormLabel>
               <FormControl>
-                <Input placeholder="Digite o Visor" {...field} />
+                <div className="flex space-x-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      value="1"
+                      checked={field.value === "1"}
+                      onChange={() => field.onChange("1")}
+                      className="w-5 h-5"
+                    />
+                    <span>Sim</span>
+                  </label>
+
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      value="0"
+                      checked={field.value === "0"}
+                      onChange={() => field.onChange("0")}
+                      className="w-5 h-5"
+                    />
+                    <span>Não</span>
+                  </label>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -104,25 +267,6 @@ export function RegisterPecasForm() {
                 <Input
                   type="number"
                   placeholder="Digite o número do item"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Campo: Quantidade */}
-        <FormField
-          control={form.control}
-          name="quantidade"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Quantidade</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="Digite a quantidade"
                   {...field}
                 />
               </FormControl>
@@ -169,22 +313,7 @@ export function RegisterPecasForm() {
             <FormItem>
               <FormLabel>Observação</FormLabel>
               <FormControl>
-                <Input placeholder="Digite a observação" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Campo: Data de Cadastro */}
-        <FormField
-          control={form.control}
-          name="dataCadastro"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Data de Cadastro</FormLabel>
-              <FormControl>
-                <Input type="datetime-local" {...field} />
+                <Input placeholder="Digite uma observação" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -199,52 +328,30 @@ export function RegisterPecasForm() {
             <FormItem>
               <FormLabel>Valor da Peça</FormLabel>
               <FormControl>
-                <Input type="text" placeholder="Digite o valor" {...field} />
+                <Input
+                  type="number"
+                  step="0.01"
+                  placeholder="Digite o valor"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Campo: Número de Série do Sensor */}
+        {/* Campo: Numero de serie da placa */}
         <FormField
           control={form.control}
-          name="nSerieSensor"
+          name="nSeriePlaca"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Número de Série do Sensor</FormLabel>
+              <FormLabel>Número de Série da Placa</FormLabel>
               <FormControl>
-                <Input placeholder="Digite o número de série" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Campo: Faixa do Sensor */}
-        <FormField
-          control={form.control}
-          name="faixaSensor"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Faixa do Sensor</FormLabel>
-              <FormControl>
-                <Input placeholder="Digite a faixa" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Campo: Data de Fabricação */}
-        <FormField
-          control={form.control}
-          name="dataFabricacao"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Data de Fabricação</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
+                <Input
+                  placeholder="Digite o número de série da placa"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -258,16 +365,107 @@ export function RegisterPecasForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Protocolo</FormLabel>
-              <FormControl>
-                <Input placeholder="Digite o protocolo" {...field} />
-              </FormControl>
-              <FormMessage />
+              <Select onValueChange={field.onChange}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Escolha o protocolo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {protocolo.map((item: IModel) => (
+                    <SelectItem key={item.id} value={item.value}>
+                      {item.value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </FormItem>
           )}
         />
 
+        {/* Campo: Modelo da Placa */}
+        <FormField
+          control={form.control}
+          name="modeloPlaca"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Modelo da placa</FormLabel>
+              <Select
+                onValueChange={(value) => {
+                  // console.log("Valor selecionado:", value);
+                  field.onChange(value);
+                  setModelo(value);
+                }}
+                value={modelo}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Modelo da placa" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {modelos.map((item: IModel) => (
+                    <SelectItem key={item.id} value={item.value}>
+                      {item.value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
+
+        {equipamento == "2" || carcaca == "0" ? null : (
+          <>
+            {/* Campo: Número de Série do Sensor */}
+            <FormField
+              control={form.control}
+              name="nSerieSensor"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Número de Série do Sensor</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Digite o número de série" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Campo: Faixa do Sensor */}
+            <FormField
+              control={form.control}
+              name="faixaSensor"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Faixa do Sensor</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Digite a faixa" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Campo: Data de Fabricação */}
+            <FormField
+              control={form.control}
+              name="dataFabricacao"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Data de Fabricação</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
+
         {/* Botão de Envio */}
-        <Button type="submit">Enviar</Button>
+        <Button type="submit">Cadastrar</Button>
       </form>
     </Form>
   );

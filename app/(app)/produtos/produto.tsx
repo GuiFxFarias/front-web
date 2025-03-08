@@ -69,7 +69,7 @@ export default function ProdutoItens() {
     <div className="flex-1 p-8">
       {/* Conteúdo Principal */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Lista de Serviços</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Lista de Vendas</h1>
         <NewSaleDialog />
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2Icon } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -129,11 +129,10 @@ export default function MoviEstoque() {
               <FormItem>
                 <Select
                   onValueChange={(value) => {
-                    // console.log("Valor selecionado:", value);
                     field.onChange(value);
                     setValueItem(value);
                   }}
-                  value={valueItem}
+                  value={valueItem || ""}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -158,7 +157,10 @@ export default function MoviEstoque() {
             name="quantidade"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Quantidade em estoque: {qtd}</FormLabel>
+                <FormLabel>
+                  Quantidade em estoque:{" "}
+                  {isLoading ? <Loader2Icon className="animate-spin" /> : qtd}
+                </FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
