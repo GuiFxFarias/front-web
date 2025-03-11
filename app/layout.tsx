@@ -1,12 +1,12 @@
 "use client";
 
-import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
 import Query from "./layoutClient";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import LoginPage from "./(auth)/login/page";
+import Cookies from "js-cookie";
 
 // const geistSans = localFont({
 //   src: "./fonts/GeistVF.woff",
@@ -76,7 +76,14 @@ export default function RootLayout({
 
                 {/* Botão de Logout */}
                 <div className="p-6">
-                  <Button variant="destructive" className="w-full">
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                    onClick={() => {
+                      Cookies.remove("token");
+                      window.location.reload();
+                    }}
+                  >
                     Logout
                   </Button>
                 </div>
@@ -84,7 +91,9 @@ export default function RootLayout({
             </aside>
           )}
 
-          <main className="w-full overflow-y-hidden">{children}</main>
+          <main className="w-full overflow-y-hidden">
+            {pathname === "/" ? <LoginPage /> : children}
+          </main>
         </body>
       </html>
     </Query>

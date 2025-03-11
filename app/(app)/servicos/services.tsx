@@ -11,16 +11,6 @@ import { IService } from "@/lib/interface/IService";
 import { DialogVerProposta } from "@/app/(app)/servicos/dialogVerProposta";
 import { getServices } from "./novoServico/api/getService";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-
 export default function ServicesItens() {
   const [search, setSearch] = useState<string>("");
   const [sStatus, setSstatus] = useState("");

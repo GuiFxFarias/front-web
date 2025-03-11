@@ -1,7 +1,12 @@
+"use server";
+
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { getServerSession } from "next-auth";
 
-export default function Painel() {
+export default async function Painel() {
+  const session = getServerSession();
+
   return (
     <div className="flex w-full min-h-screen bg-gray-100">
       {/* Dashboard */}

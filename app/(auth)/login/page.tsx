@@ -15,12 +15,17 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+
 const loginSchema = z.object({
   email: z.string().email("Por favor, insira um email válido."),
   password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres."),
 });
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const form = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -29,9 +34,34 @@ export default function LoginPage() {
     },
   });
 
-  function onSubmit(values: { email: string; password: string }) {
-    console.log("Login realizado com os dados:", values);
-    // Aqui você pode adicionar lógica para autenticar o usuário
+  async function onSubmit(values: { email: string; password: string }) {
+    try {
+      const res = await fetch(`http://localhost:3001/usuarios/login`, {
+        method: "POST",
+        body: JSON.stringify(values), // ✅ Send full object { email, password }
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const resJson = await res.json();
+
+      if (res.ok) {
+        if (resJson.token) {
+          Cookies.set("token", resJson.token, { expires: 1 }); // Expires in 1 day
+          console.log("success");
+
+          // Ensure router is properly defined (for Next.js)
+          router.push("/painel");
+        } else {
+          console.error("Erro no login: Token não recebido.");
+        }
+      } else {
+        console.error("Erro no login:", resJson);
+      }
+    } catch (error: any) {
+      console.error("Erro no login:", error.message);
+    }
   }
 
   return (
