@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { postPecas } from "./api/postAlmoxarife";
 import { useMutation, useQueryClient } from "react-query";
+import DialogConfirmForm from "@/components/dialogConfirForm";
 
 interface ItemFormData {
   itemID: string;
@@ -53,7 +54,7 @@ export const formSchema = z.object({
   }),
   carcaca: z.string().min(1, "Carcaça é obrigatória."),
   visor: z.string().min(1, "Visor é obrigatório."),
-  numeroItem: z.number().min(1, "Número do item deve ser maior que zero."),
+  numeroItem: z.number(),
   // quantidade: vou enviar 1 por padrao
   descricao: z.string().min(1, "Descrição é obrigatória."),
   codigo: z.string().optional(),
@@ -92,6 +93,7 @@ export function RegisterPecasForm() {
   const [equipamento, setEquipamento] = useState<string>();
   const [carcaca, setCarcaca] = useState<string>();
   const [modelo, setModelo] = useState<string>();
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
 
   const modelos = [
     { id: 1, value: "SMAR" },
@@ -123,15 +125,18 @@ export function RegisterPecasForm() {
       Quantidade: 1,
     };
 
-    // console.log(newValue);
     mutatePecas.mutate(newValue);
+
+    if (mutatePecas.isSuccess) {
+      setOpenDialog(true);
+    }
   }
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4 rounded-md w-[65vw] h-[60vh] overflow-y-auto px-2"
+        className="space-y-4 rounded-md w-[65vw] h-[42vh] overflow-y-auto px-2"
       >
         {/* Campo: Tipo de Equipamento (Radio Buttons) */}
         <FormField
@@ -268,6 +273,7 @@ export function RegisterPecasForm() {
                   type="number"
                   placeholder="Digite o número do item"
                   {...field}
+                  onChange={(e) => field.onChange(e.target.valueAsNumber || 0)} // Convert to number
                 />
               </FormControl>
               <FormMessage />
@@ -467,6 +473,12 @@ export function RegisterPecasForm() {
         {/* Botão de Envio */}
         <Button type="submit">Cadastrar</Button>
       </form>
+      <DialogConfirmForm
+        title="Peça cadastrada"
+        text="Sua peça foi cadastrada com sucesso!"
+        open={openDialog}
+        setOpen={(open: boolean) => setOpenDialog(open)}
+      />
     </Form>
   );
 }

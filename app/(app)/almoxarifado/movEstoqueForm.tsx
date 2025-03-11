@@ -28,6 +28,7 @@ import { getAllPecas } from "./api/getAllPecas";
 import { IPecas } from "@/lib/interface/Ipecas";
 import { useEffect, useState } from "react";
 import { putPecaQtd } from "./api/putPecaQtd";
+import DialogConfirmForm from "@/components/dialogConfirForm";
 
 interface movEstoque {
   descProduto: string;
@@ -45,6 +46,7 @@ export default function MoviEstoque() {
   const [movEstoque, setMovEstoque] = useState("");
   const [alert, setAlert] = useState<boolean>(false);
   const [qtd, setQtd] = useState<number>(0);
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
 
   const { data: allPecas = [], isLoading } = useQuery(
     ["allPecas"],
@@ -184,6 +186,12 @@ export default function MoviEstoque() {
           </div>
         </form>
       )}
+      <DialogConfirmForm
+        title="Sucesso"
+        text="Sua movimentação de estoque foi confirmada!"
+        open={openDialog}
+        setOpen={(open: boolean) => setOpenDialog(open)}
+      />
     </Form>
   );
 }

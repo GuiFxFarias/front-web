@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { useMutation, useQueryClient } from "react-query";
 import { useState } from "react";
+import DialogConfirmForm from "@/components/dialogConfirForm";
 
 export interface IProdutoPosicionadorFormData {
   descricaoProduto: string;
@@ -82,6 +83,7 @@ export default function PosicionadorForm() {
     { id: 2, value: "PROFIBUS" },
   ];
   const [modelo, setModelo] = useState<string>();
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
   const queryClient = useQueryClient();
 
   const mutatePosicionador = useMutation({
@@ -260,6 +262,12 @@ export default function PosicionadorForm() {
         {/* Botão de Envio */}
         <Button type="submit">Cadastrar</Button>
       </form>
+      <DialogConfirmForm
+        title="Equipamento cadastrado"
+        text="Seu equipamento foi cadastrado com sucesso!"
+        open={openDialog}
+        setOpen={(open: boolean) => setOpenDialog(open)}
+      />
     </Form>
   );
 }

@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import DialogConfirmForm from "@/components/dialogConfirForm";
 
 interface IProdutoTransmissorFormData {
   descricaoProduto: string;
@@ -70,6 +71,8 @@ export default function TransmissorForm() {
     },
   });
   const [modelo, setModelo] = useState<string>();
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+
   const queryClient = useQueryClient();
 
   const mutateTransmissor = useMutation({
@@ -283,6 +286,12 @@ export default function TransmissorForm() {
         {/* Botão de Envio */}
         <Button type="submit">Cadastrar</Button>
       </form>
+      <DialogConfirmForm
+        title="Equipamento cadastrado"
+        text="Seu equipamento foi cadastrado com sucesso!"
+        open={openDialog}
+        setOpen={(open: boolean) => setOpenDialog(open)}
+      />
     </Form>
   );
 }
