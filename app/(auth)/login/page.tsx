@@ -34,11 +34,11 @@ export default function LoginPage() {
     },
   });
 
-  async function onSubmit(values: { email: string; password: string }) {
+  async function onSubmit(values: { Email: string; Senha: string }) {
     try {
       const res = await fetch(`http://localhost:3001/usuarios/login`, {
         method: "POST",
-        body: JSON.stringify(values), // ✅ Send full object { email, password }
+        body: JSON.stringify(values),
         headers: {
           "Content-Type": "application/json",
         },
@@ -46,12 +46,13 @@ export default function LoginPage() {
 
       const resJson = await res.json();
 
+      console.log(resJson);
+
       if (res.ok) {
         if (resJson.token) {
-          Cookies.set("token", resJson.token, { expires: 1 }); // Expires in 1 day
+          Cookies.set("token", resJson.token);
           console.log("success");
 
-          // Ensure router is properly defined (for Next.js)
           router.push("/painel");
         } else {
           console.error("Erro no login: Token não recebido.");

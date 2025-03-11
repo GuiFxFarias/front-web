@@ -30,6 +30,8 @@ import {
 } from "@/components/ui/select";
 import { putCodService } from "../servicos/novoServico/api/putService";
 import { RegisterProduct } from "./newRegisterDialog";
+import { getAllPecas } from "./api/getAllPecas";
+import { Item } from "@/lib/interface/Ipecas";
 
 const formSchema = z.object({
   status: z.string(),
@@ -59,10 +61,13 @@ export default function AlmoxarifadoItens() {
     },
   });
 
-  const { data: equipamentos } = useQuery(["equipamentos"], getEquipamentos);
+  const { data: allPecas = [], isLoading: loading } = useQuery(
+    ["allPecas"],
+    getAllPecas
+  );
 
-  const filteredServivces = services.filter((service: IService) =>
-    service.descCliente?.toLowerCase().includes(search.toLowerCase())
+  const filteredPecas = allPecas.filter((item: Item) =>
+    item.Descricao?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -86,85 +91,26 @@ export default function AlmoxarifadoItens() {
       </div>
 
       {/* Lista de Serviços */}
-      <div className="grid grid-cols-1 gap-4 overflow-y-auto max-h-[50vh]">
+      <div className="grid grid-cols-1 gap-1 overflow-y-auto max-h-[50vh]">
         {/* Card de Serviço 1 */}
         {isLoading ? (
           "Carregando..."
         ) : (
           <>
-            {filteredServivces.map((data: IService) => {
+            {filteredPecas.map((data: Item) => {
               return (
-                <Card key={data.id}>
-                  <CardHeader className="flex justify-between flex-row items-center">
-                    <CardTitle>Serviço {data.codService}</CardTitle>
-                    <div className="flex items-center space-x-2">
-                      <DialogVerProposta
-                        codService={data.codService}
-                        descCliente={data.descCliente}
-                        descEquipamento={data.equipamentoDescricao}
-                      />
-                      <Form {...form}>
-                        <form className="flex space-x-2">
-                          <FormField
-                            control={form.control}
-                            name="status"
-                            render={({ field }) => (
-                              <FormItem>
-                                <Select
-                                  onValueChange={(value) => {
-                                    const status = { status: value };
-                                    mutatePutService.mutate({
-                                      body: status,
-                                      id: data.codService as string,
-                                    });
-                                  }}
-                                  defaultValue={data.status}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger className="w-[180px]">
-                                      <SelectValue placeholder="Status do projeto" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectGroup>
-                                      <SelectLabel>Status</SelectLabel>
-                                      {statusService.map((status, index) => (
-                                        <SelectItem value={status} key={index}>
-                                          {status}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectGroup>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </form>
-                      </Form>
+                <Card key={data.ID} className="h-[5vh]">
+                  <CardContent className="p-2">
+                    <div className="flex justify-between">
+                      <p className="w-[40%] truncate">{data.Descricao}</p>
+                      <p className="text-gray-600 w-[45%]">
+                        Valor da peça (única):
+                        {data.valorPeca}
+                      </p>
+                      <p className="text-gray-800 w-[15%] font-semibold">
+                        Quantidade: {data.Quantidade}
+                      </p>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-800 font-semibold">
-                      Cliente: {data.descCliente}
-                    </p>
-                    <p className="text-gray-600">
-                      Realizado em:{" "}
-                      {new Date(data.DataCadastro)
-                        .toLocaleString("pt-BR")
-                        .slice(0, -3)}
-                    </p>
-                    {equipamentos?.map((equip: IEquipamento) => {
-                      return (
-                        <div key={equip.ID}>
-                          <p>
-                            {data.equipamentoID == String(equip.ID)
-                              ? `Equipamento: ${equip.Descricao}`
-                              : null}
-                          </p>
-                        </div>
-                      );
-                    })}
                   </CardContent>
                 </Card>
               );

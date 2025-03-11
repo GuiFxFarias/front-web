@@ -1,4 +1,4 @@
-export interface IPecas {
+export interface Item {
   ID: number;
   ItemID: number;
   Carcaca: string;
@@ -7,11 +7,13 @@ export interface IPecas {
   Quantidade: number;
   Descricao: string;
   Codigo: string;
-  Observacao: string;
-  DataCadastro: string; // Timestamp como string (ISO format)
-  valorPeca: string;
-  nSerieSensor: string;
-  faixaSensor: string;
-  dataFabricacao: string; // Date como string (ISO format)
-  protocolo: string;
+  Observacao: string | null;
+  DataCadastro: string; // Use Date if parsing to a Date object
+  valorPeca: string; // Use number if converting it
+  nSeriePlaca: string | null;
+  protocolo: string | null;
+  nSerieSensor: string | null;
+  faixaSensor: string | null;
+  dataFabricacao: string | null;
+  modeloPlaca: string | null;
 }
