@@ -14,27 +14,35 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import { Loader2 } from "lucide-react";
+
+interface IForm {
+  Email: string;
+  Senha: string;
+}
 
 const loginSchema = z.object({
-  email: z.string().email("Por favor, insira um email válido."),
-  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres."),
+  Email: z.string().email("Por favor, insira um email válido."),
+  Senha: z.string().min(6, "A senha deve ter no mínimo 6 caracteres."),
 });
 
 export default function LoginPage() {
   const router = useRouter();
+  const [loading, setLoading] = React.useState(false);
 
-  const form = useForm({
+  const form = useForm<IForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      Email: "",
+      Senha: "",
     },
   });
 
-  async function onSubmit(values: { Email: string; Senha: string }) {
+  async function onSubmit(values: IForm) {
+    console.log(values);
+
     try {
       const res = await fetch(`http://localhost:3001/usuarios/login`, {
         method: "POST",
@@ -45,14 +53,14 @@ export default function LoginPage() {
       });
 
       const resJson = await res.json();
-
-      console.log(resJson);
+      setLoading(true);
 
       if (res.ok) {
         if (resJson.token) {
           Cookies.set("token", resJson.token);
           console.log("success");
 
+          setLoading(false);
           router.push("/painel");
         } else {
           console.error("Erro no login: Token não recebido.");
@@ -75,7 +83,7 @@ export default function LoginPage() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {/* Campo de Email */}
             <FormField
-              name="email"
+              name="Email"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
@@ -93,7 +101,7 @@ export default function LoginPage() {
             />
             {/* Campo de Senha */}
             <FormField
-              name="password"
+              name="Senha"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
@@ -110,8 +118,19 @@ export default function LoginPage() {
               )}
             />
             {/* Botão de Login */}
-            <Button type="submit" className="w-full">
-              <Link href={"/painel"}>Entrar</Link>
+            <Button
+              type="submit"
+              className="w-full flex justify-center items-center"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  Entrando...
+                  <Loader2 className="animate-spin mr-2" size={20} />{" "}
+                </>
+              ) : (
+                <Link href="/painel">Entrar</Link>
+              )}
             </Button>
           </form>
         </Form>

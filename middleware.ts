@@ -2,21 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 const SECRET_KEY = new TextEncoder().encode(
-  process.env.JWT_SECRET || "your_secret_key"
+  "dkjasdhkj32khu4khj32jnksdahf1kjdas"
 );
-
 export async function middleware(req: NextRequest) {
-  // ✅ Extract token from cookies
   const token = req.cookies.get("token")?.value;
-
   if (!token) {
     console.log("Token not found in cookies");
     return NextResponse.redirect(new URL("/", req.url));
   }
-
   try {
     await jwtVerify(token, SECRET_KEY);
-
     return NextResponse.next();
   } catch (error) {
     console.error("Invalid token:", error);
