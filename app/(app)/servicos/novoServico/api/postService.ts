@@ -12,6 +12,9 @@ export interface IServPeca {
   peca_id: number;
   quantidade_peca: number;
   idCliente: string;
+  insVisual: string;
+  manuPreventiva: boolean;
+  itemService: string;
 }
 
 export async function getEquipamentoId(id: string) {

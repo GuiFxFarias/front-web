@@ -6,7 +6,7 @@ import autoTable from "jspdf-autotable";
 import Img from "@/assets/img/CocertLogo.png";
 import { useQuery } from "react-query";
 import { getServicesId } from "../api/postService";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getClientesId } from "../../api/clientes";
 import { IServiceID } from "@/lib/interface/IServiceID";
 
@@ -15,6 +15,7 @@ export default function Relatorio() {
   const searchParams = useSearchParams();
   const codService = searchParams.get("codService");
   const idCliente = searchParams.get("idCliente");
+  const router = useRouter();
 
   // Obtém a data atual
   const dataAtual = new Date();
@@ -503,6 +504,16 @@ export default function Relatorio() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Botão para adicionar mais um item a proposta */}
+      <div className="mt-6 flex justify-end">
+        <Button
+          onClick={() => router.back()}
+          className="bg-blue-500 text-white"
+        >
+          Adicionar mais um item
+        </Button>
       </div>
 
       {/* Botão para gerar PDF */}
