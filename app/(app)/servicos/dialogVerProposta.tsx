@@ -1,23 +1,23 @@
-"use client";
+'use client'
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { DialogDescription } from "@radix-ui/react-dialog";
-import { IServiceID } from "@/lib/interface/IServiceID";
-import { useEffect, useState } from "react";
+} from '@/components/ui/dialog'
+import { DialogDescription } from '@radix-ui/react-dialog'
+import { IServiceID } from '@/lib/interface/IServiceID'
+import { useEffect, useState } from 'react'
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form'
 import {
   Select,
   SelectContent,
@@ -26,79 +26,69 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { useMutation, useQueryClient } from "react-query";
-import { putCodService } from "./novoServico/api/putService";
-import { putPecaQtd } from "../almoxarifado/api/putPecaQtd";
+} from '@/components/ui/select'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { putCodService } from './novoServico/api/putService'
+import { putPecaQtd } from '../almoxarifado/api/putPecaQtd'
+import { getAllPecas } from '../almoxarifado/api/getAllPecas'
+
+interface IDesc {
+  id: string
+  descricao: string
+  atual: number
+  requisitada: number
+}
 
 const formSchema = z.object({
   status: z.string(),
-});
-
-interface movEstoque {
-  descProduto: string;
-  quantidade: string;
-}
+})
 
 export function DialogVerProposta({
   codService,
   descCliente,
   descEquipamento,
 }: {
-  codService: string;
-  descCliente: string;
-  descEquipamento: string;
+  codService: string
+  descCliente: string
+  descEquipamento: string
 }) {
-  const [pecaService, setPecaService] = useState([]);
-  const [movEstoque, setMovEstoque] = useState("");
-  const [alert, setAlert] = useState<boolean>(false);
-  const [qtd, setQtd] = useState<number>(0);
+  const [pecaService, setPecaService] = useState<IServiceID[]>([])
+  const [alert, setAlert] = useState<boolean>()
+  const [desc, setDesc] = useState<IDesc[]>()
+  const [alertItem, setAlertItem] = useState<boolean>()
+  const [alertEstoque, setAlertEstoque] = useState<boolean>()
 
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
-  const statusService = ["Não iniciado", "Em progresso", "Concluído"];
+  const statusService = ['Não iniciado', 'Em progresso', 'Concluído']
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-  });
+  })
 
   const mutatePutService = useMutation({
     mutationFn: ({ id, body }: { id: string; body: { status: string } }) =>
       putCodService(id, body),
     onSuccess: () => {
-      queryClient.invalidateQueries(["services"]);
+      queryClient.invalidateQueries(['services'])
     },
-  });
+  })
 
   const mutatePutPecaQtd = useMutation({
     mutationFn: ({
       id,
       body,
     }: {
-      id: string;
-      body: { ID: number; Quantidade: number };
+      id: string
+      body: { ID: number; Quantidade: number }
     }) => putPecaQtd(id, body),
     onSuccess: () => {
-      queryClient.invalidateQueries(["allPecas"]);
+      queryClient.invalidateQueries(['allPecas'])
     },
-  });
-
-  function confirmEstoque(ID, qtd) {
-    if (qtd < Number(qtd) && movEstoque === "sub") {
-      console.log("teste");
-      setAlert(true);
-    }
-    mutatePutPecaQtd.mutate({
-      id: ID,
-      body: {
-        ID: Number(ID),
-        Quantidade: qtd - Number(qtd),
-      },
-    });
-  }
+  })
 
   useEffect(() => {
     async function getEquipId(codService: string) {
@@ -106,22 +96,97 @@ export function DialogVerProposta({
         const response = await fetch(
           `http://localhost:3001/servicos/${codService}`,
           {
-            method: "GET",
+            method: 'GET',
             headers: {
-              "Content-Type": "application/json",
+              'Content-Type': 'application/json',
             },
-          }
-        );
+          },
+        )
 
-        const dataPecaServ = await response.json();
-        setPecaService(dataPecaServ);
+        const dataPecaServ = await response.json()
+        setPecaService(dataPecaServ)
       } catch (error) {
-        console.error("Erro ao buscar equipamento:", error);
+        console.error('Erro ao buscar equipamento:', error)
       }
     }
 
-    getEquipId(codService);
-  }, [codService]);
+    getEquipId(codService)
+  }, [codService])
+
+  const { data: allPecas = [] } = useQuery(['allPecas'], getAllPecas)
+
+  function confirmarProposta() {
+    const quantidadesTotais: { [key: string]: number } = {}
+    pecaService.forEach((service) => {
+      const pecaId = service.peca_id
+
+      if (!quantidadesTotais[pecaId]) {
+        quantidadesTotais[pecaId] = 0
+      }
+
+      quantidadesTotais[pecaId] += service.quantidade_peca
+    })
+
+    const itemsGoingNegative: IDesc[] = []
+
+    Object.keys(quantidadesTotais).forEach((pecaId) => {
+      const peca = allPecas.find((p) => p.ID.toString() === pecaId)
+
+      const resultingQuantity = peca.Quantidade - quantidadesTotais[pecaId]
+
+      if (resultingQuantity < 0) {
+        itemsGoingNegative.push({
+          id: pecaId,
+          descricao: peca.Descricao,
+          atual: peca.Quantidade,
+          requisitada: quantidadesTotais[pecaId],
+        })
+        setDesc((prevItems) => [
+          ...(prevItems || []),
+          {
+            id: pecaId,
+            descricao: peca.Descricao,
+            atual: peca.Quantidade,
+            requisitada: quantidadesTotais[pecaId],
+          },
+        ])
+      }
+      console.log(resultingQuantity)
+    })
+
+    if (itemsGoingNegative.length === 0) {
+      // Execute your original code for the stock movement
+      Object.keys(quantidadesTotais).forEach((pecaId) => {
+        const peca = allPecas.find((p) => p.ID.toString() === pecaId)
+
+        const newPeca = {
+          ID: pecaId,
+          Quantidade: peca.Quantidade,
+        }
+
+        if (newPeca) {
+          mutatePutPecaQtd.mutate({
+            id: pecaId,
+            body: {
+              ID: peca.ID,
+              Quantidade: peca.Quantidade - quantidadesTotais[pecaId],
+            },
+          })
+        } else {
+          setAlertEstoque(true)
+        }
+      })
+    } else {
+      // console.log(
+      //   'Movimentação bloqueada - itens ficariam com estoque negativo:',
+      //   itemsGoingNegative,
+      // )
+
+      setAlertItem(true)
+    }
+
+    setAlert(false)
+  }
 
   return (
     <Dialog>
@@ -153,11 +218,11 @@ export function DialogVerProposta({
                       {serviceId.Descricao}
                     </p>
                     <p className="text-gray-600">
-                      Quantidade: {serviceId.Quantidade}
+                      Quantidade: {serviceId.quantidade_peca}
                     </p>
                   </div>
                 </div>
-              );
+              )
             })}
           </div>
         </div>
@@ -170,11 +235,11 @@ export function DialogVerProposta({
                 <FormItem>
                   <Select
                     onValueChange={(value) => {
-                      const status = { status: value };
+                      const status = { status: value }
                       mutatePutService.mutate({
                         body: status,
                         id: codService as string,
-                      });
+                      })
                     }}
                     defaultValue={status}
                   >
@@ -200,8 +265,79 @@ export function DialogVerProposta({
             />
           </form>
         </Form>
-        <Button type="submit">Confirmar</Button>
+        <Button type="button" onClick={() => setAlert(true)}>
+          Confirmar
+        </Button>
       </DialogContent>
+      <Dialog open={alert}>
+        <DialogContent className="w-[30vw]">
+          <DialogHeader>
+            <DialogTitle>Confirme</DialogTitle>
+            <DialogDescription>
+              No momento que confirmar, estará retirando os itens do
+              almoxarifado
+            </DialogDescription>
+            <div className="flex justify-between">
+              <Button
+                className="bg-zinc-200 text-black hover:bg-zinc-100"
+                onClick={() => setAlert(false)}
+              >
+                Cancelar
+              </Button>
+              <Button onClick={() => confirmarProposta()}>Confirmar</Button>
+            </div>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={alertEstoque}>
+        <DialogContent className="w-[30vw]">
+          <DialogHeader>
+            <DialogTitle>Zero estoque</DialogTitle>
+            <DialogDescription>
+              Os itens solicitados acabaram, verifique o estoque
+            </DialogDescription>
+            <div className="flex justify-between">
+              <Button
+                className="bg-zinc-200 text-black hover:bg-zinc-100"
+                onClick={() => setAlertEstoque(false)}
+              >
+                Ok
+              </Button>
+            </div>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={alertItem}>
+        <DialogContent className="w-[50vw]">
+          <DialogHeader>
+            <DialogTitle>Zero estoque</DialogTitle>
+            <DialogDescription>
+              Movimentação bloqueada - itens que ficariam com estoque negativo:
+            </DialogDescription>
+            {desc?.map((d, i) => (
+              <div key={i} className="flex flex-col">
+                <DialogDescription key={i}>
+                  <strong>Peça:</strong> {d?.descricao}
+                </DialogDescription>
+                <DialogDescription key={i}>
+                  <strong>Quantidade requistada:</strong> {d?.requisitada}
+                </DialogDescription>
+                <DialogDescription key={i}>
+                  <strong>Quantidade atual:</strong> {d?.atual}
+                </DialogDescription>
+              </div>
+            ))}
+            <div className="flex justify-between">
+              <Button
+                className="bg-zinc-200 text-black hover:bg-zinc-100"
+                onClick={() => setAlertItem(false)}
+              >
+                Ok
+              </Button>
+            </div>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </Dialog>
-  );
+  )
 }

@@ -1,87 +1,87 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import * as z from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useState } from 'react'
+import * as z from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useRouter } from 'next/navigation'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/ui/form";
-import { useQuery } from "react-query";
-import { IEquipamento } from "@/lib/interface/Iequipamento";
-import { getEquipamentos } from "./api/getEquipamentos";
-import { getClientes } from "./api/clientes";
-import { ICliente } from "@/lib/interface/Icliente";
+} from '@/components/ui/form'
+import { useQuery } from 'react-query'
+import { IEquipamento } from '@/lib/interface/Iequipamento'
+import { getEquipamentos } from './api/getEquipamentos'
+import { getClientes } from './api/clientes'
+import { ICliente } from '@/lib/interface/Icliente'
 
 const formSchema = z.object({
-  cliente: z.string().min(1, "Selecione o cliente"),
-  modelo: z.string().min(1, "Categoria é obrigatória"),
-  category: z.string().min(1, "Categoria é obrigatória"),
-  equipment: z.string().min(1, "Equipamento é obrigatório"),
-});
+  cliente: z.string().min(1, 'Selecione o cliente'),
+  modelo: z.string().min(1, 'Categoria é obrigatória'),
+  category: z.string().min(1, 'Categoria é obrigatória'),
+  equipment: z.string().min(1, 'Equipamento é obrigatório'),
+})
 
 export function NewServiceDialog() {
   // const queryClient = useQueryClient();
-  const router = useRouter();
-  const [categoryEquip, setCategoryEquip] = useState("");
-  const [valueItem, setValueItem] = useState("");
-  const [valueCliente, setValueCliente] = useState("");
-  const [category, setCategory] = useState("");
+  const router = useRouter()
+  const [categoryEquip, setCategoryEquip] = useState('')
+  const [valueItem, setValueItem] = useState('')
+  const [valueCliente, setValueCliente] = useState('')
+  const [category, setCategory] = useState('')
 
-  const { data: equipamentos } = useQuery(["equipamentos"], getEquipamentos);
+  const { data: equipamentos } = useQuery(['equipamentos'], getEquipamentos)
 
   const { data: dataCliente = [] as ICliente[] } = useQuery(
-    ["clientes"],
-    getClientes
-  );
+    ['clientes'],
+    getClientes,
+  )
 
   const categories = [
-    { value: "Transmissor", label: "Transmissor" },
-    { value: "Posicionador", label: "Posicionador" },
-  ];
+    { value: 'Transmissor', label: 'Transmissor' },
+    { value: 'Posicionador', label: 'Posicionador' },
+  ]
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      cliente: "",
-      category: "",
-      modelo: "",
-      equipment: "",
+      cliente: '',
+      category: '',
+      modelo: '',
+      equipment: '',
     },
-  });
+  })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const equipItemId = equipamentos?.filter((item: IEquipamento) => {
-      return item.Categoria === values.category;
-    });
+      return item.Categoria === values.category
+    })
 
     // console.log(equipItemId[0].ItemID);
     router.push(
-      `/servicos/novoServico?category=${values.category}&equipment=${values.equipment}&itemId=${equipItemId[0].ItemID}&model=${values.modelo}&cliente=${values.cliente}`
-    );
-    localStorage.setItem("serviceCode", "");
+      `/servicos/novoServico?category=${values.category}&equipment=${values.equipment}&itemId=${equipItemId[0].ItemID}&model=${values.modelo}&cliente=${values.cliente}`,
+    )
+    localStorage.setItem('serviceCode', '')
   }
 
   return (
@@ -107,8 +107,8 @@ export function NewServiceDialog() {
                   <FormLabel>Cliente</FormLabel>
                   <Select
                     onValueChange={(value) => {
-                      field.onChange(value);
-                      setValueCliente(value);
+                      field.onChange(value)
+                      setValueCliente(value)
                     }}
                     value={valueCliente}
                   >
@@ -138,9 +138,9 @@ export function NewServiceDialog() {
                   <FormLabel>Modelo</FormLabel>
                   <Select
                     onValueChange={(value) => {
-                      setCategory(value);
-                      setValueItem(" ");
-                      field.onChange(value);
+                      setCategory(value)
+                      setValueItem(' ')
+                      field.onChange(value)
                     }}
                     defaultValue={field.value}
                   >
@@ -158,7 +158,7 @@ export function NewServiceDialog() {
                           >
                             {category.label}
                           </SelectItem>
-                        );
+                        )
                       })}
                     </SelectContent>
                   </Select>
@@ -175,9 +175,9 @@ export function NewServiceDialog() {
                   <Select
                     onValueChange={(value) => {
                       // console.log("Valor selecionado:", value);
-                      setCategoryEquip(value);
-                      setValueItem(" ");
-                      field.onChange(value);
+                      setCategoryEquip(value)
+                      setValueItem(' ')
+                      field.onChange(value)
                     }}
                     value={field.value}
                   >
@@ -187,7 +187,7 @@ export function NewServiceDialog() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {category == "Transmissor" ? (
+                      {category == 'Transmissor' ? (
                         <>
                           <SelectItem value="Absoluto">Absoluto</SelectItem>
                           <SelectItem value="Diferencial">
@@ -197,7 +197,7 @@ export function NewServiceDialog() {
                             Manométrico
                           </SelectItem>
                         </>
-                      ) : category == "Posicionador" ? (
+                      ) : category == 'Posicionador' ? (
                         <>
                           <SelectItem value="Posicionador">
                             Posicionador
@@ -233,8 +233,8 @@ export function NewServiceDialog() {
                   <Select
                     onValueChange={(value) => {
                       // console.log("Valor selecionado:", value);
-                      field.onChange(value);
-                      setValueItem(value);
+                      field.onChange(value)
+                      setValueItem(value)
                     }}
                     value={valueItem}
                   >
@@ -247,7 +247,7 @@ export function NewServiceDialog() {
                       {equipamentos
                         ?.filter(
                           (item: IEquipamento) =>
-                            categoryEquip === item.Categoria
+                            categoryEquip === item.Categoria,
                         )
                         .map((item: IEquipamento) => (
                           <SelectItem key={item.ID} value={String(item.ID)}>
@@ -275,5 +275,5 @@ export function NewServiceDialog() {
         </Form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

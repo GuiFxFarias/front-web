@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -8,25 +8,26 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Item } from "@/lib/interface/Ipecas";
-import { DialogDescription } from "@radix-ui/react-dialog";
-import { useRouter } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+} from '@/components/ui/dialog'
+import { Item } from '@/lib/interface/Ipecas'
+import { DialogDescription } from '@radix-ui/react-dialog'
+import { useRouter } from 'next/navigation'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 import {
   getEquipamentoId,
   getServicesId,
   IServPeca,
   postPecaServico,
   postService,
-} from "./api/postService";
-import { ICliente } from "@/lib/interface/Icliente";
-import { Textarea } from "@/components/ui/textarea";
-import { ChangeEvent, useEffect, useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { CheckedState } from "@radix-ui/react-checkbox";
-import { getClientesId } from "../api/clientes";
-import { setPriority } from "os";
+} from './api/postService'
+import { ICliente } from '@/lib/interface/Icliente'
+import { Textarea } from '@/components/ui/textarea'
+import { ChangeEvent, useEffect, useState } from 'react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { CheckedState } from '@radix-ui/react-checkbox'
+import { getClientesId } from '../api/clientes'
+import { setPriority } from 'os'
+import { IServiceID } from '@/lib/interface/IServiceID'
 
 export function DialogConfirm({
   services,
@@ -36,60 +37,78 @@ export function DialogConfirm({
   codService,
   cliente,
 }: {
-  services: Item[];
-  category: string;
-  equipament: string;
-  model: string;
-  codService: string;
-  cliente: ICliente;
+  services: Item[]
+  category: string
+  equipament: string
+  model: string
+  codService: string
+  cliente: ICliente
 }) {
-  const router = useRouter();
-  const [inspVisu, setInspVisu] = useState<string>();
-  const [manuPrev, setManuPrev] = useState<boolean>(false);
-  const [itemService, setItemService] = useState<number>(0);
+  const router = useRouter()
+  const [inspVisu, setInspVisu] = useState<string>()
+  const [manuPrev, setManuPrev] = useState<boolean>(false)
+  const [itemService, setItemService] = useState<number>(0)
 
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
   const { data: equipId } = useQuery({
-    queryKey: ["equipamentoId", equipament],
+    queryKey: ['equipamentoId', equipament],
     queryFn: () => getEquipamentoId(equipament),
-  });
+  })
 
-  const { data: serviceId = [] } = useQuery(["services"], () =>
-    getServicesId(codService || "")
-  );
+  const { data: serviceId = [] } = useQuery(['services'], () =>
+    getServicesId(codService || ''),
+  )
 
   const mutateService = useMutation({
     mutationFn: postService,
     onSuccess: () => {
-      queryClient.invalidateQueries(["services"]);
+      queryClient.invalidateQueries(['services'])
     },
-  });
+  })
 
   const mutatePecaServ = useMutation({
     mutationFn: postPecaServico,
     onSuccess: () => {
-      queryClient.invalidateQueries(["pecaServ"]);
+      queryClient.invalidateQueries(['pecaServ'])
     },
-  });
+  })
 
   useEffect(() => {
     if (serviceId.length > 0) {
       const lastItems = serviceId
         .map((service) => service.itemService.at(-1))
         .filter(Boolean)
-        .at(-1);
+        .at(-1)
 
       if (lastItems !== undefined) {
-        setItemService(Number(lastItems) + 1);
+        serviceId.map((service: IServiceID) => {
+          if (codService == service.codService) {
+            setItemService(Number(lastItems) + 1)
+            console.log('aqui 1')
+          } else {
+            setItemService(itemService + 1)
+            console.log('aqui 2')
+          }
+        })
       }
+
+      // if (
+      //   lastItems !== undefined &&
+      //   serviceId.filter((item: IServiceID) => item.codService == codService)
+      // ) {
+      //   setItemService(Number(lastItems) + 1)
+      // } else if (lastItems !== undefined) {
+      //   setItemService(0)
+      //   setItemService(Number(lastItems) + 1)
+      // }
     }
-  }, [serviceId]);
+  }, [serviceId])
 
   function handleSaveService() {
     if (!codService) {
-      console.log("CodeService Undefined");
-      return;
+      console.log('CodeService Undefined')
+      return
     }
 
     // const lastItems = serviceId
@@ -98,7 +117,7 @@ export function DialogConfirm({
     //   .at(-1);
     // console.log(Number(lastItems) + 1);
 
-    console.log(itemService);
+    console.log(itemService)
 
     const valueService = {
       modelo: model,
@@ -109,9 +128,9 @@ export function DialogConfirm({
       idCliente: String(cliente.id),
       descCliente: cliente.nome,
       itemService: String(itemService),
-    };
+    }
 
-    mutateService.mutate(valueService);
+    mutateService.mutate(valueService)
 
     services.map((value: Item) => {
       const pecaServ: IServPeca = {
@@ -119,17 +138,17 @@ export function DialogConfirm({
         peca_id: value.ID,
         quantidade_peca: 1,
         idCliente: String(cliente.id),
-        insVisual: inspVisu || "",
+        insVisual: inspVisu || '',
         manuPreventiva: manuPrev,
         itemService: String(itemService),
-      };
+      }
 
-      mutatePecaServ.mutate(pecaServ);
-    });
+      mutatePecaServ.mutate(pecaServ)
+    })
 
     router.push(
-      `/servicos/novoServico/relatorioDoServico?codService=${codService}&equipament=${equipament}&idCliente=${cliente.id}`
-    );
+      `/servicos/novoServico/relatorioDoServico?codService=${codService}&equipament=${equipament}&idCliente=${cliente.id}`,
+    )
   }
 
   return (
@@ -172,7 +191,6 @@ export function DialogConfirm({
             orings e parafuso, nova calibração)
           </label>
         </div>
-        `
         <DialogFooter>
           <Button onClick={() => handleSaveService()} type="button">
             Enviar Serviço
@@ -180,5 +198,5 @@ export function DialogConfirm({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

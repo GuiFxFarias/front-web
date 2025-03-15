@@ -1,14 +1,14 @@
 export interface IServiceID {
-  Carcaca: string;
-  Visor: string;
-  Descricao: string;
-  ItemID: number;
-  Quantidade: number;
-  categoria: string;
-  codService: string;
-  modelo: string;
-  peca_id: number;
-  quantidade_peca: number;
-  valorPeca: string;
-  idCliente: string;
+  codService: string
+  peca_id: number
+  quantidade_peca: number
+  idCliente: string
+  itemService: string
+  ItemID: number
+  Carcaca: string
+  Visor: string
+  Quantidade: number
+  Descricao: string
+  valorPeca: string
+  modelo: string
 }
