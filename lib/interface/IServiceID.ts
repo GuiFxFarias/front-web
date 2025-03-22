@@ -4,6 +4,9 @@ export interface IServiceID {
   quantidade_peca: number
   idCliente: string
   itemService: string
+  equipamentoID: string
+  insVisual: string
+  manuPreventiva: number
   ItemID: number
   Carcaca: string
   Visor: string

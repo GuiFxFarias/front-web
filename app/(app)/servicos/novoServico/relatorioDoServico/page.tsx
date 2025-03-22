@@ -6,16 +6,17 @@ import autoTable from 'jspdf-autotable'
 import Img from '@/assets/img/CocertLogo.png'
 import { useQuery } from 'react-query'
 import { getServicesId } from '../api/postService'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { getClientesId } from '../../api/clientes'
 import { IServiceID } from '@/lib/interface/IServiceID'
+import { MoreItensDialog } from './moreItensDialog'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function Relatorio() {
   // const reportRef = useRef(null);
   const searchParams = useSearchParams()
   const codService = searchParams.get('codService')
   const idCliente = searchParams.get('idCliente')
-  const router = useRouter()
 
   // Obtém a data atual
   const dataAtual = new Date()
@@ -151,7 +152,7 @@ export default function Relatorio() {
       } else {
         const bodyData = serviceId.map((data: IServiceID) => [
           `${data.quantidade_peca}`,
-          `${data.modelo} ${data.categoria} - ${data.Descricao}`,
+          `${data.equipamentoDescricao} - ${data.Descricao}`,
           `${new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL',
@@ -450,70 +451,52 @@ export default function Relatorio() {
         Tabela de Peças
       </h1>
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="w-full border-collapse border border-gray-300">
-          <thead className="bg-blue-500 text-white">
-            <tr>
-              <th className="px-4 py-2 border">ID</th>
-              <th className="px-4 py-2 border">Descrição</th>
-              <th className="px-4 py-2 border">Categoria</th>
-              <th className="px-4 py-2 border">Modelo</th>
-              <th className="px-4 py-2 border">Cod. Serviço</th>
-              <th className="px-4 py-2 border">Qtd Peça</th>
-              <th className="px-4 py-2 border">Valor Peça</th>
-              <th className="px-4 py-2 border">Visor</th>
-              <th className="px-4 py-2 border">Carcaça</th>
-            </tr>
-          </thead>
-          <tbody>
-            {serviceId.map((peca: IServiceID) => (
-              <tr key={peca.peca_id} className="hover:bg-gray-100 text-center">
-                <td className="border px-4 py-2">{peca.peca_id}</td>
-                <td className="border px-4 py-2">{peca.Descricao}</td>
-                <td className="border px-4 py-2">{peca.itemService}</td>
-                <td className="border px-4 py-2">{peca.modelo}</td>
-                <td className="border px-4 py-2">{peca.codService}</td>
-                <td className="border px-4 py-2">teste</td>
-                <td className="border px-4 py-2">
-                  {new Intl.NumberFormat('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL',
-                  }).format(Number(peca.valorPeca))}
-                </td>
-                <td className="border px-4 py-2">
-                  {peca.Visor === '1' ? 'Sim' : 'Não'}
-                </td>
-                <td className="border px-4 py-2">
-                  {peca.Carcaca === '1' ? 'Sim' : 'Não'}
-                </td>
-                {/* <td className="border px-4 py-2 space-x-2">
-                  <Button
-                    variant="outline"
-                    className="text-blue-500 border-blue-500"
-                  >
-                    Editar
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    className="text-white bg-red-500"
-                  >
-                    Excluir
-                  </Button>
-                </td> */}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="h-[50vh] overflow-scroll">
+        {serviceId.map((peca: IServiceID, index) => (
+          <Card key={index} className="mt-4">
+            <CardHeader className="flex justify-between flex-row items-center">
+              <CardTitle>
+                Item do serviço: {peca.itemService} | Visor ou carcaça:{' '}
+                {peca.Visor == '1' && peca.Carcaca == '1'
+                  ? 'Visor e Carcaça'
+                  : null}
+                {peca.Visor == '1' && peca.Carcaca == '0' ? 'Visor' : null}
+                {peca.Carcaca == '1' && peca.Visor == '0' ? 'Carcaça' : null}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>
+                Inspeção visual:{' '}
+                {peca.insVisual
+                  ? peca.insVisual
+                  : 'Não foi adicionado a inspeção visual'}
+              </p>
+              <p>
+                Manutenção preventiva: {peca.manuPreventiva ? 'Sim' : 'Não'}
+              </p>
+              <p>Equipamento: {peca.equipamentoID} </p>
+              <p className="text-gray-800 font-semibold mt-4">
+                Peças de serviço:
+              </p>
+              <div className="ring-1 rounded-md ring-zinc-500">
+                <div className="w-[100%] rounded-t-md px-4 py-2 bg-blue-400 h-[5vh] flex">
+                  <div className="font-semibold w-[25%]">Descrição</div>
+                  <div className="font-semibold w-[25%]">Valor</div>
+                  <div className="font-semibold w-[25%]">Quantidade</div>
+                </div>
+                <div className="w-[100%] rounded-b-md px-4 py-2 bg-zinc-300 shadow-md  h-[5vh] flex">
+                  <div className=" w-[25%]">{peca.Descricao}</div>
+                  <div className=" w-[25%]">{peca.valorPeca}</div>
+                  <div className=" w-[25%]">{peca.quantidade_peca}</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-
       {/* Botão para adicionar mais um item a proposta */}
       <div className="mt-6 flex justify-end">
-        <Button
-          onClick={() => router.back()}
-          className="bg-blue-500 text-white"
-        >
-          Adicionar mais um item
-        </Button>
+        <MoreItensDialog title="Adiconar mais itens" cliente={clienteID} />
       </div>
 
       {/* Botão para gerar PDF */}
@@ -525,3 +508,10 @@ export default function Relatorio() {
     </div>
   )
 }
+
+//<div className="w-1/6 px-2 py-1 flex items-center justify-center ring-1 ring-zinc-200">
+//  {new Intl.NumberFormat('pt-BR', {
+//    style: 'currency',
+//    currency: 'BRL',
+//  }).format(Number(peca.valorPeca))}
+//</div>
