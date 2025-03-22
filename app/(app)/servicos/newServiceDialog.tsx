@@ -40,7 +40,7 @@ const formSchema = z.object({
   equipment: z.string().min(1, 'Equipamento é obrigatório'),
 })
 
-export function NewServiceDialog() {
+export function NewServiceDialog({ title }: { title?: string }) {
   // const queryClient = useQueryClient();
   const router = useRouter()
   const [categoryEquip, setCategoryEquip] = useState('')
@@ -88,7 +88,7 @@ export function NewServiceDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-blue-500 hover:bg-blue-600">
-          + Novo Serviço
+          {title ? title : '+ Novo Serviço'}
         </Button>
       </DialogTrigger>
       <DialogContent className="w-[50vw]">

@@ -50,8 +50,10 @@ export function DialogVerProposta({
   codService,
   descCliente,
   descEquipamento,
+  status,
 }: {
   codService: string
+  status: string
   descCliente: string
   descEquipamento: string
 }) {
@@ -59,7 +61,6 @@ export function DialogVerProposta({
   const [alert, setAlert] = useState<boolean>()
   const [desc, setDesc] = useState<IDesc[]>()
   const [alertItem, setAlertItem] = useState<boolean>()
-  const [alertEstoque, setAlertEstoque] = useState<boolean>()
 
   const queryClient = useQueryClient()
 
@@ -129,6 +130,8 @@ export function DialogVerProposta({
 
     const itemsGoingNegative: IDesc[] = []
 
+    console.log(quantidadesTotais)
+
     Object.keys(quantidadesTotais).forEach((pecaId) => {
       const peca = allPecas.find((p) => p.ID.toString() === pecaId)
 
@@ -151,7 +154,6 @@ export function DialogVerProposta({
           },
         ])
       }
-      console.log(resultingQuantity)
     })
 
     if (itemsGoingNegative.length === 0) {
@@ -172,8 +174,6 @@ export function DialogVerProposta({
               Quantidade: peca.Quantidade - quantidadesTotais[pecaId],
             },
           })
-        } else {
-          setAlertEstoque(true)
         }
       })
     } else {
@@ -181,11 +181,8 @@ export function DialogVerProposta({
       //   'Movimentação bloqueada - itens ficariam com estoque negativo:',
       //   itemsGoingNegative,
       // )
-
       setAlertItem(true)
     }
-
-    setAlert(false)
   }
 
   return (
@@ -209,10 +206,13 @@ export function DialogVerProposta({
             Tabela de Peças | {descEquipamento}
           </h1>
 
-          <div className="bg-white shadow-md rounded-lg overflow-hidden">
+          <div className="bg-white shadow-md rounded-lg overflow-y-scroll h-[30vh]">
             {pecaService.map((serviceId: IServiceID, index) => {
               return (
-                <div className="px-4 py-2 border-b border-gray-200" key={index}>
+                <div
+                  className="px-4 py-2 border-b border-gray-200 "
+                  key={index}
+                >
                   <div className="flex justify-between items-center">
                     <p className="text-lg text-gray-800">
                       {serviceId.Descricao}
@@ -250,7 +250,9 @@ export function DialogVerProposta({
                     </FormControl>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectLabel>Status</SelectLabel>
+                        <SelectLabel>
+                          {status ? status : 'Status do projeto'}
+                        </SelectLabel>
                         {statusService.map((status, index) => (
                           <SelectItem value={status} key={index}>
                             {status}
@@ -289,24 +291,6 @@ export function DialogVerProposta({
           </DialogHeader>
         </DialogContent>
       </Dialog>
-      <Dialog open={alertEstoque}>
-        <DialogContent className="w-[30vw]">
-          <DialogHeader>
-            <DialogTitle>Zero estoque</DialogTitle>
-            <DialogDescription>
-              Os itens solicitados acabaram, verifique o estoque
-            </DialogDescription>
-            <div className="flex justify-between">
-              <Button
-                className="bg-zinc-200 text-black hover:bg-zinc-100"
-                onClick={() => setAlertEstoque(false)}
-              >
-                Ok
-              </Button>
-            </div>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
       <Dialog open={alertItem}>
         <DialogContent className="w-[50vw]">
           <DialogHeader>
@@ -330,7 +314,10 @@ export function DialogVerProposta({
             <div className="flex justify-between">
               <Button
                 className="bg-zinc-200 text-black hover:bg-zinc-100"
-                onClick={() => setAlertItem(false)}
+                onClick={() => {
+                  setAlertItem(false)
+                  setDesc([])
+                }}
               >
                 Ok
               </Button>

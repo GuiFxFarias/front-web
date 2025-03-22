@@ -60,6 +60,7 @@ export default function ServicesItens() {
                     <CardTitle>Serviço {data.codService}</CardTitle>
                     <div className="flex items-center space-x-2">
                       <DialogVerProposta
+                        status={data.status}
                         codService={data.codService}
                         descCliente={data.descCliente}
                         descEquipamento={data.equipamentoDescricao}

@@ -25,8 +25,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { CheckedState } from '@radix-ui/react-checkbox'
-import { getClientesId } from '../api/clientes'
-import { setPriority } from 'os'
 import { IServiceID } from '@/lib/interface/IServiceID'
 
 export function DialogConfirm({
@@ -77,7 +75,7 @@ export function DialogConfirm({
   useEffect(() => {
     if (serviceId.length > 0) {
       const lastItems = serviceId
-        .map((service) => service.itemService.at(-1))
+        .map((service: IServPeca) => service.itemService.at(-1))
         .filter(Boolean)
         .at(-1)
 
@@ -85,10 +83,8 @@ export function DialogConfirm({
         serviceId.map((service: IServiceID) => {
           if (codService == service.codService) {
             setItemService(Number(lastItems) + 1)
-            console.log('aqui 1')
           } else {
             setItemService(itemService + 1)
-            console.log('aqui 2')
           }
         })
       }
@@ -117,12 +113,10 @@ export function DialogConfirm({
     //   .at(-1);
     // console.log(Number(lastItems) + 1);
 
-    console.log(itemService)
-
     const valueService = {
       modelo: model,
       categoria: category,
-      equipamentoID: equipament,
+      equipamentoID: equipId.ID,
       equipamentoDescricao: equipId.Descricao,
       codService: codService,
       idCliente: String(cliente.id),
