@@ -11,6 +11,7 @@ import { getClientesId } from '../../api/clientes'
 import { IServiceID } from '@/lib/interface/IServiceID'
 import { MoreItensDialog } from './moreItensDialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getServicoCodService } from './api/servicoCodService'
 
 export default function Relatorio() {
   // const reportRef = useRef(null);
@@ -48,6 +49,10 @@ export default function Relatorio() {
 
   const { data: clienteID, isLoading } = useQuery(['clientes'], () =>
     getClientesId(idCliente || ''),
+  )
+
+  const { data: servicoCodService } = useQuery(['servicesCodService'], () =>
+    getServicoCodService(codService || ''),
   )
 
   const gerarPDF = () => {
@@ -452,47 +457,103 @@ export default function Relatorio() {
       </h1>
 
       <div className="h-[50vh] overflow-scroll">
-        {serviceId.map((peca: IServiceID, index) => (
-          <Card key={index} className="mt-4">
-            <CardHeader className="flex justify-between flex-row items-center">
-              <CardTitle>
-                Item do serviço: {peca.itemService} | Visor ou carcaça:{' '}
-                {peca.Visor == '1' && peca.Carcaca == '1'
-                  ? 'Visor e Carcaça'
-                  : null}
-                {peca.Visor == '1' && peca.Carcaca == '0' ? 'Visor' : null}
-                {peca.Carcaca == '1' && peca.Visor == '0' ? 'Carcaça' : null}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>
-                Inspeção visual:{' '}
-                {peca.insVisual
-                  ? peca.insVisual
-                  : 'Não foi adicionado a inspeção visual'}
-              </p>
-              <p>
-                Manutenção preventiva: {peca.manuPreventiva ? 'Sim' : 'Não'}
-              </p>
-              <p>Equipamento: {peca.equipamentoID} </p>
-              <p className="text-gray-800 font-semibold mt-4">
-                Peças de serviço:
-              </p>
-              <div className="ring-1 rounded-md ring-zinc-500">
-                <div className="w-[100%] rounded-t-md px-4 py-2 bg-blue-400 h-[5vh] flex">
-                  <div className="font-semibold w-[25%]">Descrição</div>
-                  <div className="font-semibold w-[25%]">Valor</div>
-                  <div className="font-semibold w-[25%]">Quantidade</div>
-                </div>
-                <div className="w-[100%] rounded-b-md px-4 py-2 bg-zinc-300 shadow-md  h-[5vh] flex">
-                  <div className=" w-[25%]">{peca.Descricao}</div>
-                  <div className=" w-[25%]">{peca.valorPeca}</div>
-                  <div className=" w-[25%]">{peca.quantidade_peca}</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        {servicoCodService?.map((serv, index) => {
+          return (
+            <Card key={index} className="mt-4">
+              <>
+                <CardHeader className="flex justify-between flex-row items-center">
+                  <CardTitle>Item do serviço: {serv.itemService}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>
+                    Equipamento: <strong>{serv.equipamentoDescricao}</strong>
+                  </p>
+
+                  {serviceId
+                    .filter(
+                      (value, index, self) =>
+                        value.codService === serv.codService &&
+                        value.itemService === serv.itemService &&
+                        self.findIndex(
+                          (v) =>
+                            v.Visor === value.Visor &&
+                            v.Carcaca === value.Carcaca &&
+                            v.codService === value.codService &&
+                            v.itemService === value.itemService,
+                        ) === index,
+                    )
+                    .map((peca, i) => (
+                      <div key={i} className="w-[100%] h-[8vh] flex flex-col">
+                        <p>
+                          Visor ou carcaça:{' '}
+                          <strong>
+                            {peca.Visor == '1' && peca.Carcaca == '1'
+                              ? 'Visor e Carcaça'
+                              : null}
+                            {peca.Visor == '1' && peca.Carcaca == '0'
+                              ? 'Visor'
+                              : null}
+                            {peca.Carcaca == '1' && peca.Visor == '0'
+                              ? 'Carcaça'
+                              : null}
+                          </strong>
+                        </p>
+                        <p>
+                          Inspeção visual:{' '}
+                          <strong>
+                            {peca.insVisual
+                              ? peca.insVisual
+                              : 'Não foi adicionado a inspeção visual'}
+                          </strong>
+                        </p>
+                        <p>
+                          Manutenção preventiva:{' '}
+                          <strong>
+                            {' '}
+                            {peca.manuPreventiva ? 'Sim' : 'Não'}
+                          </strong>
+                        </p>
+                      </div>
+                    ))}
+
+                  <p className="text-gray-800 font-semibold mt-4 ">
+                    Peças de serviço:
+                  </p>
+
+                  <div className="ring-1 rounded-md ring-zinc-500">
+                    <div className="w-[100%] rounded-t-md px-4 py-2 bg-blue-400 h-[5vh] flex">
+                      <div className="font-semibold w-[25%]">Descrição</div>
+                      <div className="font-semibold w-[25%]">Valor</div>
+                      <div className="font-semibold w-[25%]">Quantidade</div>
+                    </div>
+                    {serviceId
+                      .filter(
+                        (value) =>
+                          value.codService == serv.codService &&
+                          value.itemService == serv.itemService,
+                      )
+                      .map((peca, i) => (
+                        <>
+                          <div className="w-[100%] rounded-b-md px-4 py-2 bg-zinc-300 shadow-md  h-[5vh] flex">
+                            <div className=" w-[25%]">{peca.Descricao}</div>
+                            <div className=" w-[25%]">
+                              {new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
+                              }).format(Number(peca.valorPeca))}
+                            </div>
+                            <div className=" w-[25%]">
+                              {peca.quantidade_peca}
+                            </div>
+                          </div>
+                        </>
+                      ))}
+                  </div>
+                </CardContent>
+              </>
+            </Card>
+          )
+        })}
       </div>
       {/* Botão para adicionar mais um item a proposta */}
       <div className="mt-6 flex justify-end">
@@ -510,8 +571,5 @@ export default function Relatorio() {
 }
 
 //<div className="w-1/6 px-2 py-1 flex items-center justify-center ring-1 ring-zinc-200">
-//  {new Intl.NumberFormat('pt-BR', {
-//    style: 'currency',
-//    currency: 'BRL',
-//  }).format(Number(peca.valorPeca))}
+//
 //</div>
