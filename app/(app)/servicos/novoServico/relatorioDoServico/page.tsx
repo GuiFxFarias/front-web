@@ -235,9 +235,17 @@ export default function Relatorio() {
             new Set(tempInspecao.map((a) => String(a).trim())),
           )
 
+          const uniqueTomada = Array.from(
+            new Set(
+              tempInspecaoTomada
+                .map((a) => String(a).trim())
+                .filter((a) => a !== '' && a.toLowerCase() !== 'null'),
+            ),
+          )
+
           doc.setFontSize(12)
           doc.setFont('helvetica', 'bold')
-          doc.text(`Inspeção visual do equipamento`, 14, 164)
+          doc.text('Inspeção visual do equipamento', 14, 164)
 
           doc.setTextColor(0, 0, 0)
           doc.setFont('helvetica', 'normal')
@@ -249,15 +257,19 @@ export default function Relatorio() {
             170,
           )
 
-          doc.setTextColor(0, 0, 0)
-          doc.setFont('helvetica', 'normal')
-          doc.text(
-            uniqueInspecao.map((a) =>
-              a ? a.trim() : 'Não foi inserido inspeção visual',
-            ),
-            14,
-            170,
-          )
+          if (uniqueTomada.length > 0) {
+            doc.text(
+              'Manutenção preventiva tomada de nível (desmontagem, jateamento, pintura, assepsia, reusinagem da tomada de nível, solda de lamida de aço inox 316L, fornecimento com certificado de calibração com reastrabilidade RBC)',
+              14,
+              195,
+              { align: 'justify', maxWidth: 185 },
+            )
+          } else {
+            doc.text('Não possui tomada de nível', 14, 195, {
+              align: 'justify',
+              maxWidth: 185,
+            })
+          }
         },
       )
     }
@@ -613,6 +625,7 @@ export default function Relatorio() {
         })}
       </div>
       {/* Botão para adicionar mais um item a proposta */}
+
       <div className="mt-6 flex justify-end">
         <MoreItensDialog title="Adicionar mais itens" cliente={clienteID} />
       </div>
