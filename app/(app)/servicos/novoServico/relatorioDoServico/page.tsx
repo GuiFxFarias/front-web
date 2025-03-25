@@ -12,6 +12,7 @@ import { IServiceID } from '@/lib/interface/IServiceID'
 import { MoreItensDialog } from './moreItensDialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getServicoCodService } from './api/servicoCodService'
+import { useState } from 'react'
 
 export default function Relatorio() {
   // const reportRef = useRef(null);
@@ -147,99 +148,152 @@ export default function Relatorio() {
     addFooter()
 
     const addContentPage2 = () => {
-      doc.setFontSize(12)
-      doc.setFont('helvetica', 'bold') // Define o texto como negrito
-      doc.text('1.1. Preços', 14, 40)
-      // Criar tabela
-
       if (!serviceId || serviceId.length === 0) {
         doc.text('Nenhuma peça encontrada.', 14, 30)
-      } else {
-        const bodyData = serviceId.map((data: IServiceID) => [
-          `${data.quantidade_peca}`,
-          `${data.equipamentoDescricao} - ${data.Descricao}`,
-          `${new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
-          }).format(Number(data.valorPeca))}`,
-        ])
-
-        autoTable(doc, {
-          startY: 45,
-          head: [['Quantidade', 'Descrição', 'Valor (R$)']],
-          body: bodyData,
-          theme: 'grid',
-          headStyles: { fillColor: [41, 128, 185] },
-          styles: { fontSize: 10 },
-        })
-
-        // Calcular o total
-        const totalValor = serviceId.reduce(
-          (sum: number, data: IServiceID) => sum + Number(data.valorPeca),
-          0,
-        )
-
-        autoTable(doc, {
-          startY: (doc as any).lastAutoTable.finalY + 5,
-          body: [
-            [
-              '',
-              'TOTAL',
-              new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-              }).format(totalValor),
-            ],
-          ],
-          theme: 'grid',
-          styles: { fontSize: 12, fontStyle: 'bold' },
-          columnStyles: { 2: { textColor: [0, 0, 0] } },
-        })
+        return
       }
 
-      doc.setTextColor(0, 0, 0)
-      doc.setFont('helvetica', 'normal')
-      doc.text(
-        'Os preços dessa proposta estão expressos em Reais. Os mesmos são válidos \npara as quantidades, características e condições de pagamento especificadas nas propostas \ntécnica e comercial da CONCERT; ',
-        14,
-        207,
-        {
-          align: 'justify',
-          maxWidth: 185,
-        },
-      )
-      doc.text(
-        'Os preços não consideram o fornecimento de seguro garantia, carta fiança, seguro performance e \ndemais custos financeiros não indicados nas propostas;',
-        14,
-        223,
-        {
-          align: 'justify',
-          maxWidth: 185,
-        },
-      )
+      // Agrupar por itemService
+      const groupedByItemService = serviceId.reduce((acc, data) => {
+        if (!acc[data.itemService]) {
+          acc[data.itemService] = []
+        }
+        acc[data.itemService].push(data)
+        return acc
+      }, {} as Record<string, IServiceID[]>)
 
-      doc.text(
-        'Estamos considerando que os equipamentos ofertados serão faturados para o Estado de \nSão Paulo (SP);',
-        14,
-        234,
-        {
-          align: 'justify',
-          maxWidth: 185,
+      Object.entries(groupedByItemService).forEach(
+        ([itemServiceKey, dataList], index) => {
+          if (index !== 0) {
+            doc.addPage()
+          }
+          addHeader()
+          addFooter()
+          doc.setFontSize(12)
+          doc.setFont('helvetica', 'bold')
+          doc.text(`1.1. Preços - Item do Serviço ${itemServiceKey}`, 14, 40)
+
+          const tempBody: any[] = []
+          const tempInspecao: any[] = []
+          const tempInspecaoTomada: any[] = []
+
+          dataList.forEach((data) => {
+            const serv = servicoCodService?.find(
+              (s) =>
+                s.itemService === data.itemService &&
+                s.codService === data.codService,
+            )
+
+            if (serv) {
+              tempInspecao.push(`${data.insVisual}`)
+              tempInspecaoTomada.push(`${data.manuPrevTomada}`)
+              tempBody.push([
+                `${data.quantidade_peca}`,
+                `${data.itemService}`,
+                `${serv.equipamentoDescricao} - ${data.Descricao}`,
+                `${new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                }).format(Number(data.valorPeca))}`,
+              ])
+            }
+          })
+
+          autoTable(doc, {
+            startY: 45,
+            head: [['Qtd', 'Item do serviço', 'Descrição', 'Valor (R$)']],
+            body: tempBody,
+            theme: 'grid',
+            headStyles: { fillColor: [41, 128, 185] },
+            styles: { fontSize: 10 },
+          })
+
+          // Calcular total por itemService
+          const totalValor = dataList.reduce(
+            (sum: number, data) => sum + Number(data.valorPeca),
+            0,
+          )
+
+          autoTable(doc, {
+            startY: (doc as any).lastAutoTable.finalY + 5,
+            body: [
+              [
+                '',
+                'TOTAL',
+                new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                }).format(totalValor),
+              ],
+            ],
+            theme: 'grid',
+            styles: { fontSize: 12, fontStyle: 'bold' },
+            columnStyles: { 2: { textColor: [0, 0, 0] } },
+          })
+
+          const uniqueInspecao = Array.from(
+            new Set(tempInspecao.map((a) => String(a).trim())),
+          )
+
+          doc.setFontSize(12)
+          doc.setFont('helvetica', 'bold')
+          doc.text(`Inspeção visual do equipamento`, 14, 164)
+
+          doc.setTextColor(0, 0, 0)
+          doc.setFont('helvetica', 'normal')
+          doc.text(
+            uniqueInspecao.map((a) =>
+              a ? a.trim() : 'Não foi inserido inspeção visual',
+            ),
+            14,
+            170,
+          )
+
+          doc.setTextColor(0, 0, 0)
+          doc.setFont('helvetica', 'normal')
+          doc.text(
+            uniqueInspecao.map((a) =>
+              a ? a.trim() : 'Não foi inserido inspeção visual',
+            ),
+            14,
+            170,
+          )
         },
       )
     }
 
     const addContentPage3 = () => {
+      doc.setTextColor(0, 0, 0)
+      doc.setFont('helvetica', 'normal')
+      doc.text(
+        'Os preços dessa proposta estão expressos em Reais. Os mesmos são válidos \npara as quantidades, características e condições de pagamento especificadas nas propostas \ntécnica e comercial da CONCERT;',
+        14,
+        40,
+        { align: 'justify', maxWidth: 185 },
+      )
+      doc.text(
+        'Os preços não consideram o fornecimento de seguro garantia, carta fiança, seguro performance e \ndemais custos financeiros não indicados nas propostas;',
+        14,
+        53,
+        { align: 'justify', maxWidth: 185 },
+      )
+      doc.text(
+        'Estamos considerando que os equipamentos ofertados serão faturados para o Estado de \nSão Paulo (SP);',
+        14,
+        62,
+        { align: 'justify', maxWidth: 185 },
+      )
+
       doc.setFontSize(12)
       doc.setFont('helvetica', 'bold') // Define o texto como negrito
-      doc.text('1.2. Prazo de entrega', 14, 40)
+      doc.text('1.2. Prazo de entrega', 14, 74)
 
       doc.setTextColor(0, 0, 0)
       doc.setFont('helvetica', 'normal')
       doc.text(
         'O prazo de entrega para o escopo de fornecimento descrito nesse documento é de 30 dias. O prazo \ndeverá ser confirmado na data de colocação do pedido de compras e deverá satisfazer as seguintes \ncondições:',
         14,
-        48,
+        82,
         {
           align: 'justify',
           maxWidth: 185,
@@ -248,7 +302,7 @@ export default function Relatorio() {
       doc.text(
         '- Início a partir do recebimento do pedido de compras e confirmação do pagamento do sinal \ncom o pedido;',
         16,
-        74,
+        108,
         {
           align: 'justify',
           maxWidth: 185,
@@ -258,7 +312,7 @@ export default function Relatorio() {
       doc.text(
         '- Recebimento de todas as informações do cliente e necessárias ao processo de fabricação;',
         16,
-        84,
+        118,
         {
           align: 'justify',
           maxWidth: 185,
@@ -267,7 +321,7 @@ export default function Relatorio() {
       doc.text(
         '- Cadastro comercial atualizado para pagamentos a crédito;',
         16,
-        90,
+        123,
         {
           align: 'justify',
           maxWidth: 185,
@@ -277,7 +331,7 @@ export default function Relatorio() {
       doc.text(
         '- Cumprimento das condições de pagamento acordadas, na data do vencimento de cada parcela.',
         16,
-        96,
+        128,
         {
           align: 'justify',
           maxWidth: 185,
@@ -286,12 +340,12 @@ export default function Relatorio() {
 
       doc.setFontSize(12)
       doc.setFont('helvetica', 'bold') // Define o texto como negrito
-      doc.text('1.3. Validade da proposta ', 14, 104)
+      doc.text('1.3. Validade da proposta ', 14, 135)
       doc.setFont('helvetica', 'normal')
       doc.text(
         'Essa proposta tem validade de 10 dias corridos a partir da data da emissão. Os preços, prazos de \nentrega e demais condições são válidos para pedidos dentro do prazo de validade da proposta. \nOs pedidos de compra devem mencionar o número de nossa proposta.',
         14,
-        110,
+        142,
         {
           align: 'justify',
           maxWidth: 185,
@@ -300,47 +354,12 @@ export default function Relatorio() {
 
       doc.setFontSize(12)
       doc.setFont('helvetica', 'bold') // Define o texto como negrito
-      doc.text('1.4. Primeira compra  ', 14, 130)
+      doc.text('1.4. Primeira compra  ', 14, 160)
       doc.setFont('helvetica', 'normal')
       doc.text(
         'Quando se tratar da primeira compra do cliente é necessário o envio em anexo ao pedido dos dados \ncadastrais completos para aprovação e liberação de crédito, sendo que o pedido será aceito \nsomente após este procedimento.',
         14,
-        136,
-        {
-          align: 'justify',
-          maxWidth: 185,
-        },
-      )
-
-      doc.setFontSize(12)
-      doc.setFont('helvetica', 'bold') // Define o texto como negrito
-      doc.text('1.5. Aceite do pedido de compra ', 14, 160)
-      doc.setFont('helvetica', 'normal')
-      doc.text(
-        'O aceite se dará em um prazo máximo de 02 (dois) dias úteis após o recebimento do pedido de \ncompra do cliente.',
-        14,
         166,
-        {
-          align: 'justify',
-          maxWidth: 185,
-        },
-      )
-
-      doc.setFontSize(12)
-      doc.setFont('helvetica', 'bold') // Define o texto como negrito
-      doc.text('1.6. Condição de pagamento  ', 14, 180)
-      doc.setFont('helvetica', 'normal')
-
-      doc.text(' 100% com 28 dias após o aceite da proposta.', 14, 186)
-
-      doc.setFontSize(12)
-      doc.setFont('helvetica', 'bold') // Define o texto como negrito
-      doc.text('1.7. Garantia ', 14, 198)
-      doc.setFont('helvetica', 'normal')
-      doc.text(
-        'Garantia de 6 meses, a partir da emissão da NFe. A CONCERT garante que os produtos por ela revisados/revendidos estarão livres de defeitos em sua operação, desde que respeitadas às especificações e as instruções de montagem e utilização, devendo o equipamento ser entregue na CONCERT. Em caso de cancelamento de pedido após início dos serviços, será cobrada uma indenização de no mínimo 40% (quarenta por cento) do valor do pedido. ',
-        14,
-        204,
         {
           align: 'justify',
           maxWidth: 185,
@@ -349,9 +368,43 @@ export default function Relatorio() {
     }
 
     const addContentPage4 = () => {
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold') // Define o texto como negrito
+      doc.text('1.5. Aceite do pedido de compra ', 14, 40)
+      doc.setFont('helvetica', 'normal')
+      doc.text(
+        'O aceite se dará em um prazo máximo de 02 (dois) dias úteis após o recebimento do pedido de \ncompra do cliente.',
+        14,
+        46,
+        {
+          align: 'justify',
+          maxWidth: 185,
+        },
+      )
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold') // Define o texto como negrito
+      doc.text('1.6. Condição de pagamento  ', 14, 56)
+      doc.setFont('helvetica', 'normal')
+
+      doc.text(' 100% com 28 dias após o aceite da proposta.', 14, 62)
+
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold') // Define o texto como negrito
+      doc.text('1.7. Garantia ', 14, 68)
+      doc.setFont('helvetica', 'normal')
+      doc.text(
+        'Garantia de 6 meses, a partir da emissão da NFe. A CONCERT garante que os produtos por ela revisados/revendidos estarão livres de defeitos em sua operação, desde que respeitadas às especificações e as instruções de montagem e utilização, devendo o equipamento ser entregue na CONCERT. Em caso de cancelamento de pedido após início dos serviços, será cobrada uma indenização de no mínimo 40% (quarenta por cento) do valor do pedido. ',
+        14,
+        74,
+        {
+          align: 'justify',
+          maxWidth: 185,
+        },
+      )
+
       doc.setTextColor(0, 0, 0)
       doc.setFont('helvetica', 'normal')
-      doc.text('Estão exclusos da garantia:', 14, 44, {
+      doc.text('Estão exclusos da garantia:', 14, 100, {
         align: 'justify',
         maxWidth: 185,
       })
@@ -359,7 +412,7 @@ export default function Relatorio() {
       doc.text(
         ' - Componentes normalmente sujeitos ao desgaste natural durante a operação; \n - Elementos de vida útil menor que o período de garantia; \n - Defeitos causados pelo transporte, manuseio e/ou armazenamento inadequado, quando estes serviços não são de responsabilidade do fornecedor; \n - Defeitos causados pela instalação inadequada quando a instalação não é de responsabilidade do fornecedor e não foi realizado por uma supervisão do fornecedor; \n - Defeitos causados por condições ambientais inadequadas (por exemplo, na presença de componentes agressivos); \n - Defeitos causados por operação fora dos limites da capacidade do equipamento; \n - Defeitos causados por manutenção inadequada e/ou reparos por parte de pessoas ou empresa não autorizadas por escrito pelo fornecedor. ',
         16,
-        50,
+        105,
         {
           align: 'left',
           maxWidth: 185,
@@ -368,25 +421,25 @@ export default function Relatorio() {
 
       doc.setFontSize(12)
       doc.setFont('helvetica', 'bold') // Define o texto como negrito
-      doc.text('1.8. Frete', 14, 95)
+      doc.text('1.8. Frete', 14, 160)
 
       doc.setTextColor(0, 0, 0)
       doc.setFont('helvetica', 'normal')
-      doc.text('Frete FOB - Incoterms 2020', 14, 100, {
+      doc.text('Frete FOB - Incoterms 2020', 14, 165, {
         align: 'justify',
         maxWidth: 185,
       })
 
       doc.setFontSize(12)
       doc.setFont('helvetica', 'bold') // Define o texto como negrito
-      doc.text('1.9. Impostos', 14, 110)
+      doc.text('1.9. Impostos', 14, 175)
 
       doc.setTextColor(0, 0, 0)
       doc.setFont('helvetica', 'normal')
       doc.text(
         'Todos os impostos estão inclusos nos valores apresentados nesta proposta',
         14,
-        115,
+        180,
         {
           align: 'justify',
           maxWidth: 185,
@@ -395,14 +448,14 @@ export default function Relatorio() {
 
       doc.setFontSize(12)
       doc.setFont('helvetica', 'bold') // Define o texto como negrito
-      doc.text('1.10. Embalagem', 14, 125)
+      doc.text('1.10. Embalagem', 14, 190)
 
       doc.setTextColor(0, 0, 0)
       doc.setFont('helvetica', 'normal')
       doc.text(
         'Adequada para o transporte rodoviário. Outros tipos de embalagem sob consulta.   ',
         14,
-        130,
+        195,
         {
           align: 'justify',
           maxWidth: 185,
@@ -411,14 +464,14 @@ export default function Relatorio() {
 
       doc.setFontSize(12)
       doc.setFont('helvetica', 'bold') // Define o texto como negrito
-      doc.text('Observações', 14, 140)
+      doc.text('Observações', 14, 205)
 
       doc.setTextColor(0, 0, 0)
       doc.setFont('helvetica', 'normal')
       doc.text(
         'A CONCERT não se responsabiliza pelo pagamento de fretes relativos ao envio de materiais em garantia ou conserto. Nossa proposta não inclui o fornecimento de treinamento ou assistência técnica em campo. Caso seja necessário entre em contato para que possamos prever este item em nossa proposta. Alguns equipamentos podem descalibrar/danificar caso exista choque mecânico no momento do transporte.',
         14,
-        145,
+        210,
 
         {
           align: 'justify',
@@ -507,6 +560,10 @@ export default function Relatorio() {
                           </strong>
                         </p>
                         <p>
+                          Tomada de nível:{' '}
+                          <strong>{peca.manuPrevTomada ? 'Sim' : 'Não'}</strong>
+                        </p>
+                        <p>
                           Manutenção preventiva:{' '}
                           <strong>
                             {' '}
@@ -516,7 +573,7 @@ export default function Relatorio() {
                       </div>
                     ))}
 
-                  <p className="text-gray-800 font-semibold mt-4 ">
+                  <p className="text-gray-800 font-semibold mt-8 ">
                     Peças de serviço:
                   </p>
 
@@ -534,7 +591,7 @@ export default function Relatorio() {
                       )
                       .map((peca, i) => (
                         <>
-                          <div className="w-[100%] rounded-b-md px-4 py-2 bg-zinc-300 shadow-md  h-[5vh] flex">
+                          <div className="w-[100%] rounded-b-md px-4 py-2 bg-zinc-100 h-[5vh] flex">
                             <div className=" w-[25%]">{peca.Descricao}</div>
                             <div className=" w-[25%]">
                               {new Intl.NumberFormat('pt-BR', {
@@ -557,7 +614,7 @@ export default function Relatorio() {
       </div>
       {/* Botão para adicionar mais um item a proposta */}
       <div className="mt-6 flex justify-end">
-        <MoreItensDialog title="Adiconar mais itens" cliente={clienteID} />
+        <MoreItensDialog title="Adicionar mais itens" cliente={clienteID} />
       </div>
 
       {/* Botão para gerar PDF */}

@@ -45,6 +45,7 @@ export function DialogConfirm({
   const router = useRouter()
   const [inspVisu, setInspVisu] = useState<string>()
   const [manuPrev, setManuPrev] = useState<boolean>(false)
+  const [manuPrevTomada, setManuPrevTomada] = useState<boolean>(false)
   const [itemService, setItemService] = useState<number>(0)
 
   const queryClient = useQueryClient()
@@ -134,6 +135,7 @@ export function DialogConfirm({
         idCliente: String(cliente.id),
         insVisual: inspVisu || '',
         manuPreventiva: manuPrev,
+        manuPrevTomada: manuPrevTomada,
         itemService: String(itemService),
       }
 
@@ -183,6 +185,22 @@ export function DialogConfirm({
           >
             Manutenção preventiva (desmontagem, jateamento, pintura, troca de
             orings e parafuso, nova calibração)
+          </label>
+        </div>
+        <div className="flex items-center">
+          <Checkbox
+            id="manuPrevTomada"
+            className="mr-4"
+            onCheckedChange={(check: CheckedState) => setManuPrevTomada(check)}
+          />
+          <label
+            htmlFor="manuPrev"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Manutenção preventica tomada de nível (desmontagem, jateamento,
+            pintura, assepsia, reusinagem da tomada de nível, solda de lamida de
+            aço inox 316L, fornecimento com certificado de calibração com
+            reastrabilidade RBC)
           </label>
         </div>
         <DialogFooter>
