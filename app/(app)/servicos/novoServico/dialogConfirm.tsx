@@ -154,7 +154,7 @@ export function DialogConfirm({
           Salvar
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[725px]">
+      <DialogContent className="sm:max-w-[725px] h-[70vh] overflow-auto">
         <DialogHeader>
           <DialogTitle>Peças | Cliente: {cliente.nome}</DialogTitle>
         </DialogHeader>
@@ -194,10 +194,10 @@ export function DialogConfirm({
             onCheckedChange={(check: CheckedState) => setManuPrevTomada(check)}
           />
           <label
-            htmlFor="manuPrev"
+            htmlFor="manuPrevTomada"
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
-            Manutenção preventica tomada de nível (desmontagem, jateamento,
+            Manutenção preventiva tomada de nível (desmontagem, jateamento,
             pintura, assepsia, reusinagem da tomada de nível, solda de lamida de
             aço inox 316L, fornecimento com certificado de calibração com
             reastrabilidade RBC)

@@ -236,11 +236,7 @@ export default function Relatorio() {
           )
 
           const uniqueTomada = Array.from(
-            new Set(
-              tempInspecaoTomada
-                .map((a) => String(a).trim())
-                .filter((a) => a !== '' && a.toLowerCase() !== 'null'),
-            ),
+            new Set(tempInspecaoTomada.map((a) => String(a).trim())),
           )
 
           doc.setFontSize(12)
@@ -257,19 +253,16 @@ export default function Relatorio() {
             170,
           )
 
-          if (uniqueTomada.length > 0) {
-            doc.text(
-              'Manutenção preventiva tomada de nível (desmontagem, jateamento, pintura, assepsia, reusinagem da tomada de nível, solda de lamida de aço inox 316L, fornecimento com certificado de calibração com reastrabilidade RBC)',
-              14,
-              195,
-              { align: 'justify', maxWidth: 185 },
-            )
-          } else {
-            doc.text('Não possui tomada de nível', 14, 195, {
-              align: 'justify',
-              maxWidth: 185,
-            })
-          }
+          doc.text(
+            uniqueTomada.map((a) =>
+              a == '1'
+                ? 'Manutenção preventiva tomada de nível (desmontagem, jateamento, pintura, assepsia, reusinagem da tomada de nível, solda de lamida de aço inox 316L fornecimento com certificado de calibração com reastrabilidade RBC)'
+                : 'Não existe tomada de nível',
+            ),
+            14,
+            196,
+            { align: 'justify', maxWidth: 185 },
+          )
         },
       )
     }
@@ -547,43 +540,48 @@ export default function Relatorio() {
                             v.itemService === value.itemService,
                         ) === index,
                     )
-                    .map((peca, i) => (
-                      <div key={i} className="w-[100%] h-[8vh] flex flex-col">
-                        <p>
-                          Visor ou carcaça:{' '}
-                          <strong>
-                            {peca.Visor == '1' && peca.Carcaca == '1'
-                              ? 'Visor e Carcaça'
-                              : null}
-                            {peca.Visor == '1' && peca.Carcaca == '0'
-                              ? 'Visor'
-                              : null}
-                            {peca.Carcaca == '1' && peca.Visor == '0'
-                              ? 'Carcaça'
-                              : null}
-                          </strong>
-                        </p>
-                        <p>
-                          Inspeção visual:{' '}
-                          <strong>
-                            {peca.insVisual
-                              ? peca.insVisual
-                              : 'Não foi adicionado a inspeção visual'}
-                          </strong>
-                        </p>
-                        <p>
-                          Tomada de nível:{' '}
-                          <strong>{peca.manuPrevTomada ? 'Sim' : 'Não'}</strong>
-                        </p>
-                        <p>
-                          Manutenção preventiva:{' '}
-                          <strong>
-                            {' '}
-                            {peca.manuPreventiva ? 'Sim' : 'Não'}
-                          </strong>
-                        </p>
-                      </div>
-                    ))}
+                    .map((peca, i) => {
+                      console.log(peca)
+                      return (
+                        <div key={i} className="w-[100%] h-[8vh] flex flex-col">
+                          <p>
+                            Visor ou carcaça:{' '}
+                            <strong>
+                              {peca.Visor == '1' && peca.Carcaca == '1'
+                                ? 'Visor e Carcaça'
+                                : null}
+                              {peca.Visor == '1' && peca.Carcaca == '0'
+                                ? 'Visor'
+                                : null}
+                              {peca.Carcaca == '1' && peca.Visor == '0'
+                                ? 'Carcaça'
+                                : null}
+                            </strong>
+                          </p>
+                          <p>
+                            Inspeção visual:{' '}
+                            <strong>
+                              {peca.insVisual
+                                ? peca.insVisual
+                                : 'Não foi adicionado a inspeção visual'}
+                            </strong>
+                          </p>
+                          <p>
+                            Tomada de nível:{' '}
+                            <strong>
+                              {peca.manuPrevTomada ? 'Sim' : 'Não'}
+                            </strong>
+                          </p>
+                          <p>
+                            Manutenção preventiva:{' '}
+                            <strong>
+                              {' '}
+                              {peca.manuPreventiva ? 'Sim' : 'Não'}
+                            </strong>
+                          </p>
+                        </div>
+                      )
+                    })}
 
                   <p className="text-gray-800 font-semibold mt-8 ">
                     Peças de serviço:
@@ -604,7 +602,12 @@ export default function Relatorio() {
                       .map((peca, i) => (
                         <>
                           <div className="w-[100%] rounded-b-md px-4 py-2 bg-zinc-100 h-[5vh] flex">
-                            <div className=" w-[25%]">{peca.Descricao}</div>
+                            <div
+                              className=" w-[25%] truncate hover:cursor-pointer"
+                              title={peca.Descricao}
+                            >
+                              {peca.Descricao}
+                            </div>
                             <div className=" w-[25%]">
                               {new Intl.NumberFormat('pt-BR', {
                                 style: 'currency',
