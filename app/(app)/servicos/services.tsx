@@ -47,7 +47,7 @@ export default function ServicesItens() {
       </div>
 
       {/* Lista de Serviços */}
-      <div className="grid grid-cols-1 gap-4 overflow-y-auto max-h-[50vh]">
+      <div className="grid grid-cols-1 gap-4 overflow-y-scroll max-h-[50vh]">
         {/* Card de Serviço 1 */}
         {isLoading ? (
           'Carregando...'

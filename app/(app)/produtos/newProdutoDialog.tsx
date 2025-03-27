@@ -1,88 +1,123 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import * as z from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useState } from 'react'
+import * as z from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/ui/form";
-import { useQuery } from "react-query";
-import { IEquipamento } from "@/lib/interface/Iequipamento";
-import { getEquipamentos } from "../servicos/api/getEquipamentos";
-import { getClientes } from "../servicos/api/clientes";
-import { ICliente } from "@/lib/interface/Icliente";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { getClientes } from '../servicos/api/clientes'
+import { ICliente } from '@/lib/interface/Icliente'
+import { Input } from '@/components/ui/input'
+import { getAllPrdTransmissor } from './api/getPrdTransmissor'
+import { IPrdTrm } from '@/lib/interface/IprdTrm'
+import { putPrdTrm } from './api/putPrdTrm'
 
 const formSchema = z.object({
-  descProduto: z.string().min(1, "Selecione o produto"),
-  nSerieEquip: z.string().min(1, "Selecione o numero de série"),
-  protocolo: z.string().min(1, "Selecione o protocolo"),
-  preco: z.string().min(1, "Insira o preco do produto"),
-});
+  cliente: z.string().min(1, 'Selecione o cliente'),
+  modelo: z.string().min(1, 'Selecione o modelo'),
+  marca: z.string().min(1, 'Selecione a marca'),
+  prdTrm: z.string().min(1, 'Selecione o produto'),
+  preco: z.string().min(1, 'Insira o preco do produto'),
+})
 
 export function NewSaleDialog() {
-  // const queryClient = useQueryClient();
-  const router = useRouter();
-  const [categoryEquip, setCategoryEquip] = useState("");
-  const [valueItem, setValueItem] = useState("");
-  const [valueCliente, setValueCliente] = useState("");
-  const [category, setCategory] = useState("");
-
-  const { data: equipamentos } = useQuery(["equipamentos"], getEquipamentos);
+  const queryClient = useQueryClient()
+  const [valueItem, setValueItem] = useState('')
+  const [marca, setMarca] = useState('')
+  const [id, setId] = useState('')
 
   const { data: dataCliente = [] as ICliente[] } = useQuery(
-    ["clientes"],
-    getClientes
-  );
+    ['clientes'],
+    getClientes,
+  )
+
+  const { data: prdTrm = [] as IPrdTrm[] } = useQuery(
+    ['prdTrm'],
+    getAllPrdTransmissor,
+  )
 
   const categories = [
-    { value: "Transmissor", label: "Transmissor" },
-    { value: "Posicionador", label: "Posicionador" },
-  ];
+    { value: 'Transmissor', label: 'Transmissor' },
+    { value: 'Posicionador', label: 'Posicionador' },
+  ]
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      descProduto: "",
-      nSerieEquip: "",
-      protocolo: "",
-      preco: "",
+      cliente: '',
+      modelo: '',
+      marca: '',
+      prdTrm: '',
+      preco: '',
     },
-  });
+  })
+
+  const marcas = [
+    { id: 1, value: 'SMAR' },
+    { id: 2, value: 'YOKOGAWA' },
+    { id: 3, value: 'ROSEMOUNT' },
+    { id: 4, value: 'ENDRES+HAUSER' },
+    { id: 5, value: 'ABB' },
+    { id: 6, value: 'SIEMENS' },
+    { id: 7, value: 'FOXBORO' },
+  ]
+
+  const mutateService = useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string
+      body: { dataProposta: string; cliente: string }
+    }) => putPrdTrm(id, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['services'])
+    },
+  })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // const equipItemId = equipamentos?.filter((item: IEquipamento) => {
-    //   return item.Categoria === values.category;
-    // });
-    // // console.log(equipItemId[0].ItemID);
-    // router.push(
-    //   `/servicos/novoServico?category=${values.category}&equipment=${values.equipment}&itemId=${equipItemId[0].ItemID}&model=${values.modelo}&cliente=${values.cliente}`
-    // );
-    // localStorage.setItem("serviceCode", "");
+    const body = {
+      dataProposta:
+        new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(),
+      cliente: values.cliente,
+    }
+
+    mutateService.mutate({
+      id: String(values.prdTrm),
+      body: body,
+    })
+    setOpen(false)
   }
+
+  const filteredPrdTrm = prdTrm.filter((item: IPrdTrm) => marca == item.modelo)
+
+  const precoFilteredPrdTrm = prdTrm.filter(
+    (item: IPrdTrm) => id == String(item.id),
+  )
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -91,7 +126,7 @@ export function NewSaleDialog() {
       </DialogTrigger>
       <DialogContent className="w-[50vw]">
         <DialogHeader>
-          <DialogTitle>Novo Serviço</DialogTitle>
+          <DialogTitle>Nova venda</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -99,16 +134,14 @@ export function NewSaleDialog() {
             {/* Select de Equipamento */}
             <FormField
               control={form.control}
-              name="descProduto"
+              name="cliente"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descrição do produto</FormLabel>
+                  <FormLabel>Cliente</FormLabel>
                   <Select
                     onValueChange={(value) => {
-                      field.onChange(value);
-                      setValueCliente(value);
+                      field.onChange(value)
                     }}
-                    value={valueCliente}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -130,15 +163,13 @@ export function NewSaleDialog() {
             {/* Select de Categoria */}
             <FormField
               control={form.control}
-              name="nSerieEquip"
+              name="modelo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Número de serie do equipamento</FormLabel>
+                  <FormLabel>Selecione o modelo</FormLabel>
                   <Select
                     onValueChange={(value) => {
-                      setCategory(value);
-                      setValueItem(" ");
-                      field.onChange(value);
+                      field.onChange(value)
                     }}
                     defaultValue={field.value}
                   >
@@ -156,7 +187,7 @@ export function NewSaleDialog() {
                           >
                             {category.label}
                           </SelectItem>
-                        );
+                        )
                       })}
                     </SelectContent>
                   </Select>
@@ -164,57 +195,66 @@ export function NewSaleDialog() {
               )}
             />
 
+            {/* Select de Marca */}
             <FormField
               control={form.control}
-              name="protocolo"
+              name="marca"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Protocolo</FormLabel>
+                  <FormLabel>Selecione a marca</FormLabel>
                   <Select
                     onValueChange={(value) => {
-                      // console.log("Valor selecionado:", value);
-                      setCategoryEquip(value);
-                      setValueItem(" ");
-                      field.onChange(value);
+                      setMarca(value)
+                      field.onChange(value)
                     }}
-                    value={field.value}
+                    defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione a categoria" />
+                        <SelectValue placeholder="Selecione a marca" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {category == "Transmissor" ? (
-                        <>
-                          <SelectItem value="Absoluto">Absoluto</SelectItem>
-                          <SelectItem value="Diferencial">
-                            Diferencial
+                      {marcas.map((category) => {
+                        return (
+                          <SelectItem key={category.id} value={category.value}>
+                            {category.value}
                           </SelectItem>
-                          <SelectItem value="Manometrico">
-                            Manométrico
+                        )
+                      })}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+
+            {/* Select de Equipamento cadastrado no almoxarifado */}
+            <FormField
+              control={form.control}
+              name="prdTrm"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Selecione os produtos</FormLabel>
+                  <Select
+                    onValueChange={(value) => {
+                      setId(value)
+                      field.onChange(value)
+                    }}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o modelo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {filteredPrdTrm.map((prdTrm: IPrdTrm) => {
+                        return (
+                          <SelectItem key={prdTrm.id} value={String(prdTrm.id)}>
+                            {prdTrm.descricaoProduto} {prdTrm.nSerieEquipamento}
                           </SelectItem>
-                        </>
-                      ) : category == "Posicionador" ? (
-                        <>
-                          <SelectItem value="Posicionador">
-                            Posicionador
-                          </SelectItem>
-                        </>
-                      ) : (
-                        <>
-                          <SelectItem value="Absoluto">Absoluto</SelectItem>
-                          <SelectItem value="Diferencial">
-                            Diferencial
-                          </SelectItem>
-                          <SelectItem value="Manometrico">
-                            Manométrico
-                          </SelectItem>
-                          <SelectItem value="Posicionador">
-                            Posicionador
-                          </SelectItem>
-                        </>
-                      )}
+                        )
+                      })}
                     </SelectContent>
                   </Select>
                 </FormItem>
@@ -229,19 +269,27 @@ export function NewSaleDialog() {
                 <FormItem>
                   <FormLabel>
                     <p>
-                      Preço | <i>Preço cadastrado no almoxarifado:</i>
+                      <i>
+                        Preço cadastrado no almoxarifado:{' '}
+                        {precoFilteredPrdTrm.map((a: IPrdTrm) =>
+                          new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
+                          }).format(Number(a.preco)),
+                        )}
+                      </i>
                     </p>
                   </FormLabel>
                   <Select
                     onValueChange={(value) => {
                       // console.log("Valor selecionado:", value);
-                      field.onChange(value);
-                      setValueItem(value);
+                      field.onChange(value)
+                      setValueItem(value)
                     }}
                     value={valueItem}
                   >
                     <FormControl>
-                      <Input placeholder="Insira o preço da venda" {...field} />
+                      <Input placeholder="Adicione um valor" {...field} />
                     </FormControl>
                   </Select>
                 </FormItem>
@@ -253,15 +301,18 @@ export function NewSaleDialog() {
               <Button
                 variant="outline"
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false)
+                  form.reset()
+                }}
               >
                 Cancelar
               </Button>
-              <Button type="submit">Cadastrar Serviço</Button>
+              <Button type="submit">Cadastrar Proposta</Button>
             </div>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

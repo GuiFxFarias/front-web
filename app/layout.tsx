@@ -1,12 +1,12 @@
-"use client";
+'use client'
 
-import "./globals.css";
-import Query from "./layoutClient";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import LoginPage from "./(auth)/login/page";
-import Cookies from "js-cookie";
+import './globals.css'
+import Query from './layoutClient'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import LoginPage from './(auth)/login/page'
+import Cookies from 'js-cookie'
 
 // const geistSans = localFont({
 //   src: "./fonts/GeistVF.woff",
@@ -27,12 +27,12 @@ import Cookies from "js-cookie";
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   // Rotas sem barra lateral
-  const noSidebarRoutes = ["/", "/login", "/register"];
+  const noSidebarRoutes = ['/', '/login', '/register']
 
   return (
     <Query>
@@ -47,11 +47,11 @@ export default function RootLayout({
                     Painel
                   </h2>
                   <nav className="space-y-4">
-                    <Link href="/painel" className="w-full block">
+                    {/* <Link href="/painel" className="w-full block">
                       <Button className="w-full justify-start" variant="ghost">
                         Dashboard
                       </Button>
-                    </Link>
+                    </Link> */}
                     <Link href="/servicos" className="w-full block">
                       <Button className="w-full justify-start" variant="ghost">
                         Serviços
@@ -80,8 +80,8 @@ export default function RootLayout({
                     variant="destructive"
                     className="w-full"
                     onClick={() => {
-                      Cookies.remove("token");
-                      window.location.reload();
+                      Cookies.remove('token')
+                      window.location.reload()
                     }}
                   >
                     Logout
@@ -92,10 +92,10 @@ export default function RootLayout({
           )}
 
           <main className="w-full overflow-y-hidden">
-            {pathname === "/" ? <LoginPage /> : children}
+            {pathname === '/' ? <LoginPage /> : children}
           </main>
         </body>
       </html>
     </Query>
-  );
+  )
 }

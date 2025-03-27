@@ -11,8 +11,7 @@ import { getClientesId } from '../../api/clientes'
 import { IServiceID } from '@/lib/interface/IServiceID'
 import { MoreItensDialog } from './moreItensDialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getServicoCodService } from './api/servicoCodService'
-import { useState } from 'react'
+import { getServicoCodService } from './api/servicoCodService''
 
 export default function Relatorio() {
   // const reportRef = useRef(null);

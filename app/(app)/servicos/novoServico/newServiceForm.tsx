@@ -9,7 +9,7 @@ import LD301Visor from '../../../../assets/img/LD301 Visor.png'
 import LD301Carcaca from '../../../../assets/img/LD301 Carcaca.png'
 import { useQuery } from 'react-query'
 import { getPecasItemId } from '../api/getPecasItemId'
-import { IPecasItem } from '@/lib/interface/Ipecas'
+import { Item } from '@/lib/interface/Ipecas'
 import { DialogConfirm } from './dialogConfirm'
 import { v4 as uuidv4 } from 'uuid'
 import { getClientesId } from '../api/clientes'
@@ -58,7 +58,7 @@ export default function NewServiceForm() {
 
   // Salvar serviço
   const handleSaveService = () => {
-    const selectedServices = pecasItemId.filter((item: IPecasItem) =>
+    const selectedServices = pecasItemId.filter((item: Item) =>
       selectedItems.includes(item.ID),
     )
     return selectedServices
@@ -111,8 +111,8 @@ export default function NewServiceForm() {
       <div className="flex flex-row">
         <div className="grid gap-4 w-1/2 overflow-y-auto h-[63vh] mr-4">
           {pecasItemId
-            .filter((item: IPecasItem) => item.Visor === visor)
-            .map((item: IPecasItem) => {
+            .filter((item: Item) => item.Visor === visor)
+            .map((item: Item) => {
               return (
                 <div
                   key={item.ID}
