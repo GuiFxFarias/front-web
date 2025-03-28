@@ -18,6 +18,8 @@ import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { IAllVendas } from '@/lib/interface/todasVendas'
 import { getTodasVendas } from './api/getTodasVendas'
+import { getAllPrdPos } from './api/getPrdPosicionador'
+import { getAllPrdTransmissor } from './api/getPrdTransmissor'
 
 export default function ProdutoItens() {
   const [search, setSearch] = useState<string>('')
@@ -474,10 +476,25 @@ export default function ProdutoItens() {
     ['vendas'],
     getTodasVendas,
   )
+  const { data: prdTrm = [] } = useQuery(['prdTrm'], getAllPrdTransmissor)
+  const { data: prdPos = [] } = useQuery(['prdPos'], getAllPrdPos)
 
   // const filteredPrdTrms = prdTrms.filter((prdTrm: IPrdTrm) =>
   //   prdTrm.cliente?.toLowerCase().includes(search.toLowerCase()),
   // )
+
+  const sameVendas = allVendas.reduce((acc, venda) => {
+    acc[venda.idVenda] = acc[venda.idVenda] || []
+    acc[venda.idVenda].push(venda)
+    return acc
+  }, {} as Record<string, any[]>)
+
+  for (const idVenda in sameVendas) {
+    console.log('Venda:', idVenda)
+    sameVendas[idVenda].forEach((item) => {
+      console.log('Item:', item)
+    })
+  }
 
   return (
     <div className="flex-1 p-8">
@@ -503,12 +520,15 @@ export default function ProdutoItens() {
         {isLoading ? (
           'Carregando...'
         ) : (
+         
           <>
-            {allVendas.map((data: IAllVendas) => {
-              return (
-                <Card key={data.id}>
+            {Object.entries(sameVendas).map(([idVenda, itens]) => (
+              <div key={idVenda}>
+                {itens.map((item, index) => (
+                  <Card key={index}>
                   <CardHeader className="flex justify-between flex-row items-center">
-                    <CardTitle>Cliente: {data.nomeCliente}</CardTitle>
+                    <CardTitle>Cliente: {item.nomeCliente}</CardTitle>
+
                     <Dialog>
                       <DialogTrigger>
                         <Button
@@ -521,12 +541,12 @@ export default function ProdutoItens() {
                       <DialogContent className="w-[50vw] justify-start flex flex-col">
                         <DialogHeader>
                           <DialogTitle>
-                            Proposta de venda para a(o) {data.nomeCliente}
+                            Proposta de venda para a(o) {item.nomeCliente}
                           </DialogTitle>
                           <DialogDescription>
-                            Proposta gerada no dia {data.dataProposta} para a
-                            venda do equipamento {data.descricaoProduto} (
-                            {data.nSerieEquipamento}).
+                            Proposta gerada no dia {item.dataProposta} para a
+                            venda do equipamento {item.descricaoProduto} (
+                            {item.nSerieEquipamento}).
                           </DialogDescription>
                           <DialogDescription>
                             <p className="text-zinc-700">
@@ -550,44 +570,56 @@ export default function ProdutoItens() {
                   <CardContent>
                     <p className="text-gray-800 font-semibold">
                       Descrição do produto:{' '}
-                      {data.descricaoProduto
-                        ? data.descricaoProduto
+                      {item.descricaoProduto
+                        ? item.descricaoProduto
                         : 'Não possui'}
                     </p>
 
                     <p className="text-gray-800">
                       Número de série:{' '}
-                      {data.nSerieEquipamento
-                        ? data.nSerieEquipamento
+                      {item.nSerieEquipamento
+                        ? item.nSerieEquipamento
                         : 'Não possui'}
                     </p>
 
                     <p className="text-gray-800">
                       Número de série do sensor:{' '}
-                      {data.nSerieSensor ? data.nSerieSensor : 'Não possui'}
+                      {item.nSerieSensor ? item.nSerieSensor : 'Não possui'}
                     </p>
 
                     <p className="text-gray-600">
                       Data criação proposta:{' '}
-                      {data.dataProposta ? data.dataProposta : 'Não possui'}
+                      {item.dataProposta ? item.dataProposta : 'Não possui'}
                     </p>
 
                     <p className="text-gray-600">
                       Valor da proposta:{' '}
-                      {data.preco
+                      {item.preco
                         ? new Intl.NumberFormat('pt-BR', {
                             style: 'currency',
                             currency: 'BRL',
-                          }).format(Number(data.preco))
+                          }).format(Number(item.preco))
                         : 'Não possui'}
                     </p>
                   </CardContent>
                 </Card>
-              )
-            })}
+                ))}
+              </div>
+            ))}
           </>
-        )}
+
+          
+
+        )}}
       </div>
     </div>
   )
 }
+
+
+{/* itens.map((item, index) => (
+
+                ))
+              
+                
+              ) */}
