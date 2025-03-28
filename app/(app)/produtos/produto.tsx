@@ -5,9 +5,6 @@ import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { useQuery } from 'react-query'
 import { NewSaleDialog } from './newProdutoDialog'
-import { getAllPrdTransmissor } from './api/getPrdTransmissor'
-import { IPrdTrm } from '@/lib/interface/IprdTrm'
-import { getClientes } from '../servicos/api/clientes'
 import {
   Dialog,
   DialogContent,
@@ -19,6 +16,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { IAllVendas } from '@/lib/interface/todasVendas'
+import { getTodasVendas } from './api/getTodasVendas'
 
 export default function ProdutoItens() {
   const [search, setSearch] = useState<string>('')
@@ -471,12 +470,10 @@ export default function ProdutoItens() {
     doc.save('proposta_tecnica.pdf')
   }
 
-  const { data: prdTrms = [], isLoading } = useQuery(
-    ['prdTrm'],
-    getAllPrdTransmissor,
+  const { data: allVendas = [], isLoading } = useQuery(
+    ['vendas'],
+    getTodasVendas,
   )
-
-  const { data: clientes } = useQuery(['clientes'], () => getClientes())
 
   // const filteredPrdTrms = prdTrms.filter((prdTrm: IPrdTrm) =>
   //   prdTrm.cliente?.toLowerCase().includes(search.toLowerCase()),
@@ -507,62 +504,49 @@ export default function ProdutoItens() {
           'Carregando...'
         ) : (
           <>
-            {prdTrms.map((data: IPrdTrm) => {
+            {allVendas.map((data: IAllVendas) => {
               return (
                 <Card key={data.id}>
-                  {clientes
-                    ?.filter((cliente) => cliente.id === Number(data.cliente))
-                    .map((cliente) => (
-                      <div key={cliente.id} className="flex">
-                        <CardHeader className="flex justify-between flex-row items-center">
-                          <CardTitle>Cliente: {cliente.nome}</CardTitle>
-                          <div className="flex items-center space-x-2">
-                            {/* <DialogVerProposta
-                        codService={data.codService}
-                        descCliente={data.descCliente}
-                        descEquipamento={data.equipamentoDescricao}
-                        /> */}
-                          </div>
-                        </CardHeader>
-                        <Dialog>
-                          <DialogTrigger>
-                            <Button
-                              variant="outline"
-                              className="bg-blue-500 text-white"
-                            >
-                              Ver proposta
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="w-[50vw] justify-start flex flex-col">
-                            <DialogHeader>
-                              <DialogTitle>
-                                Proposta de venda para a(o) {cliente.nome}
-                              </DialogTitle>
-                              <DialogDescription>
-                                Proposta gerada no dia {data.dataProposta} para
-                                a venda do equipamento {data.descricaoProduto} (
-                                {data.nSerieEquipamento}).
-                              </DialogDescription>
-                              <DialogDescription>
-                                <p className="text-zinc-700">
-                                  Para confirmar a venda basta finalizar a
-                                  proposta
-                                </p>
-                              </DialogDescription>
-                            </DialogHeader>
-                            <Button className="bg-blue-500 text-white hover:bg-blue-600">
-                              Confirmar proposta
-                            </Button>
-                            <Button
-                              onClick={gerarPDF}
-                              className="bg-zinc-300 text-black hover:text-white"
-                            >
-                              Gerar PDF
-                            </Button>
-                          </DialogContent>
-                        </Dialog>
-                      </div>
-                    ))}
+                  <CardHeader className="flex justify-between flex-row items-center">
+                    <CardTitle>Cliente: {data.nomeCliente}</CardTitle>
+                    <Dialog>
+                      <DialogTrigger>
+                        <Button
+                          variant="outline"
+                          className="bg-blue-500 text-white"
+                        >
+                          Ver proposta
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="w-[50vw] justify-start flex flex-col">
+                        <DialogHeader>
+                          <DialogTitle>
+                            Proposta de venda para a(o) {data.nomeCliente}
+                          </DialogTitle>
+                          <DialogDescription>
+                            Proposta gerada no dia {data.dataProposta} para a
+                            venda do equipamento {data.descricaoProduto} (
+                            {data.nSerieEquipamento}).
+                          </DialogDescription>
+                          <DialogDescription>
+                            <p className="text-zinc-700">
+                              Para confirmar a venda basta finalizar a proposta
+                            </p>
+                          </DialogDescription>
+                        </DialogHeader>
+                        <Button className="bg-blue-500 text-white hover:bg-blue-600">
+                          Confirmar proposta
+                        </Button>
+                        <Button
+                          onClick={gerarPDF}
+                          className="bg-zinc-300 text-black hover:text-white"
+                        >
+                          Gerar PDF
+                        </Button>
+                      </DialogContent>
+                    </Dialog>
+                  </CardHeader>
+
                   <CardContent>
                     <p className="text-gray-800 font-semibold">
                       Descrição do produto:{' '}

@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import {
   Select,
@@ -26,122 +27,106 @@ import {
   FormItem,
   FormLabel,
 } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { getClientes } from '../servicos/api/clientes'
 import { ICliente } from '@/lib/interface/Icliente'
-import { Input } from '@/components/ui/input'
 import { getAllPrdTransmissor } from './api/getPrdTransmissor'
-import { IPrdTrm } from '@/lib/interface/IprdTrm'
-import { putPrdTrm } from './api/putPrdTrm'
+import { postVendas } from './api/postVendas'
+import { useFieldArray } from 'react-hook-form'
+import { getAllPrdPos } from './api/getPrdPosicionador'
 
 const formSchema = z.object({
-  cliente: z.string().min(1, 'Selecione o cliente'),
-  modelo: z.string().min(1, 'Selecione o modelo'),
-  marca: z.string().min(1, 'Selecione a marca'),
-  prdTrm: z.string().min(1, 'Selecione o produto'),
-  preco: z.string().min(1, 'Insira o preco do produto'),
+  idCliente: z.string().min(1, 'Selecione o cliente'),
+  status: z.string().min(1, 'Informe o status'),
+  itens: z.array(
+    z.object({
+      itemVenda: z.string().min(1, 'Informe o item'),
+      tipoProduto: z.string().min(1, 'Informe o tipo de produto'),
+      marca: z.string().min(1, 'Selecione a marca'),
+      idProduto: z.string().min(1, 'Selecione o produto'),
+    }),
+  ),
 })
 
 export function NewSaleDialog() {
   const queryClient = useQueryClient()
-  const [valueItem, setValueItem] = useState('')
-  const [marca, setMarca] = useState('')
-  const [id, setId] = useState('')
-
-  const { data: dataCliente = [] as ICliente[] } = useQuery(
-    ['clientes'],
-    getClientes,
-  )
-
-  const { data: prdTrm = [] as IPrdTrm[] } = useQuery(
-    ['prdTrm'],
-    getAllPrdTransmissor,
-  )
-
-  const categories = [
-    { value: 'Transmissor', label: 'Transmissor' },
-    { value: 'Posicionador', label: 'Posicionador' },
-  ]
-
+  const [, setId] = useState('')
   const [open, setOpen] = useState(false)
+
+  const { data: dataCliente = [] } = useQuery(['clientes'], getClientes)
+  const { data: prdTrm = [] } = useQuery(['prdTrm'], getAllPrdTransmissor)
+  const { data: prdPos = [] } = useQuery(['prdPos'], getAllPrdPos)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      cliente: '',
-      modelo: '',
-      marca: '',
-      prdTrm: '',
-      preco: '',
+      idCliente: '',
+      status: '',
+      itens: [{ itemVenda: '', tipoProduto: '', marca: '', idProduto: '' }],
     },
   })
 
-  const marcas = [
-    { id: 1, value: 'SMAR' },
-    { id: 2, value: 'YOKOGAWA' },
-    { id: 3, value: 'ROSEMOUNT' },
-    { id: 4, value: 'ENDRES+HAUSER' },
-    { id: 5, value: 'ABB' },
-    { id: 6, value: 'SIEMENS' },
-    { id: 7, value: 'FOXBORO' },
-  ]
+  const { control, handleSubmit } = form
 
-  const mutateService = useMutation({
-    mutationFn: ({
-      id,
-      body,
-    }: {
-      id: string
-      body: { dataProposta: string; cliente: string }
-    }) => putPrdTrm(id, body),
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'itens',
+  })
+
+  const mutateVenda = useMutation({
+    mutationFn: (body: any) => postVendas(body),
     onSuccess: () => {
-      queryClient.invalidateQueries(['services'])
+      queryClient.invalidateQueries(['vendas'])
     },
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const body = {
-      dataProposta:
-        new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(),
-      cliente: values.cliente,
-    }
+    const sharedId = crypto.randomUUID()
+    const sharedDate = new Date().toLocaleString('pt-BR')
 
-    mutateService.mutate({
-      id: String(values.prdTrm),
-      body: body,
-    })
+    const vendas = values.itens.map((item) => ({
+      idCliente: Number(values.idCliente),
+      idVenda: sharedId,
+      tipoProduto: item.tipoProduto,
+      marca: item.marca,
+      itemVenda: item.itemVenda,
+      idProduto: item.idProduto,
+      dataProposta: sharedDate,
+      dataVenda: null,
+      status: values.status,
+    }))
+
+    console.log('vendas', vendas)
+    mutateVenda.mutate(vendas)
+    form.reset()
     setOpen(false)
   }
-
-  const filteredPrdTrm = prdTrm.filter((item: IPrdTrm) => marca == item.modelo)
-
-  const precoFilteredPrdTrm = prdTrm.filter(
-    (item: IPrdTrm) => id == String(item.id),
-  )
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-blue-500 hover:bg-blue-600">+ Nova venda</Button>
       </DialogTrigger>
-      <DialogContent className="w-[50vw]">
+      <DialogContent className="w-[50vw] overflow-y-auto max-h-[80vh]">
         <DialogHeader>
           <DialogTitle>Nova venda</DialogTitle>
         </DialogHeader>
-
+        <DialogDescription className="text-xs text-zinc-400">
+          Preencha os dados para realizar a nova venda.
+        </DialogDescription>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Select de Equipamento */}
+            {/* Cliente */}
             <FormField
               control={form.control}
-              name="cliente"
+              name="idCliente"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Cliente</FormLabel>
                   <Select
-                    onValueChange={(value) => {
-                      field.onChange(value)
-                    }}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -160,155 +145,198 @@ export function NewSaleDialog() {
               )}
             />
 
-            {/* Select de Categoria */}
+            {fields.map((field, index) => {
+              const tipoSelecionado = form.watch(`itens.${index}.tipoProduto`)
+              const marcaSelecionada = form.watch(`itens.${index}.marca`)
+
+              const produtosFiltrados =
+                tipoSelecionado === 'Transmissor'
+                  ? prdTrm.filter((item) => item.modelo == marcaSelecionada)
+                  : prdPos.filter(
+                      (item) => item.modeloPlaca == marcaSelecionada,
+                    )
+
+              return (
+                <div
+                  key={field.id}
+                  className="border p-3 rounded-md space-y-2 relative"
+                >
+                  <FormField
+                    control={form.control}
+                    name={`itens.${index}.marca`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Marca</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione a marca" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {[
+                              'SMAR',
+                              'YOKOGAWA',
+                              'ROSEMOUNT',
+                              'ENDRES+HAUSER',
+                              'ABB',
+                              'SIEMENS',
+                              'FOXBORO',
+                            ].map((marca) => (
+                              <SelectItem key={marca} value={marca}>
+                                {marca}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* tipoProduto */}
+                  <FormField
+                    control={form.control}
+                    name={`itens.${index}.tipoProduto`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo de Produto</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o tipo" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Transmissor">
+                              Transmissor
+                            </SelectItem>
+                            <SelectItem value="Posicionador">
+                              Posicionador
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* itemVenda */}
+                  <FormField
+                    control={form.control}
+                    name={`itens.${index}.itemVenda`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Item de Venda</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: 1" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* idProduto */}
+                  <FormField
+                    control={form.control}
+                    name={`itens.${index}.idProduto`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Produto</FormLabel>
+                        <Select
+                          onValueChange={(value) => {
+                            setId(value)
+                            field.onChange(value)
+                          }}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o produto" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {produtosFiltrados.map((prdTrm) => (
+                              <SelectItem
+                                key={prdTrm.id}
+                                value={String(prdTrm.id)}
+                              >
+                                {prdTrm.descricaoProduto} -{' '}
+                                {prdTrm.nSerieEquipamento}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* botão de remover */}
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="absolute h-6 top-0 right-3"
+                    onClick={() => remove(index)}
+                  >
+                    Remover
+                  </Button>
+                </div>
+              )
+            })}
+
+            {/* Status */}
             <FormField
               control={form.control}
-              name="modelo"
+              name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Selecione o modelo</FormLabel>
+                  <FormLabel>Status</FormLabel>
                   <Select
-                    onValueChange={(value) => {
-                      field.onChange(value)
-                    }}
+                    onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione o modelo" />
+                        <SelectValue placeholder="Selecione o status" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categories.map((category) => {
-                        return (
-                          <SelectItem
-                            key={category.value}
-                            value={category.value}
-                          >
-                            {category.label}
-                          </SelectItem>
-                        )
-                      })}
+                      <SelectItem value="1">Proposta</SelectItem>
+                      <SelectItem value="2">Concluído</SelectItem>
+                      <SelectItem value="3">Cancelado</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>
               )}
             />
 
-            {/* Select de Marca */}
-            <FormField
-              control={form.control}
-              name="marca"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Selecione a marca</FormLabel>
-                  <Select
-                    onValueChange={(value) => {
-                      setMarca(value)
-                      field.onChange(value)
-                    }}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione a marca" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {marcas.map((category) => {
-                        return (
-                          <SelectItem key={category.id} value={category.value}>
-                            {category.value}
-                          </SelectItem>
-                        )
-                      })}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
-
-            {/* Select de Equipamento cadastrado no almoxarifado */}
-            <FormField
-              control={form.control}
-              name="prdTrm"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Selecione os produtos</FormLabel>
-                  <Select
-                    onValueChange={(value) => {
-                      setId(value)
-                      field.onChange(value)
-                    }}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o modelo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {filteredPrdTrm.map((prdTrm: IPrdTrm) => {
-                        return (
-                          <SelectItem key={prdTrm.id} value={String(prdTrm.id)}>
-                            {prdTrm.descricaoProduto} {prdTrm.nSerieEquipamento}
-                          </SelectItem>
-                        )
-                      })}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
-
-            {/* Select de Equipamento */}
-            <FormField
-              control={form.control}
-              name="preco"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <p>
-                      <i>
-                        Preço cadastrado no almoxarifado:{' '}
-                        {precoFilteredPrdTrm.map((a: IPrdTrm) =>
-                          new Intl.NumberFormat('pt-BR', {
-                            style: 'currency',
-                            currency: 'BRL',
-                          }).format(Number(a.preco)),
-                        )}
-                      </i>
-                    </p>
-                  </FormLabel>
-                  <Select
-                    onValueChange={(value) => {
-                      // console.log("Valor selecionado:", value);
-                      field.onChange(value)
-                      setValueItem(value)
-                    }}
-                    value={valueItem}
-                  >
-                    <FormControl>
-                      <Input placeholder="Adicione um valor" {...field} />
-                    </FormControl>
-                  </Select>
-                </FormItem>
-              )}
-            />
-
-            {/* Botões de Ação */}
+            {/* Botões */}
             <div className="flex justify-end gap-2">
               <Button
-                variant="outline"
                 type="button"
-                onClick={() => {
-                  setOpen(false)
-                  form.reset()
-                }}
+                variant="outline"
+                onClick={() =>
+                  append({
+                    itemVenda: '',
+                    tipoProduto: '',
+                    marca: '',
+                    idProduto: '',
+                  })
+                }
+              >
+                + Adicionar Item
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
               >
                 Cancelar
               </Button>
-              <Button type="submit">Cadastrar Proposta</Button>
+              <Button type="submit">Cadastrar</Button>
             </div>
           </form>
         </Form>
