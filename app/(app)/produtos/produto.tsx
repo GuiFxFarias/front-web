@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { useQuery } from 'react-query'
+import Img from '@/assets/img/CocertLogo.png'
 import { NewSaleDialog } from './newProdutoDialog'
 import {
   Dialog,
@@ -16,28 +17,35 @@ import {
 import { Button } from '@/components/ui/button'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { IAllVendas } from '@/lib/interface/todasVendas'
+import { IVendaComProdutoCliente } from '@/lib/interface/todasVendas'
 import { getTodasVendas } from './api/getTodasVendas'
-import { getAllPrdPos } from './api/getPrdPosicionador'
-import { getAllPrdTransmissor } from './api/getPrdTransmissor'
 
 export default function ProdutoItens() {
-  const [search, setSearch] = useState<string>('')
+  const [, setSearch] = useState<string>('')
 
-  const gerarPDF = () => {
+  const gerarPDF = (venda: IVendaComProdutoCliente[]) => {
     const doc = new jsPDF()
+    const cliente = venda[0] // usando o primeiro item para pegar os dados do cliente
+
+    const dataFormatada = new Date().toLocaleDateString('pt-BR')
 
     // Adiciona cabeçalho
     const addHeader = () => {
       doc.setFontSize(16)
       doc.setTextColor(40)
+      doc.setFont('helvetica', 'normal')
       doc.text('CONCERT - INSTRUMENTAÇÃO INDUSTRIAL', 14, 15)
       doc.addImage(Img.src, 'PNG', 170, 5, 25, 25)
       doc.setFontSize(12)
-      doc.text(`Proposta Nº ${codService}  - Revisão 0`, 14, 22)
+      doc.text(
+        `Proposta Nº ${cliente.idVenda.slice(0, 8).toUpperCase()} - Revisão 0`,
+        14,
+        22,
+      )
+
       doc.setFontSize(10)
       doc.text(`Data: ${dataFormatada}`, 14, 28)
-      doc.line(10, 32, 200, 32) // Linha separadora
+      doc.line(10, 32, 200, 32)
     }
 
     // Adiciona rodapé
@@ -49,40 +57,27 @@ export default function ProdutoItens() {
         doc.text(`Página ${i} de ${pageCount}`, 180, 290)
       }
       doc.setFontSize(12)
-      doc.text('CONCERT - INSTRUMENTAÇÃO INDUSTRIAL', 100, 250, {
-        align: 'left',
-      })
-      doc.text('RUA ÁLVARO ANTONIO MOSSIN, 253', 100, 256, {
-        align: 'left',
-      })
-
-      doc.text('SERTÃOZINHO-SP - CEP: 14177-134', 100, 262, {
-        align: 'left',
-      })
-
-      doc.text('CNPJ: 48.644.361/0001-05', 100, 268, {
-        align: 'left',
-      })
-
-      doc.text('Fone: (16) 99149-8643', 100, 274, {
-        align: 'left',
-      })
+      doc.setFont('helvetica', 'normal')
+      doc.text('CONCERT - INSTRUMENTAÇÃO INDUSTRIAL', 100, 250)
+      doc.text('RUA ÁLVARO ANTONIO MOSSIN, 253', 100, 256)
+      doc.text('SERTÃOZINHO-SP - CEP: 14177-134', 100, 262)
+      doc.text('CNPJ: 48.644.361/0001-05', 100, 268)
+      doc.text('Fone: (16) 99149-8643', 100, 274)
       doc.addImage(Img.src, 'PNG', 14, 245, 35, 35)
     }
 
     // Conteúdo da proposta
     const addContentPage1 = () => {
       doc.setFontSize(12)
-      doc.text(`AT.: ${clienteID?.nome}`, 14, 40)
+      doc.text(`AT.: ${cliente.nomeCliente}`, 14, 40)
       doc.text(
-        `Fone: (${clienteID?.telefone?.slice(
-          0,
+        `Fone: (${cliente.telefone?.slice(0, 2)}) ${cliente.telefone?.slice(
           2,
-        )}) ${clienteID?.telefone?.slice(2)}`,
+        )}`,
         14,
         46,
       )
-      doc.text(`Email: ${clienteID?.email}`, 14, 52)
+      doc.text(`Email: ${cliente.email}`, 14, 52)
 
       doc.setFontSize(12)
       doc.text('Prezados(as) Senhores(as),', 14, 68)
@@ -116,123 +111,54 @@ export default function ProdutoItens() {
     addFooter()
 
     const addContentPage2 = () => {
-      if (!serviceId || serviceId.length === 0) {
-        doc.text('Nenhuma peça encontrada.', 14, 30)
-        return
-      }
-
-      // Agrupar por itemService
-      const groupedByItemService = serviceId.reduce((acc, data) => {
-        if (!acc[data.itemService]) {
-          acc[data.itemService] = []
-        }
-        acc[data.itemService].push(data)
+      const grouped = venda.reduce((acc, item) => {
+        if (!acc[item.itemVenda]) acc[item.itemVenda] = []
+        acc[item.itemVenda].push(item)
         return acc
-      }, {} as Record<string, IServiceID[]>)
+      }, {} as Record<string, IVendaComProdutoCliente[]>)
 
-      Object.entries(groupedByItemService).forEach(
-        ([itemServiceKey, dataList], index) => {
-          if (index !== 0) {
-            doc.addPage()
-          }
-          addHeader()
-          addFooter()
-          doc.setFontSize(12)
-          doc.setFont('helvetica', 'bold')
-          doc.text(`1.1. Preços - Item do Serviço ${itemServiceKey}`, 14, 40)
+      Object.entries(grouped).forEach(([itemVenda, produtos], index) => {
+        if (index !== 0) doc.addPage()
+        addHeader()
+        addFooter()
 
-          const tempBody: any[] = []
-          const tempInspecao: any[] = []
-          const tempInspecaoTomada: any[] = []
+        doc.setFontSize(12)
+        doc.setFont('helvetica', 'bold')
+        doc.text(`1.1. Preços - Item de Venda ${itemVenda}`, 14, 40)
 
-          dataList.forEach((data) => {
-            const serv = servicoCodService?.find(
-              (s) =>
-                s.itemService === data.itemService &&
-                s.codService === data.codService,
-            )
+        const body = produtos.map((prod) => [
+          itemVenda,
+          `${prod.descricaoProduto ?? 'Sem descrição'}`,
+          prod.preco
+            ? new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              }).format(Number(prod.preco))
+            : 'R$ 0,00',
+        ])
 
-            if (serv) {
-              tempInspecao.push(`${data.insVisual}`)
-              tempInspecaoTomada.push(`${data.manuPrevTomada}`)
-              tempBody.push([
-                `${data.quantidade_peca}`,
-                `${data.itemService}`,
-                `${serv.equipamentoDescricao} - ${data.Descricao}`,
-                `${new Intl.NumberFormat('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                }).format(Number(data.valorPeca))}`,
-              ])
-            }
-          })
+        autoTable(doc, {
+          startY: 45,
+          head: [['Item', 'Descrição', 'Valor (R$)']],
+          body,
+          theme: 'grid',
+          styles: { fontSize: 10 },
+          headStyles: { fillColor: [41, 128, 185] },
+        })
 
-          autoTable(doc, {
-            startY: 45,
-            head: [['Qtd', 'Item do serviço', 'Descrição', 'Valor (R$)']],
-            body: tempBody,
-            theme: 'grid',
-            headStyles: { fillColor: [41, 128, 185] },
-            styles: { fontSize: 10 },
-          })
+        const total = produtos.reduce(
+          (sum, p) => sum + (p.preco ? Number(p.preco) : 0),
+          0,
+        )
 
-          // Calcular total por itemService
-          const totalValor = dataList.reduce(
-            (sum: number, data) => sum + Number(data.valorPeca),
-            0,
-          )
-
-          autoTable(doc, {
-            startY: (doc as any).lastAutoTable.finalY + 5,
-            body: [
-              [
-                '',
-                'TOTAL',
-                new Intl.NumberFormat('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                }).format(totalValor),
-              ],
-            ],
-            theme: 'grid',
-            styles: { fontSize: 12, fontStyle: 'bold' },
-            columnStyles: { 2: { textColor: [0, 0, 0] } },
-          })
-
-          const uniqueInspecao = Array.from(
-            new Set(tempInspecao.map((a) => String(a).trim())),
-          )
-
-          const uniqueTomada = Array.from(
-            new Set(tempInspecaoTomada.map((a) => String(a).trim())),
-          )
-
-          doc.setFontSize(12)
-          doc.setFont('helvetica', 'bold')
-          doc.text('Inspeção visual do equipamento', 14, 164)
-
-          doc.setTextColor(0, 0, 0)
-          doc.setFont('helvetica', 'normal')
-          doc.text(
-            uniqueInspecao.map((a) =>
-              a ? a.trim() : 'Não foi inserido inspeção visual',
-            ),
-            14,
-            170,
-          )
-
-          doc.text(
-            uniqueTomada.map((a) =>
-              a == '1'
-                ? 'Manutenção preventiva tomada de nível (desmontagem, jateamento, pintura, assepsia, reusinagem da tomada de nível, solda de lamida de aço inox 316L fornecimento com certificado de calibração com reastrabilidade RBC)'
-                : 'Não existe tomada de nível',
-            ),
-            14,
-            196,
-            { align: 'justify', maxWidth: 185 },
-          )
-        },
-      )
+        autoTable(doc, {
+          startY: (doc as any).lastAutoTable.finalY + 5,
+          body: [['', 'TOTAL', '', `R$ ${total.toFixed(2)}`]],
+          theme: 'grid',
+          styles: { fontSize: 12, fontStyle: 'bold' },
+          columnStyles: { 3: { textColor: [0, 0, 0] } },
+        })
+      })
     }
 
     const addContentPage3 = () => {
@@ -469,15 +395,15 @@ export default function ProdutoItens() {
     addFooter()
 
     // Salva o documento
-    doc.save('proposta_tecnica.pdf')
+    doc.save(`proposta_${cliente.nomeCliente}.pdf`)
   }
 
   const { data: allVendas = [], isLoading } = useQuery(
     ['vendas'],
     getTodasVendas,
   )
-  const { data: prdTrm = [] } = useQuery(['prdTrm'], getAllPrdTransmissor)
-  const { data: prdPos = [] } = useQuery(['prdPos'], getAllPrdPos)
+  // const { data: prdTrm = [] } = useQuery(['prdTrm'], getAllPrdTransmissor)
+  // const { data: prdPos = [] } = useQuery(['prdPos'], getAllPrdPos)
 
   // const filteredPrdTrms = prdTrms.filter((prdTrm: IPrdTrm) =>
   //   prdTrm.cliente?.toLowerCase().includes(search.toLowerCase()),
@@ -490,9 +416,9 @@ export default function ProdutoItens() {
   }, {} as Record<string, any[]>)
 
   for (const idVenda in sameVendas) {
-    console.log('Venda:', idVenda)
+    // console.log('Venda:', idVenda)
     sameVendas[idVenda].forEach((item) => {
-      console.log('Item:', item)
+      // console.log('Item:', item)
     })
   }
 
@@ -520,12 +446,11 @@ export default function ProdutoItens() {
         {isLoading ? (
           'Carregando...'
         ) : (
-         
           <>
-            {Object.entries(sameVendas).map(([idVenda, itens]) => (
-              <div key={idVenda}>
-                {itens.map((item, index) => (
-                  <Card key={index}>
+            {Object.entries(sameVendas).map(([idVenda, itens]) => {
+              const item = itens[0] // Use the first item to show sale info
+              return (
+                <Card key={idVenda}>
                   <CardHeader className="flex justify-between flex-row items-center">
                     <CardTitle>Cliente: {item.nomeCliente}</CardTitle>
 
@@ -544,9 +469,7 @@ export default function ProdutoItens() {
                             Proposta de venda para a(o) {item.nomeCliente}
                           </DialogTitle>
                           <DialogDescription>
-                            Proposta gerada no dia {item.dataProposta} para a
-                            venda do equipamento {item.descricaoProduto} (
-                            {item.nSerieEquipamento}).
+                            Proposta gerada no dia {item.dataProposta}
                           </DialogDescription>
                           <DialogDescription>
                             <p className="text-zinc-700">
@@ -557,69 +480,50 @@ export default function ProdutoItens() {
                         <Button className="bg-blue-500 text-white hover:bg-blue-600">
                           Confirmar proposta
                         </Button>
-                        <Button
-                          onClick={gerarPDF}
-                          className="bg-zinc-300 text-black hover:text-white"
-                        >
+                        <Button onClick={() => gerarPDF(itens)}>
                           Gerar PDF
                         </Button>
                       </DialogContent>
                     </Dialog>
                   </CardHeader>
 
-                  <CardContent>
-                    <p className="text-gray-800 font-semibold">
-                      Descrição do produto:{' '}
-                      {item.descricaoProduto
-                        ? item.descricaoProduto
-                        : 'Não possui'}
-                    </p>
-
-                    <p className="text-gray-800">
-                      Número de série:{' '}
-                      {item.nSerieEquipamento
-                        ? item.nSerieEquipamento
-                        : 'Não possui'}
-                    </p>
-
-                    <p className="text-gray-800">
-                      Número de série do sensor:{' '}
-                      {item.nSerieSensor ? item.nSerieSensor : 'Não possui'}
-                    </p>
-
-                    <p className="text-gray-600">
-                      Data criação proposta:{' '}
-                      {item.dataProposta ? item.dataProposta : 'Não possui'}
-                    </p>
-
-                    <p className="text-gray-600">
-                      Valor da proposta:{' '}
-                      {item.preco
-                        ? new Intl.NumberFormat('pt-BR', {
-                            style: 'currency',
-                            currency: 'BRL',
-                          }).format(Number(item.preco))
-                        : 'Não possui'}
-                    </p>
+                  <CardContent className=" space-y-4">
+                    {itens.map((item, index) => (
+                      <div key={index} className="mb-4 border-b pb-2">
+                        <p className="text-gray-800 font-semibold">
+                          Descrição do produto:{' '}
+                          {item.descricaoProduto || 'Não possui'}
+                        </p>
+                        <p className="text-gray-800">
+                          Número de série:{' '}
+                          {item.nSerieEquipamento || 'Não possui'}
+                        </p>
+                        <p className="text-gray-800">
+                          Número de série do sensor:{' '}
+                          {item.nSerieSensor || 'Não possui'}
+                        </p>
+                        <p className="text-gray-600">
+                          Data criação proposta:{' '}
+                          {item.dataProposta || 'Não possui'}
+                        </p>
+                        <p className="text-gray-600">
+                          Valor da proposta:{' '}
+                          {item.preco
+                            ? new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
+                              }).format(Number(item.preco))
+                            : 'Não possui'}
+                        </p>
+                      </div>
+                    ))}
                   </CardContent>
                 </Card>
-                ))}
-              </div>
-            ))}
+              )
+            })}
           </>
-
-          
-
-        )}}
+        )}
       </div>
     </div>
   )
 }
-
-
-{/* itens.map((item, index) => (
-
-                ))
-              
-                
-              ) */}

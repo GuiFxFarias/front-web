@@ -1,14 +1,30 @@
-export interface IAllVendas {
+export interface IVendaComProdutoCliente {
   id: number
   idVenda: string
-  nomeCliente: string
   itemVenda: string
-  tipoProduto: string
+  tipoProduto: 'Transmissor' | 'Posicionador' | string
   dataProposta: string
   dataVenda: string | null
   status: string
+  marca: string
+  idProduto: string
+
+  // Cliente
+  idCliente: number
+  nomeCliente: string
+  cnpj: string
+  nome_responsavel: string
+  email: string
+  telefone: string
+  endereco: string
+  cidade: string
+  estado: string
+  cep: string
+  data_criacao: string
+
+  // Produto
   descricaoProduto: string
-  nSerieEquipamento: string
-  nSerieSensor: string
-  preco: string
+  nSerieEquipamento: string | null
+  nSerieSensor: string | null
+  preco: string | null
 }
