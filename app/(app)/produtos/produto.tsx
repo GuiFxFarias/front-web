@@ -415,20 +415,21 @@ export default function ProdutoItens() {
     sameVendas[idVenda].forEach((item) => {})
   }
 
-  const mutateStatus = useMutation(
-    (variables: { id: string; body: any }) =>
-      putAttVendas(variables.id, variables.body),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['vendas'])
-      },
+  const mutateStatus = useMutation({
+    mutationFn: ({ id, campo }: { id: string; campo: { status: string } }) =>
+      putAttVendas(id, campo),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['services'])
     },
-  )
+  })
 
-  function confirmarProposta(values: { id: string; status: string }) {
-    console.log(values)
-
-    mutateStatus.mutate({ id: values.id, body: values.status })
+  function confirmarProposta(id, campoStatus: { status: string }) {
+    mutateStatus.mutate({
+      id,
+      campo: {
+        status: campoStatus.status,
+      },
+    })
   }
 
   return (
@@ -478,7 +479,8 @@ export default function ProdutoItens() {
                             Proposta de venda para a(o) {item.nomeCliente}
                           </DialogTitle>
                           <DialogDescription>
-                            Proposta gerada no dia {item.dataProposta}
+                            Proposta {item.idVenda.slice(0, 8).toUpperCase()}{' '}
+                            gerada no dia {item.dataProposta}
                           </DialogDescription>
                           <DialogDescription>
                             <p className="text-zinc-700">
@@ -491,10 +493,7 @@ export default function ProdutoItens() {
                           <Button
                             className="bg-zinc-500 text-white hover:bg-blue-600"
                             onClick={() =>
-                              confirmarProposta({
-                                id: item.idVenda,
-                                status: '1',
-                              })
+                              confirmarProposta(item.idVenda, { status: '2' })
                             }
                           >
                             Cancelar proposta
@@ -503,10 +502,7 @@ export default function ProdutoItens() {
                             <Button
                               className="bg-blue-500 mr-2 text-white hover:bg-blue-600"
                               onClick={() =>
-                                confirmarProposta({
-                                  id: item.idVenda,
-                                  status: '0',
-                                })
+                                confirmarProposta(item.idVenda, { status: '1' })
                               }
                             >
                               Confirmar proposta
