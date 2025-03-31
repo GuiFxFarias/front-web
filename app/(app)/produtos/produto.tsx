@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { useQuery } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 import Img from '@/assets/img/CocertLogo.png'
 import { NewSaleDialog } from './newProdutoDialog'
 import {
@@ -19,8 +19,10 @@ import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { IVendaComProdutoCliente } from '@/lib/interface/todasVendas'
 import { getTodasVendas } from './api/getTodasVendas'
+import { putAttVendas } from './api/putVendas'
 
 export default function ProdutoItens() {
+  const queryClient = useQueryClient()
   const [, setSearch] = useState<string>('')
 
   const gerarPDF = (venda: IVendaComProdutoCliente[]) => {
@@ -402,12 +404,6 @@ export default function ProdutoItens() {
     ['vendas'],
     getTodasVendas,
   )
-  // const { data: prdTrm = [] } = useQuery(['prdTrm'], getAllPrdTransmissor)
-  // const { data: prdPos = [] } = useQuery(['prdPos'], getAllPrdPos)
-
-  // const filteredPrdTrms = prdTrms.filter((prdTrm: IPrdTrm) =>
-  //   prdTrm.cliente?.toLowerCase().includes(search.toLowerCase()),
-  // )
 
   const sameVendas = allVendas.reduce((acc, venda) => {
     acc[venda.idVenda] = acc[venda.idVenda] || []
@@ -416,10 +412,23 @@ export default function ProdutoItens() {
   }, {} as Record<string, any[]>)
 
   for (const idVenda in sameVendas) {
-    // console.log('Venda:', idVenda)
-    sameVendas[idVenda].forEach((item) => {
-      // console.log('Item:', item)
-    })
+    sameVendas[idVenda].forEach((item) => {})
+  }
+
+  const mutateStatus = useMutation(
+    (variables: { id: string; body: any }) =>
+      putAttVendas(variables.id, variables.body),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['vendas'])
+      },
+    },
+  )
+
+  function confirmarProposta(values: { id: string; status: string }) {
+    console.log(values)
+
+    mutateStatus.mutate({ id: values.id, body: values.status })
   }
 
   return (
@@ -477,12 +486,36 @@ export default function ProdutoItens() {
                             </p>
                           </DialogDescription>
                         </DialogHeader>
-                        <Button className="bg-blue-500 text-white hover:bg-blue-600">
-                          Confirmar proposta
-                        </Button>
-                        <Button onClick={() => gerarPDF(itens)}>
-                          Gerar PDF
-                        </Button>
+                        <div className="flex w-full justify-between items-center mt-4">
+                          {' '}
+                          <Button
+                            className="bg-zinc-500 text-white hover:bg-blue-600"
+                            onClick={() =>
+                              confirmarProposta({
+                                id: item.idVenda,
+                                status: '1',
+                              })
+                            }
+                          >
+                            Cancelar proposta
+                          </Button>
+                          <div className="flex">
+                            <Button
+                              className="bg-blue-500 mr-2 text-white hover:bg-blue-600"
+                              onClick={() =>
+                                confirmarProposta({
+                                  id: item.idVenda,
+                                  status: '0',
+                                })
+                              }
+                            >
+                              Confirmar proposta
+                            </Button>
+                            <Button onClick={() => gerarPDF(itens)}>
+                              Gerar PDF
+                            </Button>
+                          </div>
+                        </div>
                       </DialogContent>
                     </Dialog>
                   </CardHeader>

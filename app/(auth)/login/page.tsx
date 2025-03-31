@@ -1,8 +1,8 @@
-"use client";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+'use client'
+import React from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
 import {
   Form,
   FormField,
@@ -10,66 +10,66 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
-import { Loader2 } from "lucide-react";
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import Cookies from 'js-cookie'
+import { Loader2 } from 'lucide-react'
 
 interface IForm {
-  Email: string;
-  Senha: string;
+  Email: string
+  Senha: string
 }
 
 const loginSchema = z.object({
-  Email: z.string().email("Por favor, insira um email válido."),
-  Senha: z.string().min(6, "A senha deve ter no mínimo 6 caracteres."),
-});
+  Email: z.string().email('Por favor, insira um email válido.'),
+  Senha: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres.'),
+})
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [loading, setLoading] = React.useState(false);
+  const router = useRouter()
+  const [loading, setLoading] = React.useState(false)
 
   const form = useForm<IForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      Email: "",
-      Senha: "",
+      Email: '',
+      Senha: '',
     },
-  });
+  })
 
   async function onSubmit(values: IForm) {
-    console.log(values);
+    console.log(values)
 
     try {
       const res = await fetch(`http://localhost:3001/usuarios/login`, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify(values),
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-      });
+      })
 
-      const resJson = await res.json();
-      setLoading(true);
+      const resJson = await res.json()
+      setLoading(true)
 
       if (res.ok) {
         if (resJson.token) {
-          Cookies.set("token", resJson.token);
-          console.log("success");
+          Cookies.set('token', resJson.token)
+          console.log('success')
 
-          setLoading(false);
-          router.push("/painel");
+          setLoading(false)
+          router.push('/painel')
         } else {
-          console.error("Erro no login: Token não recebido.");
+          console.error('Erro no login: Token não recebido.')
         }
       } else {
-        console.error("Erro no login:", resJson);
+        console.error('Erro no login:', resJson)
       }
     } catch (error: any) {
-      console.error("Erro no login:", error.message);
+      console.error('Erro no login:', error.message)
     }
   }
 
@@ -126,7 +126,7 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   Entrando...
-                  <Loader2 className="animate-spin mr-2" size={20} />{" "}
+                  <Loader2 className="animate-spin mr-2" size={20} />{' '}
                 </>
               ) : (
                 <Link href="/painel">Entrar</Link>
@@ -136,5 +136,5 @@ export default function LoginPage() {
         </Form>
       </div>
     </div>
-  );
+  )
 }

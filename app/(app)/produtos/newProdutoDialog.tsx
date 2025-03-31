@@ -304,9 +304,8 @@ export function NewSaleDialog() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="1">Proposta</SelectItem>
-                      <SelectItem value="2">Concluído</SelectItem>
-                      <SelectItem value="3">Cancelado</SelectItem>
+                      <SelectItem value="0">Proposta</SelectItem>
+                      <SelectItem value="1">Concluído</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>
