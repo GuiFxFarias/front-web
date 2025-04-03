@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import * as z from 'zod'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react';
+import * as z from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Dialog,
   DialogContent,
@@ -11,30 +11,30 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from '@/components/ui/dialog'
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
-import { getClientes } from '../servicos/api/clientes'
-import { ICliente } from '@/lib/interface/Icliente'
-import { getAllPrdTransmissor } from './api/getPrdTransmissor'
-import { postVendas } from './api/postVendas'
-import { useFieldArray } from 'react-hook-form'
-import { getAllPrdPos } from './api/getPrdPosicionador'
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { getClientes } from '../servicos/api/clientes';
+import { ICliente } from '@/lib/interface/Icliente';
+import { getAllPrdTransmissor } from './api/getPrdTransmissor';
+import { postVendas } from './api/postVendas';
+import { useFieldArray } from 'react-hook-form';
+import { getAllPrdPos } from './api/getPrdPosicionador';
 
 const formSchema = z.object({
   idCliente: z.string().min(1, 'Selecione o cliente'),
@@ -45,18 +45,18 @@ const formSchema = z.object({
       tipoProduto: z.string().min(1, 'Informe o tipo de produto'),
       marca: z.string().min(1, 'Selecione a marca'),
       idProduto: z.string().min(1, 'Selecione o produto'),
-    }),
+    })
   ),
-})
+});
 
 export function NewSaleDialog() {
-  const queryClient = useQueryClient()
-  const [, setId] = useState('')
-  const [open, setOpen] = useState(false)
+  const queryClient = useQueryClient();
+  const [, setId] = useState('');
+  const [open, setOpen] = useState(false);
 
-  const { data: dataCliente = [] } = useQuery(['clientes'], getClientes)
-  const { data: prdTrm = [] } = useQuery(['prdTrm'], getAllPrdTransmissor)
-  const { data: prdPos = [] } = useQuery(['prdPos'], getAllPrdPos)
+  const { data: dataCliente = [] } = useQuery(['clientes'], getClientes);
+  const { data: prdTrm = [] } = useQuery(['prdTrm'], getAllPrdTransmissor);
+  const { data: prdPos = [] } = useQuery(['prdPos'], getAllPrdPos);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,25 +65,25 @@ export function NewSaleDialog() {
       status: '',
       itens: [{ itemVenda: '', tipoProduto: '', marca: '', idProduto: '' }],
     },
-  })
+  });
 
-  const { control, handleSubmit } = form
+  const { control, handleSubmit } = form;
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'itens',
-  })
+  });
 
   const mutateVenda = useMutation({
     mutationFn: (body: any) => postVendas(body),
     onSuccess: () => {
-      queryClient.invalidateQueries(['vendas'])
+      queryClient.invalidateQueries(['vendas']);
     },
-  })
+  });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const sharedId = crypto.randomUUID()
-    const sharedDate = new Date().toLocaleString('pt-BR')
+    const sharedId = crypto.randomUUID();
+    const sharedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
     const vendas = values.itens.map((item) => ({
       idCliente: Number(values.idCliente),
@@ -95,32 +95,32 @@ export function NewSaleDialog() {
       dataProposta: sharedDate,
       dataVenda: null,
       status: values.status,
-    }))
+    }));
 
-    console.log('vendas', vendas)
-    mutateVenda.mutate(vendas)
-    form.reset()
-    setOpen(false)
+    console.log('vendas', vendas);
+    mutateVenda.mutate(vendas);
+    form.reset();
+    setOpen(false);
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-blue-500 hover:bg-blue-600">+ Nova venda</Button>
+        <Button className='bg-blue-500 hover:bg-blue-600'>+ Nova venda</Button>
       </DialogTrigger>
-      <DialogContent className="w-[50vw] overflow-y-auto max-h-[80vh]">
+      <DialogContent className='w-[50vw] overflow-y-auto max-h-[80vh]'>
         <DialogHeader>
           <DialogTitle>Nova venda</DialogTitle>
         </DialogHeader>
-        <DialogDescription className="text-xs text-zinc-400">
+        <DialogDescription className='text-xs text-zinc-400'>
           Preencha os dados para realizar a nova venda.
         </DialogDescription>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
             {/* Cliente */}
             <FormField
               control={form.control}
-              name="idCliente"
+              name='idCliente'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Cliente</FormLabel>
@@ -130,7 +130,7 @@ export function NewSaleDialog() {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione o cliente" />
+                        <SelectValue placeholder='Selecione o cliente' />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -146,20 +146,20 @@ export function NewSaleDialog() {
             />
 
             {fields.map((field, index) => {
-              const tipoSelecionado = form.watch(`itens.${index}.tipoProduto`)
-              const marcaSelecionada = form.watch(`itens.${index}.marca`)
+              const tipoSelecionado = form.watch(`itens.${index}.tipoProduto`);
+              const marcaSelecionada = form.watch(`itens.${index}.marca`);
 
               const produtosFiltrados =
                 tipoSelecionado === 'Transmissor'
                   ? prdTrm.filter((item) => item.modelo == marcaSelecionada)
                   : prdPos.filter(
-                      (item) => item.modeloPlaca == marcaSelecionada,
-                    )
+                      (item) => item.modeloPlaca == marcaSelecionada
+                    );
 
               return (
                 <div
                   key={field.id}
-                  className="border p-3 rounded-md space-y-2 relative"
+                  className='border p-3 rounded-md space-y-2 relative'
                 >
                   <FormField
                     control={form.control}
@@ -173,7 +173,7 @@ export function NewSaleDialog() {
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Selecione a marca" />
+                              <SelectValue placeholder='Selecione a marca' />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -209,14 +209,14 @@ export function NewSaleDialog() {
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Selecione o tipo" />
+                              <SelectValue placeholder='Selecione o tipo' />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Transmissor">
+                            <SelectItem value='Transmissor'>
                               Transmissor
                             </SelectItem>
-                            <SelectItem value="Posicionador">
+                            <SelectItem value='Posicionador'>
                               Posicionador
                             </SelectItem>
                           </SelectContent>
@@ -233,7 +233,7 @@ export function NewSaleDialog() {
                       <FormItem>
                         <FormLabel>Item de Venda</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: 1" {...field} />
+                          <Input placeholder='Ex: 1' {...field} />
                         </FormControl>
                       </FormItem>
                     )}
@@ -248,14 +248,14 @@ export function NewSaleDialog() {
                         <FormLabel>Produto</FormLabel>
                         <Select
                           onValueChange={(value) => {
-                            setId(value)
-                            field.onChange(value)
+                            setId(value);
+                            field.onChange(value);
                           }}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Selecione o produto" />
+                              <SelectValue placeholder='Selecione o produto' />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -276,21 +276,21 @@ export function NewSaleDialog() {
 
                   {/* botão de remover */}
                   <Button
-                    type="button"
-                    variant="destructive"
-                    className="absolute h-6 top-0 right-3"
+                    type='button'
+                    variant='destructive'
+                    className='absolute h-6 top-0 right-3'
                     onClick={() => remove(index)}
                   >
                     Remover
                   </Button>
                 </div>
-              )
+              );
             })}
 
             {/* Status */}
             <FormField
               control={form.control}
-              name="status"
+              name='status'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
@@ -300,12 +300,12 @@ export function NewSaleDialog() {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione o status" />
+                        <SelectValue placeholder='Selecione o status' />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="0">Proposta</SelectItem>
-                      <SelectItem value="1">Concluído</SelectItem>
+                      <SelectItem value='0'>Proposta</SelectItem>
+                      <SelectItem value='1'>Concluído</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>
@@ -313,10 +313,10 @@ export function NewSaleDialog() {
             />
 
             {/* Botões */}
-            <div className="flex justify-end gap-2">
+            <div className='flex justify-end gap-2'>
               <Button
-                type="button"
-                variant="outline"
+                type='button'
+                variant='outline'
                 onClick={() =>
                   append({
                     itemVenda: '',
@@ -329,17 +329,17 @@ export function NewSaleDialog() {
                 + Adicionar Item
               </Button>
               <Button
-                type="button"
-                variant="outline"
+                type='button'
+                variant='outline'
                 onClick={() => setOpen(false)}
               >
                 Cancelar
               </Button>
-              <Button type="submit">Cadastrar</Button>
+              <Button type='submit'>Cadastrar</Button>
             </div>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
