@@ -1,53 +1,56 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Input } from '@/components/ui/input'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { NewServiceDialog } from './newServiceDialog'
-import { useQuery } from 'react-query'
-import { getEquipamentos } from './api/getEquipamentos'
-import { IEquipamento } from '@/lib/interface/Iequipamento'
-import { IService } from '@/lib/interface/IService'
-import { DialogVerProposta } from '@/app/(app)/servicos/dialogVerProposta'
-import { getServices } from './novoServico/api/getService'
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { NewServiceDialog } from './newServiceDialog';
+import { useQuery } from 'react-query';
+import { getEquipamentos } from './api/getEquipamentos';
+import { IEquipamento } from '@/lib/interface/Iequipamento';
+import { IService } from '@/lib/interface/IService';
+import { DialogVerProposta } from '@/app/(app)/servicos/dialogVerProposta';
+import { getServices } from './novoServico/api/getService';
 
 export default function ServicesItens() {
-  const [search, setSearch] = useState<string>('')
-  const [sStatus, setSstatus] = useState('')
+  const [search, setSearch] = useState<string>('');
+  const [sStatus, setSstatus] = useState('');
 
-  const { data: services = [], isLoading } = useQuery(['services'], getServices)
+  const { data: services = [], isLoading } = useQuery(
+    ['services'],
+    getServices
+  );
 
-  const { data: equipamentos } = useQuery(['equipamentos'], getEquipamentos)
+  const { data: equipamentos } = useQuery(['equipamentos'], getEquipamentos);
 
   const filterCodService = services.filter(
     (service, index, self) =>
-      index === self.findIndex((s) => s.codService === service.codService),
-  )
+      index === self.findIndex((s) => s.codService === service.codService)
+  );
 
   const filteredServivces = filterCodService.filter((service) =>
-    service.descCliente?.toLowerCase().includes(search.toLowerCase()),
-  )
+    service.descCliente?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="flex-1 p-8">
+    <div className='flex-1 p-8'>
       {/* Conteúdo Principal */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Lista de Serviços</h1>
+      <div className='flex justify-between items-center mb-6'>
+        <h1 className='text-3xl font-bold text-gray-800'>Lista de Serviços</h1>
         <NewServiceDialog />
       </div>
 
       {/* Barra de Pesquisa */}
-      <div className="flex items-center mb-6">
+      <div className='flex items-center mb-6'>
         <Input
-          type="text"
-          placeholder="Pesquisar cliente..."
-          className="w-full max-w-md"
+          type='text'
+          placeholder='Pesquisar cliente...'
+          className='w-full max-w-md'
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
       {/* Lista de Serviços */}
-      <div className="grid grid-cols-1 gap-4 overflow-y-scroll max-h-[50vh]">
+      <div className='grid grid-cols-1 gap-4 overflow-y-scroll max-h-[50vh]'>
         {/* Card de Serviço 1 */}
         {isLoading ? (
           'Carregando...'
@@ -56,9 +59,9 @@ export default function ServicesItens() {
             {filteredServivces.map((data: IService) => {
               return (
                 <Card key={data.id}>
-                  <CardHeader className="flex justify-between flex-row items-center">
+                  <CardHeader className='flex justify-between flex-row items-center'>
                     <CardTitle>Serviço {data.codService}</CardTitle>
-                    <div className="flex items-center space-x-2">
+                    <div className='flex items-center space-x-2'>
                       <DialogVerProposta
                         status={data.status}
                         codService={data.codService}
@@ -68,16 +71,16 @@ export default function ServicesItens() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-800 font-semibold">
+                    <p className='text-gray-800 font-semibold'>
                       Cliente: {data.descCliente}
                     </p>
-                    <p className="text-gray-600">
+                    <p className='text-gray-600'>
                       Realizado em:{' '}
                       {new Date(data.DataCadastro)
                         .toLocaleString('pt-BR')
                         .slice(0, -3)}
                     </p>
-                    {equipamentos.map((equip: IEquipamento) => {
+                    {equipamentos?.map((equip: IEquipamento) => {
                       return (
                         <div key={equip.ID}>
                           <p>
@@ -86,15 +89,15 @@ export default function ServicesItens() {
                               : null}
                           </p>
                         </div>
-                      )
+                      );
                     })}
                   </CardContent>
                 </Card>
-              )
+              );
             })}
           </>
         )}
       </div>
     </div>
-  )
+  );
 }

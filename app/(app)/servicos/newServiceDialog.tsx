@@ -74,10 +74,10 @@ export function NewServiceDialog({ title }: { title?: string }) {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const equipItemId = equipamentos?.filter((item: IEquipamento) => {
-      return item.Categoria === values.category;
+      return item.ID === Number(values.equipment);
     });
 
-    // console.log(equipItemId[0].ItemID);
+    console.log(equipItemId[0].ItemID);
     router.push(
       `/servicos/novoServico?category=${values.category}&equipment=${values.equipment}&itemId=${equipItemId[0].ItemID}&model=${values.modelo}&cliente=${values.cliente}`
     );

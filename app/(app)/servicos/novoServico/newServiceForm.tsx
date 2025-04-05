@@ -5,8 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import LD301Visor from '../../../../assets/img/LD301 Visor.png';
-import LD301Carcaca from '../../../../assets/img/LD301 Carcaca.png';
 import { useQuery } from 'react-query';
 import { getPecasItemId } from '../api/getPecasItemId';
 import { Item } from '@/lib/interface/Ipecas';
@@ -79,6 +77,10 @@ export default function NewServiceForm() {
     }
   }, []);
 
+  if (!itemID) return <p>Nenhum item selecionado.</p>;
+
+  const imagePath = `/img/${itemID}.png`; // ou .jpg
+
   return (
     <div className='p-6 space-y-6'>
       <div>
@@ -107,7 +109,7 @@ export default function NewServiceForm() {
         Carcaça
       </Button>
 
-      <div className='flex flex-row'>
+      <div className='flex flex-row overflow-y-scroll h-[70vh]'>
         <div className='grid gap-4 w-1/2 overflow-y-auto h-[63vh] mr-4'>
           {pecasItemId
             .filter((item: Item) => item.Visor === visor)
@@ -155,12 +157,11 @@ export default function NewServiceForm() {
             onClick={toggleZoom} // Abre o zoom ao clicar
           >
             <Image
-              src={visor == '1' ? LD301Visor : LD301Carcaca}
-              alt='Imagem responsiva'
-              layout='responsive'
-              width={16}
-              height={9}
-              className='rounded-lg shadow-md'
+              src={imagePath}
+              alt={`Imagem do item ${itemID}`}
+              width={400}
+              height={300}
+              className='w-[400px] h-auto rounded-lg shadow'
             />
           </div>
 
@@ -172,11 +173,11 @@ export default function NewServiceForm() {
             >
               <div className='relative'>
                 <Image
-                  src={visor == '1' ? LD301Visor : LD301Carcaca}
+                  src={imagePath}
                   alt='Imagem ampliada'
                   width={1200} // Largura personalizada para o zoom
-                  height={600} // Altura personalizada para o zoom
-                  className='rounded-lg shadow-lg'
+                  height={400} // Altura personalizada para o zoom
+                  className='rounded-lg shadow-lg scale-50'
                 />
                 <button
                   onClick={toggleZoom}

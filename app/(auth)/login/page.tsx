@@ -1,8 +1,8 @@
-'use client'
-import React from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
+'use client';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import {
   Form,
   FormField,
@@ -10,27 +10,27 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import Cookies from 'js-cookie'
-import { Loader2 } from 'lucide-react'
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
+import { Loader2 } from 'lucide-react';
 
 interface IForm {
-  Email: string
-  Senha: string
+  Email: string;
+  Senha: string;
 }
 
 const loginSchema = z.object({
   Email: z.string().email('Por favor, insira um email válido.'),
   Senha: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres.'),
-})
+});
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [loading, setLoading] = React.useState(false)
+  const router = useRouter();
+  const [loading, setLoading] = React.useState(false);
 
   const form = useForm<IForm>({
     resolver: zodResolver(loginSchema),
@@ -38,10 +38,10 @@ export default function LoginPage() {
       Email: '',
       Senha: '',
     },
-  })
+  });
 
   async function onSubmit(values: IForm) {
-    console.log(values)
+    console.log(values);
 
     try {
       const res = await fetch(`http://localhost:3001/usuarios/login`, {
@@ -50,48 +50,48 @@ export default function LoginPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-      })
+      });
 
-      const resJson = await res.json()
-      setLoading(true)
+      const resJson = await res.json();
+      setLoading(true);
 
       if (res.ok) {
         if (resJson.token) {
-          Cookies.set('token', resJson.token)
-          console.log('success')
+          Cookies.set('token', resJson.token);
+          console.log('success');
 
-          setLoading(false)
-          router.push('/painel')
+          setLoading(false);
+          router.push('/painel');
         } else {
-          console.error('Erro no login: Token não recebido.')
+          console.error('Erro no login: Token não recebido.');
         }
       } else {
-        console.error('Erro no login:', resJson)
+        console.error('Erro no login:', resJson);
       }
     } catch (error: any) {
-      console.error('Erro no login:', error.message)
+      console.error('Erro no login:', error.message);
     }
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white shadow-lg rounded-lg">
-        <h1 className="text-2xl font-semibold text-center text-gray-700">
+    <div className='flex items-center justify-center min-h-screen bg-gray-100'>
+      <div className='w-full max-w-md p-8 space-y-6 bg-white shadow-lg rounded-lg'>
+        <h1 className='text-2xl font-semibold text-center text-gray-700'>
           Login
         </h1>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
             {/* Campo de Email */}
             <FormField
-              name="Email"
+              name='Email'
               control={form.control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input
-                      type="email"
-                      placeholder="Digite seu email"
+                      type='email'
+                      placeholder='Digite seu email'
                       {...field}
                     />
                   </FormControl>
@@ -101,15 +101,15 @@ export default function LoginPage() {
             />
             {/* Campo de Senha */}
             <FormField
-              name="Senha"
+              name='Senha'
               control={form.control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Senha</FormLabel>
                   <FormControl>
                     <Input
-                      type="password"
-                      placeholder="Digite sua senha"
+                      type='password'
+                      placeholder='Digite sua senha'
                       {...field}
                     />
                   </FormControl>
@@ -119,22 +119,22 @@ export default function LoginPage() {
             />
             {/* Botão de Login */}
             <Button
-              type="submit"
-              className="w-full flex justify-center items-center"
+              type='submit'
+              className='w-full flex justify-center items-center'
               disabled={loading}
             >
               {loading ? (
                 <>
+                  <Loader2 className='animate-spin mr-2' size={20} />
                   Entrando...
-                  <Loader2 className="animate-spin mr-2" size={20} />{' '}
                 </>
               ) : (
-                <Link href="/painel">Entrar</Link>
+                'Entrar'
               )}
             </Button>
           </form>
         </Form>
       </div>
     </div>
-  )
+  );
 }
