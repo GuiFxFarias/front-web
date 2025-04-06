@@ -110,7 +110,7 @@ export default function NewServiceForm() {
       </Button>
 
       <div className='flex flex-row overflow-y-scroll h-[70vh]'>
-        <div className='grid gap-4 w-1/2 overflow-y-auto h-[63vh] mr-4'>
+        <div className='grid gap-4 w-2/3 overflow-y-auto mr-4'>
           {pecasItemId
             .filter((item: Item) => item.Visor === visor)
             .map((item: Item) => {
@@ -168,16 +168,16 @@ export default function NewServiceForm() {
           {/* Modal de Zoom */}
           {isZoomed && (
             <div
-              className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50'
+              className='fixed inset-0 flex items-center  justify-center bg-black bg-opacity-75 z-50'
               onClick={toggleZoom} // Fecha o zoom ao clicar fora da imagem
             >
-              <div className='relative'>
+              <div className='relative h-[70vh] w-[60vw] overflow-y-auto'>
                 <Image
                   src={imagePath}
                   alt='Imagem ampliada'
-                  width={1200} // Largura personalizada para o zoom
-                  height={400} // Altura personalizada para o zoom
-                  className='rounded-lg shadow-lg scale-50'
+                  width={1800} // Largura personalizada para o zoom
+                  height={700} // Altura personalizada para o zoom
+                  className='rounded-lg shadow-lg scale-100'
                 />
                 <button
                   onClick={toggleZoom}

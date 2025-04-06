@@ -116,7 +116,7 @@ export function RegisterPecasForm() {
   const mutatePecas = useMutation({
     mutationFn: postPecas,
     onSuccess: () => {
-      queryClient.invalidateQueries(['pecas']);
+      queryClient.invalidateQueries(['allPecas']);
     },
   });
 
