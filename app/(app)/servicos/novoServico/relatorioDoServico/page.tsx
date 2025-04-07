@@ -152,7 +152,6 @@ export default function Relatorio() {
         return;
       }
 
-      // Agrupar por itemService
       const groupedByItemService = serviceId.reduce((acc, data) => {
         if (!acc[data.itemService]) {
           acc[data.itemService] = [];

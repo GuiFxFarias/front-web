@@ -29,7 +29,7 @@ import { getEquipamentos } from '../servicos/api/getEquipamentos';
 import { IEquipamento } from '@/lib/interface/Iequipamento';
 
 interface ItemFormData {
-  itemID: string;
+  ItemID: string;
   carcaca: '1' | '0'; // Checkbox selection
   visor: '1' | '0'; // Checkbox selection
   numeroItem: number;
@@ -51,7 +51,7 @@ interface IModel {
 }
 
 export const formSchema = z.object({
-  itemID: z.string(),
+  ItemID: z.string(),
   carcaca: z.string().min(1, 'Carcaça é obrigatória.'),
   visor: z.string().min(1, 'Visor é obrigatório.'),
   numeroItem: z.number(),
@@ -73,7 +73,7 @@ export function RegisterPecasForm() {
   const form = useForm<ItemFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      itemID: '1',
+      ItemID: '1',
       carcaca: '1',
       visor: '0',
       numeroItem: 1,
@@ -93,7 +93,6 @@ export function RegisterPecasForm() {
   const [equipamento, setEquipamento] = useState<string>();
   const [carcaca, setCarcaca] = useState<string>();
   const [modelo, setModelo] = useState<string>();
-  const [stateItemid, setStateItemid] = useState<string>();
   const [openDialog, setOpenDialog] = useState<boolean>(false);
 
   const modelos = [
@@ -124,29 +123,36 @@ export function RegisterPecasForm() {
 
   function onSubmit(values: ItemFormData) {
     equipamentos
-      .filter((itens) => itens.ID == values.itemID)
-      .map((item) => setStateItemid(item.ItemID));
-
-    if (values.dataFabricacao == '') {
-      const newValue = {
-        ...values,
-        Quantidade: 1,
-        dataFabricacao: null,
-        itemID: stateItemid,
-      };
-      mutatePecas.mutate(newValue);
-    } else {
-      const newValue = {
-        ...values,
-        Quantidade: 1,
-        itemID: stateItemid,
-      };
-      mutatePecas.mutate(newValue);
-    }
-
-    if (mutatePecas.isSuccess) {
-      setOpenDialog(true);
-    }
+      .filter((itens) => itens.ID == values.ItemID)
+      .map((item) => {
+        if (values.dataFabricacao == '') {
+          const newValue = {
+            ...values,
+            Quantidade: 1,
+            dataFabricacao: null,
+            ItemID: item.ItemID,
+          };
+          mutatePecas.mutate(newValue, {
+            onSuccess: () => {
+              setOpenDialog(true);
+            },
+          });
+          // console.log(newValue);
+        } else {
+          const newValue = {
+            ...values,
+            Quantidade: 1,
+            ItemID: item.ItemID,
+          };
+          mutatePecas.mutate(newValue, {
+            onSuccess: () => {
+              setOpenDialog(true);
+            },
+          });
+          // console.log(newValue);
+        }
+      });
+    form.reset();
   }
 
   return (
@@ -158,7 +164,7 @@ export function RegisterPecasForm() {
         {/* Select de Equipamento */}
         <FormField
           control={form.control}
-          name='itemID'
+          name='ItemID'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Equipamento</FormLabel>
@@ -482,7 +488,7 @@ export function RegisterPecasForm() {
         title='Peça cadastrada'
         text='Sua peça foi cadastrada com sucesso!'
         open={openDialog}
-        setOpen={(open: boolean) => setOpenDialog(open)}
+        setOpen={setOpenDialog}
       />
     </Form>
   );

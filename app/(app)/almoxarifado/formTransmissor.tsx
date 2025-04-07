@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Form,
@@ -7,23 +7,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { postTransmissor } from "./api/postAlmoxarife";
-import { useMutation, useQueryClient } from "react-query";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { postTransmissor } from './api/postAlmoxarife';
+import { useMutation, useQueryClient } from 'react-query';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useState } from "react";
-import DialogConfirmForm from "@/components/dialogConfirForm";
+} from '@/components/ui/select';
+import { useState } from 'react';
+import DialogConfirmForm from '@/components/dialogConfirForm';
 
 interface IProdutoTransmissorFormData {
   descricaoProduto: string;
@@ -43,31 +43,31 @@ interface IModel {
 }
 
 const formSchema = z.object({
-  descricaoProduto: z.string().min(1, "Descrição do produto é obrigatória."),
+  descricaoProduto: z.string().min(1, 'Descrição do produto é obrigatória.'),
   nSerieEquipamento: z
     .string()
-    .min(1, "Número de série do equipamento é obrigatório."),
-  protocolo: z.string().min(1, "Protocolo é obrigatório."),
+    .min(1, 'Número de série do equipamento é obrigatório.'),
+  protocolo: z.string().min(1, 'Protocolo é obrigatório.'),
   sensor: z.boolean(),
   nSerieSensor: z.string().optional(), // Opcional caso não tenha sensor
   faixa: z.string().optional(),
   dataFabric: z.string().optional(),
-  preco: z.string().min(1, "Preço é obrigatório."),
-  modelo: z.string().min(1, "O modelo é obrigatório."),
+  preco: z.string().min(1, 'Preço é obrigatório.'),
+  modelo: z.string().min(1, 'O modelo é obrigatório.'),
 });
 
 export default function TransmissorForm() {
   const form = useForm<IProdutoTransmissorFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      descricaoProduto: "",
-      nSerieEquipamento: "",
-      protocolo: "",
+      descricaoProduto: '',
+      nSerieEquipamento: '',
+      protocolo: '',
       sensor: false, // Default value for boolean
-      nSerieSensor: "",
-      faixa: "",
-      dataFabric: "",
-      preco: "",
+      nSerieSensor: '',
+      faixa: '',
+      dataFabric: '',
+      preco: '',
     },
   });
   const [modelo, setModelo] = useState<string>();
@@ -78,45 +78,49 @@ export default function TransmissorForm() {
   const mutateTransmissor = useMutation({
     mutationFn: postTransmissor,
     onSuccess: () => {
-      queryClient.invalidateQueries(["produtos_transmissor"]);
+      queryClient.invalidateQueries(['produtos_transmissor']);
     },
   });
 
   const modelos = [
-    { id: 1, value: "SMAR" },
-    { id: 2, value: "YOKOGAWA" },
-    { id: 3, value: "ROSEMOUNT" },
-    { id: 4, value: "ENDRES+HAUSER" },
-    { id: 5, value: "ABB" },
-    { id: 6, value: "SIEMENS" },
-    { id: 7, value: "FOXBORO" },
+    { id: 1, value: 'SMAR' },
+    { id: 2, value: 'YOKOGAWA' },
+    { id: 3, value: 'ROSEMOUNT' },
+    { id: 4, value: 'ENDRES+HAUSER' },
+    { id: 5, value: 'ABB' },
+    { id: 6, value: 'SIEMENS' },
+    { id: 7, value: 'FOXBORO' },
   ];
 
   const protocolo = [
-    { id: 1, value: "HART" },
-    { id: 2, value: "PROFIBUS" },
+    { id: 1, value: 'HART' },
+    { id: 2, value: 'PROFIBUS' },
   ];
 
   function onSubmit(values: IProdutoTransmissorFormData) {
-    // console.log(values);
-    mutateTransmissor.mutate(values);
+    mutateTransmissor.mutate(values, {
+      onSuccess: () => {
+        setOpenDialog(true);
+      },
+    });
+    form.reset();
   }
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4 h-[34vh] rounded-md w-[65vw]  pt-4 overflow-y-auto px-2"
+        className='space-y-4 h-[34vh] rounded-md w-[65vw]  pt-4 overflow-y-auto px-2'
       >
         {/* Campo: Descrição do Produto */}
         <FormField
           control={form.control}
-          name="descricaoProduto"
+          name='descricaoProduto'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Descrição do Produto</FormLabel>
               <FormControl>
-                <Input placeholder="Digite a descrição" {...field} />
+                <Input placeholder='Digite a descrição' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -126,12 +130,12 @@ export default function TransmissorForm() {
         {/* Campo: Número de Série do Equipamento */}
         <FormField
           control={form.control}
-          name="nSerieEquipamento"
+          name='nSerieEquipamento'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Número de Série do Equipamento</FormLabel>
               <FormControl>
-                <Input placeholder="Digite o número de série" {...field} />
+                <Input placeholder='Digite o número de série' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -141,14 +145,14 @@ export default function TransmissorForm() {
         {/* Campo: Protocolo */}
         <FormField
           control={form.control}
-          name="protocolo"
+          name='protocolo'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Protocolo</FormLabel>
               <Select onValueChange={field.onChange}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Escolha o protocolo" />
+                    <SelectValue placeholder='Escolha o protocolo' />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -166,7 +170,7 @@ export default function TransmissorForm() {
         {/* Campo: Modelo da Placa */}
         <FormField
           control={form.control}
-          name="modelo"
+          name='modelo'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Modelo</FormLabel>
@@ -180,7 +184,7 @@ export default function TransmissorForm() {
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Modelo" />
+                    <SelectValue placeholder='Modelo' />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -198,15 +202,15 @@ export default function TransmissorForm() {
         {/* Campo: Sensor (Checkbox) */}
         <FormField
           control={form.control}
-          name="sensor"
+          name='sensor'
           render={({ field }) => (
-            <FormItem className="flex items-center space-x-2">
+            <FormItem className='flex items-center space-x-2'>
               <FormControl>
                 <input
-                  type="checkbox"
+                  type='checkbox'
                   checked={field.value}
                   onChange={(e) => field.onChange(e.target.checked)}
-                  className="w-5 h-5"
+                  className='w-5 h-5'
                 />
               </FormControl>
               <FormLabel>Possui Sensor?</FormLabel>
@@ -216,16 +220,16 @@ export default function TransmissorForm() {
         />
 
         {/* Campo: Número de Série do Sensor (Somente se o sensor for true) */}
-        {form.watch("sensor") && (
+        {form.watch('sensor') && (
           <>
             <FormField
               control={form.control}
-              name="nSerieSensor"
+              name='nSerieSensor'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Número de Série do Sensor</FormLabel>
                   <FormControl>
-                    <Input placeholder="Digite o número de série" {...field} />
+                    <Input placeholder='Digite o número de série' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -235,12 +239,12 @@ export default function TransmissorForm() {
             {/* Campo: Faixa do Sensor */}
             <FormField
               control={form.control}
-              name="faixa"
+              name='faixa'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Faixa do Sensor</FormLabel>
                   <FormControl>
-                    <Input placeholder="Digite a faixa" {...field} />
+                    <Input placeholder='Digite a faixa' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -250,12 +254,12 @@ export default function TransmissorForm() {
             {/* Campo: Data de Fabricação */}
             <FormField
               control={form.control}
-              name="dataFabric"
+              name='dataFabric'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Data de Fabricação</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input type='date' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -266,15 +270,15 @@ export default function TransmissorForm() {
         {/* Campo: Preço */}
         <FormField
           control={form.control}
-          name="preco"
+          name='preco'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Preço</FormLabel>
               <FormControl>
                 <Input
-                  type="number"
-                  step="0.01"
-                  placeholder="Digite o preço"
+                  type='number'
+                  step='0.01'
+                  placeholder='Digite o preço'
                   {...field}
                 />
               </FormControl>
@@ -284,13 +288,13 @@ export default function TransmissorForm() {
         />
 
         {/* Botão de Envio */}
-        <Button type="submit">Cadastrar</Button>
+        <Button type='submit'>Cadastrar</Button>
       </form>
       <DialogConfirmForm
-        title="Equipamento cadastrado"
-        text="Seu equipamento foi cadastrado com sucesso!"
+        title='Equipamento cadastrado'
+        text='Seu equipamento foi cadastrado com sucesso!'
         open={openDialog}
-        setOpen={(open: boolean) => setOpenDialog(open)}
+        setOpen={setOpenDialog}
       />
     </Form>
   );

@@ -1,12 +1,12 @@
-'use client'
+'use client';
 
-import './globals.css'
-import Query from './layoutClient'
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import LoginPage from './(auth)/login/page'
-import Cookies from 'js-cookie'
+import './globals.css';
+import Query from './layoutClient';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import LoginPage from './(auth)/login/page';
+import Cookies from 'js-cookie';
 
 // const geistSans = localFont({
 //   src: "./fonts/GeistVF.woff",
@@ -27,61 +27,70 @@ import Cookies from 'js-cookie'
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   // Rotas sem barra lateral
-  const noSidebarRoutes = ['/', '/login', '/register']
+  const noSidebarRoutes = ['/', '/login', '/register'];
 
   return (
     <Query>
-      <html lang="en" className="overflow-y-hidden h-[100vh]">
+      <html lang='en' className='overflow-y-hidden h-[100vh]'>
         <body className={` antialiased flex flex-row min-h-screen w-full`}>
           {noSidebarRoutes.includes(pathname) ? null : (
-            <aside className="w-64 bg-white shadow-lg">
-              <div className="flex flex-col justify-between h-full">
+            <aside className='w-64 bg-white shadow-lg'>
+              <div className='flex flex-col justify-between h-full'>
                 {/* Navegação */}
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold text-gray-700 mb-6">
+                <div className='p-6'>
+                  <h2 className='text-2xl font-bold text-gray-700 mb-6'>
                     Painel
                   </h2>
-                  <nav className="space-y-4">
+                  <nav className='space-y-4'>
                     {/* <Link href="/painel" className="w-full block">
                       <Button className="w-full justify-start" variant="ghost">
                         Dashboard
                       </Button>
                     </Link> */}
-                    <Link href="/servicos" className="w-full block">
-                      <Button className="w-full justify-start" variant="ghost">
+                    <Link href='/servicos' className='w-full block'>
+                      <Button className='w-full justify-start' variant='ghost'>
                         Serviços
                       </Button>
                     </Link>
-                    <Link href="/produtos" className="w-full block">
-                      <Button className="w-full justify-start" variant="ghost">
+                    <Link href='/produtos' className='w-full block'>
+                      <Button className='w-full justify-start' variant='ghost'>
                         Produtos
                       </Button>
                     </Link>
-                    <Link href="/almoxarifado" className="w-full block">
+                    <Link href='/almoxarifado' className='w-full block'>
                       <Button
-                        className="w
-                    -full justify-start"
-                        variant="ghost"
+                        className='w
+                    -full justify-start'
+                        variant='ghost'
                       >
                         Almoxarifado
+                      </Button>
+                    </Link>
+                    <Link href='/clientes' className='w-full block'>
+                      <Button
+                        className='w
+                    -full justify-start'
+                        variant='ghost'
+                      >
+                        Clientes
                       </Button>
                     </Link>
                   </nav>
                 </div>
 
                 {/* Botão de Logout */}
-                <div className="p-6">
+                <div className='p-6'>
                   <Button
-                    variant="destructive"
-                    className="w-full"
+                    variant='destructive'
+                    className='w-full'
                     onClick={() => {
-                      Cookies.remove('token')
-                      window.location.reload()
+                      Cookies.remove('token');
+                      window.location.reload();
                     }}
                   >
                     Logout
@@ -91,11 +100,11 @@ export default function RootLayout({
             </aside>
           )}
 
-          <main className="w-full overflow-y-hidden">
+          <main className='w-full overflow-y-hidden'>
             {pathname === '/' ? <LoginPage /> : children}
           </main>
         </body>
       </html>
     </Query>
-  )
+  );
 }

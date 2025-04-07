@@ -35,6 +35,7 @@ import { getAllPrdTransmissor } from './api/getPrdTransmissor';
 import { postVendas } from './api/postVendas';
 import { useFieldArray } from 'react-hook-form';
 import { getAllPrdPos } from './api/getPrdPosicionador';
+import DialogConfirmForm from '@/components/dialogConfirForm';
 
 const formSchema = z.object({
   idCliente: z.string().min(1, 'Selecione o cliente'),
@@ -53,6 +54,7 @@ export function NewSaleDialog() {
   const queryClient = useQueryClient();
   const [, setId] = useState('');
   const [open, setOpen] = useState(false);
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
 
   const { data: dataCliente = [] } = useQuery(['clientes'], getClientes);
   const { data: prdTrm = [] } = useQuery(['prdTrm'], getAllPrdTransmissor);
@@ -67,7 +69,7 @@ export function NewSaleDialog() {
     },
   });
 
-  const { control, handleSubmit } = form;
+  const { control } = form;
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -97,8 +99,11 @@ export function NewSaleDialog() {
       status: values.status,
     }));
 
-    console.log('vendas', vendas);
-    mutateVenda.mutate(vendas);
+    mutateVenda.mutate(vendas, {
+      onSuccess: () => {
+        setOpenDialog(true);
+      },
+    });
     form.reset();
     setOpen(false);
   }
@@ -338,6 +343,12 @@ export function NewSaleDialog() {
               <Button type='submit'>Cadastrar</Button>
             </div>
           </form>
+          <DialogConfirmForm
+            title='Venda cadastrada'
+            text='Sua venda foi cadastrada com sucesso!'
+            open={openDialog}
+            setOpen={setOpenDialog}
+          />
         </Form>
       </DialogContent>
     </Dialog>
