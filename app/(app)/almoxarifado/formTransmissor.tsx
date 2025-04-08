@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/select';
 import { useState } from 'react';
 import DialogConfirmForm from '@/components/dialogConfirForm';
+import { putAttProdutoVenda } from './api/putConfirmaVenda';
 
 interface IProdutoTransmissorFormData {
   descricaoProduto: string;
@@ -35,6 +36,7 @@ interface IProdutoTransmissorFormData {
   dataFabric: string; // Keeping it as a string to match form input, but can be Date
   preco: string;
   modelo: string;
+  quantidade: number;
 }
 
 interface IModel {
@@ -54,6 +56,7 @@ const formSchema = z.object({
   dataFabric: z.string().optional(),
   preco: z.string().min(1, 'Preço é obrigatório.'),
   modelo: z.string().min(1, 'O modelo é obrigatório.'),
+  quantidade: z.number(),
 });
 
 export default function TransmissorForm() {
@@ -68,6 +71,7 @@ export default function TransmissorForm() {
       faixa: '',
       dataFabric: '',
       preco: '',
+      quantidade: 1,
     },
   });
   const [modelo, setModelo] = useState<string>();

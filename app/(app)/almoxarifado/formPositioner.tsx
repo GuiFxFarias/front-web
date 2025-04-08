@@ -34,6 +34,7 @@ export interface IProdutoPosicionadorFormData {
   modeloPlaca: string;
   protocolo: string;
   preco: string;
+  quantidade: number;
 }
 interface IModel {
   id: number;
@@ -51,6 +52,7 @@ export const formSchema = z.object({
   modeloPlaca: z.string().min(1, 'Modelo da Placa é obrigatório.'),
   protocolo: z.string().min(1, 'Protocolo é obrigatório.'),
   preco: z.string().min(1, 'O preço é obrigatório.'),
+  quantidade: z.number(),
 });
 
 export default function PosicionadorForm() {
@@ -65,6 +67,7 @@ export default function PosicionadorForm() {
       modeloPlaca: '',
       protocolo: '',
       preco: '',
+      quantidade: 1,
     },
   });
 

@@ -105,7 +105,6 @@ export function NewSaleDialog() {
       },
     });
     form.reset();
-    setOpen(false);
   }
 
   return (

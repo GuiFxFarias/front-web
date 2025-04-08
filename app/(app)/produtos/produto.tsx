@@ -20,10 +20,13 @@ import autoTable from 'jspdf-autotable';
 import { IVendaComProdutoCliente } from '@/lib/interface/todasVendas';
 import { getTodasVendas } from './api/getTodasVendas';
 import { putAttVendas } from './api/putVendas';
+import DialogConfirmForm from '@/components/dialogConfirForm';
+import { putAttProdutoVenda } from '../almoxarifado/api/putConfirmaVenda';
 
 export default function ProdutoItens() {
   const queryClient = useQueryClient();
   const [, setSearch] = useState<string>('');
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
 
   const gerarPDF = (venda: IVendaComProdutoCliente[]) => {
     const doc = new jsPDF();
@@ -423,6 +426,15 @@ export default function ProdutoItens() {
     },
   });
 
+  const mutateTrmVenda = useMutation({
+    mutationFn: ({ id, quantidade }: { id: string; quantidade: number }) =>
+      putAttProdutoVenda(id, { quantidade }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries(['produtos_transmissor']); // refresh data
+    },
+  });
+
   function confirmarProposta(id: any, campoStatus: { status: string }) {
     mutateStatus.mutate({
       id,
@@ -430,6 +442,20 @@ export default function ProdutoItens() {
         status: campoStatus.status,
       },
     });
+    mutateTrmVenda.mutate(
+      {
+        id: id,
+        quantidade: 0,
+      },
+      {
+        onSuccess: () => {
+          setOpenDialog(true);
+        },
+        onError: (error) => {
+          console.error('Erro ao atualizar status:', error);
+        },
+      }
+    );
   }
 
   return (
@@ -559,6 +585,20 @@ export default function ProdutoItens() {
                       )
                     )}
                   </CardContent>
+                  <DialogConfirmForm
+                    title={
+                      item.status == '1'
+                        ? 'Proposta confirmada'
+                        : 'Proposta cancelada'
+                    }
+                    text={
+                      item.status == '1'
+                        ? 'Sua proposta foi cancela, mas ela está disponível para alteração ainda'
+                        : 'Proposta de venda confirmada'
+                    }
+                    open={openDialog}
+                    setOpen={setOpenDialog}
+                  />
                 </Card>
               );
             })}
