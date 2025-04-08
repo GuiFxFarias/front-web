@@ -123,8 +123,8 @@ export function RegisterPecasForm() {
 
   function onSubmit(values: ItemFormData) {
     equipamentos
-      .filter((itens) => itens.ID == values.ItemID)
-      .map((item) => {
+      .filter((itens: IEquipamento) => itens.ID == Number(values.ItemID))
+      .map((item: IEquipamento) => {
         if (values.dataFabricacao == '') {
           const newValue = {
             ...values,
