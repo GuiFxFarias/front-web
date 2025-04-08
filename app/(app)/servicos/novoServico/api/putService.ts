@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export async function putCodService(id: string, data: any) {
   const response = await fetch(`http://localhost:3001/servicos/${id}`, {
-    method: "PUT", // Corrected from "GET" to "PUT"
+    method: 'PUT', // Corrected from "GET" to "PUT"
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(data), // Now works with the PUT method
   });

@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,24 +8,23 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
-import { Item } from '@/lib/interface/Ipecas'
-import { DialogDescription } from '@radix-ui/react-dialog'
-import { useRouter } from 'next/navigation'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
+} from '@/components/ui/dialog';
+import { Item } from '@/lib/interface/Ipecas';
+import { DialogDescription } from '@radix-ui/react-dialog';
+import { useRouter } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import {
   getEquipamentoId,
   getServicesId,
   IServPeca,
   postPecaServico,
   postService,
-} from './api/postService'
-import { ICliente } from '@/lib/interface/Icliente'
-import { Textarea } from '@/components/ui/textarea'
-import { ChangeEvent, useEffect, useState } from 'react'
-import { Checkbox } from '@/components/ui/checkbox'
-import { CheckedState } from '@radix-ui/react-checkbox'
-import { IServiceID } from '@/lib/interface/IServiceID'
+} from './api/postService';
+import { ICliente } from '@/lib/interface/Icliente';
+import { Textarea } from '@/components/ui/textarea';
+import { ChangeEvent, useEffect, useState } from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { IServiceID } from '@/lib/interface/IServiceID';
 
 export function DialogConfirm({
   services,
@@ -35,59 +34,59 @@ export function DialogConfirm({
   codService,
   cliente,
 }: {
-  services: Item[]
-  category: string
-  equipament: string
-  model: string
-  codService: string
-  cliente: ICliente
+  services: Item[];
+  category: string;
+  equipament: string;
+  model: string;
+  codService: string;
+  cliente: ICliente;
 }) {
-  const router = useRouter()
-  const [inspVisu, setInspVisu] = useState<string>()
-  const [manuPrev, setManuPrev] = useState<boolean>(false)
-  const [manuPrevTomada, setManuPrevTomada] = useState<boolean>(false)
-  const [itemService, setItemService] = useState<number>(0)
+  const router = useRouter();
+  const [inspVisu, setInspVisu] = useState<string>();
+  const [manuPrev, setManuPrev] = useState<boolean>(false);
+  const [manuPrevTomada, setManuPrevTomada] = useState<boolean>(false);
+  const [itemService, setItemService] = useState<number>(0);
 
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   const { data: equipId } = useQuery({
     queryKey: ['equipamentoId', equipament],
     queryFn: () => getEquipamentoId(equipament),
-  })
+  });
 
   const { data: serviceId = [] } = useQuery(['services'], () =>
-    getServicesId(codService || ''),
-  )
+    getServicesId(codService || '')
+  );
 
   const mutateService = useMutation({
     mutationFn: postService,
     onSuccess: () => {
-      queryClient.invalidateQueries(['services'])
+      queryClient.invalidateQueries(['services']);
     },
-  })
+  });
 
   const mutatePecaServ = useMutation({
     mutationFn: postPecaServico,
     onSuccess: () => {
-      queryClient.invalidateQueries(['pecaServ'])
+      queryClient.invalidateQueries(['pecaServ']);
     },
-  })
+  });
 
   useEffect(() => {
     if (serviceId.length > 0) {
       const lastItems = serviceId
         .map((service: IServPeca) => service.itemService.at(-1))
         .filter(Boolean)
-        .at(-1)
+        .at(-1);
 
       if (lastItems !== undefined) {
         serviceId.map((service: IServiceID) => {
           if (codService == service.codService) {
-            setItemService(Number(lastItems) + 1)
+            setItemService(Number(lastItems) + 1);
           } else {
-            setItemService(itemService + 1)
+            setItemService(itemService + 1);
           }
-        })
+        });
       }
 
       // if (
@@ -100,12 +99,12 @@ export function DialogConfirm({
       //   setItemService(Number(lastItems) + 1)
       // }
     }
-  }, [serviceId])
+  }, [codService, itemService, serviceId]);
 
   function handleSaveService() {
     if (!codService) {
-      console.log('CodeService Undefined')
-      return
+      console.log('CodeService Undefined');
+      return;
     }
 
     // const lastItems = serviceId
@@ -123,9 +122,9 @@ export function DialogConfirm({
       idCliente: String(cliente.id),
       descCliente: cliente.nome,
       itemService: String(itemService),
-    }
+    };
 
-    mutateService.mutate(valueService)
+    mutateService.mutate(valueService);
 
     services.map((value: Item) => {
       const pecaServ: IServPeca = {
@@ -137,65 +136,65 @@ export function DialogConfirm({
         manuPreventiva: manuPrev,
         manuPrevTomada: manuPrevTomada,
         itemService: String(itemService),
-      }
+      };
 
-      mutatePecaServ.mutate(pecaServ)
-    })
+      mutatePecaServ.mutate(pecaServ);
+    });
 
     router.push(
-      `/servicos/novoServico/relatorioDoServico?codService=${codService}&equipament=${equipament}&idCliente=${cliente.id}`,
-    )
+      `/servicos/novoServico/relatorioDoServico?codService=${codService}&equipament=${equipament}&idCliente=${cliente.id}`
+    );
   }
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="bg-blue-500 text-white">
+        <Button variant='outline' className='bg-blue-500 text-white'>
           Salvar
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[725px] h-[70vh] overflow-auto">
+      <DialogContent className='sm:max-w-[725px] h-[70vh] overflow-auto'>
         <DialogHeader>
           <DialogTitle>Peças | Cliente: {cliente.nome}</DialogTitle>
         </DialogHeader>
-        <DialogDescription className="border-b border-gray-700 pb-1 mb-5">
+        <DialogDescription className='border-b border-gray-700 pb-1 mb-5'>
           Peças que serão utilizadas nesse serviço
         </DialogDescription>
         {services.map((service) => (
           <div key={service.ID}>
-            <p className="border-b border-gray-300 pb-2">{service.Descricao}</p>
+            <p className='border-b border-gray-300 pb-2'>{service.Descricao}</p>
           </div>
         ))}
         <Textarea
-          placeholder="Adicione a inspeção visual."
-          className="resize-none h-[20vh]"
+          placeholder='Adicione a inspeção visual.'
+          className='resize-none h-[20vh]'
           onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
             setInspVisu(e.target.value)
           }
         />
-        <div className="flex items-center">
+        <div className='flex items-center'>
           <Checkbox
-            id="manuPrev"
-            className="mr-4"
-            onCheckedChange={(check: CheckedState) => setManuPrev(check)}
+            id='manuPrev'
+            className='mr-4'
+            onCheckedChange={(check: boolean) => setManuPrev(check)}
           />
           <label
-            htmlFor="manuPrev"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            htmlFor='manuPrev'
+            className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
           >
             Manutenção preventiva (desmontagem, jateamento, pintura, troca de
             orings e parafuso, nova calibração)
           </label>
         </div>
-        <div className="flex items-center">
+        <div className='flex items-center'>
           <Checkbox
-            id="manuPrevTomada"
-            className="mr-4"
-            onCheckedChange={(check: CheckedState) => setManuPrevTomada(check)}
+            id='manuPrevTomada'
+            className='mr-4'
+            onCheckedChange={(check: boolean) => setManuPrevTomada(check)}
           />
           <label
-            htmlFor="manuPrevTomada"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            htmlFor='manuPrevTomada'
+            className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
           >
             Manutenção preventiva tomada de nível (desmontagem, jateamento,
             pintura, assepsia, reusinagem da tomada de nível, solda de lamida de
@@ -204,11 +203,11 @@ export function DialogConfirm({
           </label>
         </div>
         <DialogFooter>
-          <Button onClick={() => handleSaveService()} type="button">
+          <Button onClick={() => handleSaveService()} type='button'>
             Enviar Serviço
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

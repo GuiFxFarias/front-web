@@ -5,8 +5,9 @@ export interface IService {
   equipamentoID: string;
   equipamentoDescricao: string;
   codService: string;
-  DataCadastro: Date;
+  DataCadastro: string;
   idCliente: string;
   descCliente: string;
-  status: "Não iniciado" | "Em desenvolvimento" | "Concluído";
+  status: 'Não iniciado' | 'Em desenvolvimento' | 'Em progresso' | 'Concluído';
+  itemService: string;
 }

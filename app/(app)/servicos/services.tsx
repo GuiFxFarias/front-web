@@ -1,5 +1,5 @@
 'use client';
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -13,7 +13,6 @@ import { getServices } from './novoServico/api/getService';
 
 export default function ServicesItens() {
   const [search, setSearch] = useState<string>('');
-  const [sStatus, setSstatus] = useState('');
 
   const { data: services = [], isLoading } = useQuery(
     ['services'],
@@ -23,11 +22,11 @@ export default function ServicesItens() {
   const { data: equipamentos } = useQuery(['equipamentos'], getEquipamentos);
 
   const filterCodService = services.filter(
-    (service, index, self) =>
-      index === self.findIndex((s) => s.codService === service.codService)
+    (service: any, index: any, self: any) =>
+      index === self.findIndex((s: any) => s.codService === service.codService)
   );
 
-  const filteredServivces = filterCodService.filter((service) =>
+  const filteredServivces = filterCodService.filter((service: any) =>
     service.descCliente?.toLowerCase().includes(search.toLowerCase())
   );
 

@@ -44,7 +44,7 @@ export default function ClienteForm() {
     },
   });
 
-  const { mutate, isPending, isSuccess, isError } = usePostCliente();
+  const { mutate } = usePostCliente();
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     mutate(values, {

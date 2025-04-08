@@ -1,5 +1,5 @@
 'use client';
-// import { useRef } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from '@/components/ui/button';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -12,6 +12,7 @@ import { IServiceID } from '@/lib/interface/IServiceID';
 import { MoreItensDialog } from './moreItensDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getServicoCodService } from './api/servicoCodService';
+import { IService } from '@/lib/interface/IService';
 
 export default function Relatorio() {
   // const reportRef = useRef(null);
@@ -152,7 +153,7 @@ export default function Relatorio() {
         return;
       }
 
-      const groupedByItemService = serviceId.reduce((acc, data) => {
+      const groupedByItemService = serviceId.reduce((acc: any, data: any) => {
         if (!acc[data.itemService]) {
           acc[data.itemService] = [];
         }
@@ -160,109 +161,109 @@ export default function Relatorio() {
         return acc;
       }, {} as Record<string, IServiceID[]>);
 
-      Object.entries(groupedByItemService).forEach(
-        ([itemServiceKey, dataList], index) => {
-          if (index !== 0) {
-            doc.addPage();
-          }
-          addHeader();
-          addFooter();
-          doc.setFontSize(12);
-          doc.setFont('helvetica', 'bold');
-          doc.text(`1.1. Preços - Item do Serviço ${itemServiceKey}`, 14, 40);
-
-          const tempBody: any[] = [];
-          const tempInspecao: any[] = [];
-          const tempInspecaoTomada: any[] = [];
-
-          dataList.forEach((data) => {
-            const serv = servicoCodService?.find(
-              (s) =>
-                s.itemService === data.itemService &&
-                s.codService === data.codService
-            );
-
-            if (serv) {
-              tempInspecao.push(`${data.insVisual}`);
-              tempInspecaoTomada.push(`${data.manuPrevTomada}`);
-              tempBody.push([
-                `${data.quantidade_peca}`,
-                `${data.itemService}`,
-                `${serv.equipamentoDescricao} - ${data.Descricao}`,
-                `${new Intl.NumberFormat('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                }).format(Number(data.valorPeca))}`,
-              ]);
-            }
-          });
-
-          autoTable(doc, {
-            startY: 45,
-            head: [['Qtd', 'Item do serviço', 'Descrição', 'Valor (R$)']],
-            body: tempBody,
-            theme: 'grid',
-            headStyles: { fillColor: [41, 128, 185] },
-            styles: { fontSize: 10 },
-          });
-
-          // Calcular total por itemService
-          const totalValor = dataList.reduce(
-            (sum: number, data) => sum + Number(data.valorPeca),
-            0
-          );
-
-          autoTable(doc, {
-            startY: (doc as any).lastAutoTable.finalY + 5,
-            body: [
-              [
-                '',
-                'TOTAL',
-                new Intl.NumberFormat('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                }).format(totalValor),
-              ],
-            ],
-            theme: 'grid',
-            styles: { fontSize: 12, fontStyle: 'bold' },
-            columnStyles: { 2: { textColor: [0, 0, 0] } },
-          });
-
-          const uniqueInspecao = Array.from(
-            new Set(tempInspecao.map((a) => String(a).trim()))
-          );
-
-          const uniqueTomada = Array.from(
-            new Set(tempInspecaoTomada.map((a) => String(a).trim()))
-          );
-
-          doc.setFontSize(12);
-          doc.setFont('helvetica', 'bold');
-          doc.text('Inspeção visual do equipamento', 14, 164);
-
-          doc.setTextColor(0, 0, 0);
-          doc.setFont('helvetica', 'normal');
-          doc.text(
-            uniqueInspecao.map((a) =>
-              a ? a.trim() : 'Não foi inserido inspeção visual'
-            ),
-            14,
-            170
-          );
-
-          doc.text(
-            uniqueTomada.map((a) =>
-              a == '1'
-                ? 'Manutenção preventiva tomada de nível (desmontagem, jateamento, pintura, assepsia, reusinagem da tomada de nível, solda de lamida de aço inox 316L fornecimento com certificado de calibração com reastrabilidade RBC)'
-                : 'Não existe tomada de nível'
-            ),
-            14,
-            196,
-            { align: 'justify', maxWidth: 185 }
-          );
+      (
+        Object.entries(groupedByItemService) as [string, IServiceID[]][]
+      ).forEach(([itemServiceKey, dataList], index) => {
+        if (index !== 0) {
+          doc.addPage();
         }
-      );
+        addHeader();
+        addFooter();
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`1.1. Preços - Item do Serviço ${itemServiceKey}`, 14, 40);
+
+        const tempBody: any[] = [];
+        const tempInspecao: any[] = [];
+        const tempInspecaoTomada: any[] = [];
+
+        dataList.forEach((data: any) => {
+          const serv = servicoCodService?.find(
+            (s: any) =>
+              s.itemService === data.itemService &&
+              s.codService === data.codService
+          );
+
+          if (serv) {
+            tempInspecao.push(`${data.insVisual}`);
+            tempInspecaoTomada.push(`${data.manuPrevTomada}`);
+            tempBody.push([
+              `${data.quantidade_peca}`,
+              `${data.itemService}`,
+              `${serv.equipamentoDescricao} - ${data.Descricao}`,
+              `${new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              }).format(Number(data.valorPeca))}`,
+            ]);
+          }
+        });
+
+        autoTable(doc, {
+          startY: 45,
+          head: [['Qtd', 'Item do serviço', 'Descrição', 'Valor (R$)']],
+          body: tempBody,
+          theme: 'grid',
+          headStyles: { fillColor: [41, 128, 185] },
+          styles: { fontSize: 10 },
+        });
+
+        // Calcular total por itemService
+        const totalValor = dataList.reduce(
+          (sum: number, data: any) => sum + Number(data.valorPeca),
+          0
+        );
+
+        autoTable(doc, {
+          startY: (doc as any).lastAutoTable.finalY + 5,
+          body: [
+            [
+              '',
+              'TOTAL',
+              new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              }).format(totalValor),
+            ],
+          ],
+          theme: 'grid',
+          styles: { fontSize: 12, fontStyle: 'bold' },
+          columnStyles: { 2: { textColor: [0, 0, 0] } },
+        });
+
+        const uniqueInspecao = Array.from(
+          new Set(tempInspecao.map((a) => String(a).trim()))
+        );
+
+        const uniqueTomada = Array.from(
+          new Set(tempInspecaoTomada.map((a) => String(a).trim()))
+        );
+
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Inspeção visual do equipamento', 14, 164);
+
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'normal');
+        doc.text(
+          uniqueInspecao.map((a) =>
+            a ? a.trim() : 'Não foi inserido inspeção visual'
+          ),
+          14,
+          170
+        );
+
+        doc.text(
+          uniqueTomada.map((a) =>
+            a == '1'
+              ? 'Manutenção preventiva tomada de nível (desmontagem, jateamento, pintura, assepsia, reusinagem da tomada de nível, solda de lamida de aço inox 316L fornecimento com certificado de calibração com reastrabilidade RBC)'
+              : 'Não existe tomada de nível'
+          ),
+          14,
+          196,
+          { align: 'justify', maxWidth: 185 }
+        );
+      });
     };
 
     const addContentPage3 = () => {
@@ -513,7 +514,7 @@ export default function Relatorio() {
       </h1>
 
       <div className='h-[50vh] overflow-scroll'>
-        {servicoCodService?.map((serv, index) => {
+        {servicoCodService?.map((serv: IService, index: number) => {
           return (
             <Card key={index} className='mt-4'>
               <>
@@ -527,18 +528,18 @@ export default function Relatorio() {
 
                   {serviceId
                     .filter(
-                      (value, index, self) =>
+                      (value: IServiceID, index: number, self: any) =>
                         value.codService === serv.codService &&
                         value.itemService === serv.itemService &&
                         self.findIndex(
-                          (v) =>
+                          (v: any) =>
                             v.Visor === value.Visor &&
                             v.Carcaca === value.Carcaca &&
                             v.codService === value.codService &&
                             v.itemService === value.itemService
                         ) === index
                     )
-                    .map((peca, i) => {
+                    .map((peca: IServiceID, i: number) => {
                       console.log(peca);
                       return (
                         <div key={i} className='w-[100%] h-[8vh] flex flex-col'>
@@ -593,11 +594,11 @@ export default function Relatorio() {
                     </div>
                     {serviceId
                       .filter(
-                        (value) =>
+                        (value: IServiceID) =>
                           value.codService == serv.codService &&
                           value.itemService == serv.itemService
                       )
-                      .map((peca, i) => (
+                      .map((peca: IServiceID) => (
                         <>
                           <div className='w-[100%] rounded-b-md px-4 py-2 bg-zinc-100 h-[5vh] flex'>
                             <div

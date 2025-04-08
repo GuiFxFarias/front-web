@@ -233,7 +233,7 @@ export function DialogVerProposta({
             <FormField
               control={form.control}
               name='status'
-              render={({ field }) => (
+              render={({}) => (
                 <FormItem>
                   <Select
                     onValueChange={(value) => {
