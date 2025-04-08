@@ -24,7 +24,6 @@ import {
 } from '@/components/ui/select';
 import { useState } from 'react';
 import DialogConfirmForm from '@/components/dialogConfirForm';
-import { putAttProdutoVenda } from './api/putConfirmaVenda';
 
 interface IProdutoTransmissorFormData {
   descricaoProduto: string;
