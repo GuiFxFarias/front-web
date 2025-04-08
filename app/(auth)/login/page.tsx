@@ -41,8 +41,6 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: IForm) {
-    console.log(values);
-
     try {
       const res = await fetch(`http://localhost:3001/usuarios/login`, {
         method: 'POST',
