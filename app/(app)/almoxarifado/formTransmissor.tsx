@@ -176,7 +176,6 @@ export default function TransmissorForm() {
               <FormLabel>Modelo</FormLabel>
               <Select
                 onValueChange={(value) => {
-                  // console.log("Valor selecionado:", value);
                   field.onChange(value);
                   setModelo(value);
                 }}

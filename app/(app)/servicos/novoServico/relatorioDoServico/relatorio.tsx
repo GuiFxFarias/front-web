@@ -540,7 +540,6 @@ export default function Relatorio() {
                         ) === index
                     )
                     .map((peca: IServiceID, i: number) => {
-                      console.log(peca);
                       return (
                         <div key={i} className='w-[100%] h-[8vh] flex flex-col'>
                           <p>

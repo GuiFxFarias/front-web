@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { AlertCircle, Loader2Icon } from 'lucide-react'
+import { AlertCircle, Loader2Icon } from 'lucide-react';
 
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   Form,
   FormControl,
@@ -10,76 +10,76 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { Button } from '@/components/ui/button'
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
-import { getAllPecas } from './api/getAllPecas'
-import { Item } from '@/lib/interface/Ipecas'
-import { useEffect, useState } from 'react'
-import { putPecaQtd } from './api/putPecaQtd'
-import DialogConfirmForm from '@/components/dialogConfirForm'
+} from '@/components/ui/select';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { getAllPecas } from './api/getAllPecas';
+import { Item } from '@/lib/interface/Ipecas';
+import { useEffect, useState } from 'react';
+import { putPecaQtd } from './api/putPecaQtd';
+import DialogConfirmForm from '@/components/dialogConfirForm';
 
 interface movEstoque {
-  descProduto: string
-  quantidade: string
+  descProduto: string;
+  quantidade: string;
 }
 
 const formSchema = z.object({
   descProduto: z.string(),
   quantidade: z.string(),
-})
+});
 
 export default function MoviEstoque() {
-  const queryClient = useQueryClient()
-  const [valueItem, setValueItem] = useState('')
-  const [movEstoque, setMovEstoque] = useState('')
-  const [alert, setAlert] = useState<boolean>(false)
-  const [qtd, setQtd] = useState<number>(0)
-  const [openDialog, setOpenDialog] = useState<boolean>(false)
+  const queryClient = useQueryClient();
+  const [valueItem, setValueItem] = useState('');
+  const [movEstoque, setMovEstoque] = useState('');
+  const [alert, setAlert] = useState<boolean>(false);
+  const [qtd, setQtd] = useState<number>(0);
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
 
-  const { data: allPecas = [], isLoading } = useQuery(['allPecas'], getAllPecas)
+  const { data: allPecas = [], isLoading } = useQuery(
+    ['allPecas'],
+    getAllPecas
+  );
 
   useEffect(() => {
     allPecas.filter((item: Item) => {
-      return String(item.ID) == valueItem ? setQtd(item.Quantidade) : null
-    })
-  }, [allPecas, valueItem])
+      return String(item.ID) == valueItem ? setQtd(item.Quantidade) : null;
+    });
+  }, [allPecas, valueItem]);
 
   const form = useForm<movEstoque>({
     resolver: zodResolver(formSchema),
-  })
+  });
 
   const mutatePutPecaQtd = useMutation({
     mutationFn: ({
       id,
       body,
     }: {
-      id: string
-      body: { ID: number; Quantidade: number }
+      id: string;
+      body: { ID: number; Quantidade: number };
     }) => putPecaQtd(id, body),
     onSuccess: () => {
-      queryClient.invalidateQueries(['allPecas'])
+      queryClient.invalidateQueries(['allPecas']);
     },
-  })
+  });
 
   function onSubmit(values: movEstoque) {
     if (qtd < Number(values.quantidade) && movEstoque === 'sub') {
-      console.log('teste')
-      setAlert(true)
+      setAlert(true);
     }
-
-    console.log(values.descProduto)
 
     if (movEstoque === 'add') {
       mutatePutPecaQtd.mutate({
@@ -88,8 +88,8 @@ export default function MoviEstoque() {
           ID: Number(values.descProduto),
           Quantidade: qtd + Number(values.quantidade),
         },
-      })
-      setAlert(false)
+      });
+      setAlert(false);
     } else if (qtd > Number(values.quantidade) && movEstoque === 'sub') {
       mutatePutPecaQtd.mutate({
         id: values.descProduto,
@@ -97,8 +97,8 @@ export default function MoviEstoque() {
           ID: Number(values.descProduto),
           Quantidade: qtd - Number(values.quantidade),
         },
-      })
-      setAlert(false)
+      });
+      setAlert(false);
     }
   }
 
@@ -109,35 +109,35 @@ export default function MoviEstoque() {
       ) : (
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 rounded-md w-[65vw] h-[60vh] overflow-y-auto px-2"
+          className='space-y-4 rounded-md w-[65vw] h-[60vh] overflow-y-auto px-2'
         >
           <Alert
             className={alert ? 'block border-red-500 bg-red-100' : 'hidden'}
           >
-            <AlertCircle className="h-4 w-4 " color="red" />
-            <AlertTitle className="text-red-500 font-semibold">
+            <AlertCircle className='h-4 w-4 ' color='red' />
+            <AlertTitle className='text-red-500 font-semibold'>
               Error
             </AlertTitle>
-            <AlertDescription className="text-red-500">
+            <AlertDescription className='text-red-500'>
               Não é possivel retirar mais itens do que os cadastrados.
             </AlertDescription>
           </Alert>
           {/* Campo: Número de Série do Equipamento */}
           <FormField
             control={form.control}
-            name="descProduto"
+            name='descProduto'
             render={({ field }) => (
               <FormItem>
                 <Select
                   onValueChange={(value) => {
-                    field.onChange(value)
-                    setValueItem(value)
+                    field.onChange(value);
+                    setValueItem(value);
                   }}
                   value={valueItem || ''}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione o equipamento" />
+                      <SelectValue placeholder='Selecione o equipamento' />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -155,12 +155,12 @@ export default function MoviEstoque() {
           {/* Campo: Descrição do Produto */}
           <FormField
             control={form.control}
-            name="quantidade"
+            name='quantidade'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
                   Quantidade em estoque:{' '}
-                  {isLoading ? <Loader2Icon className="animate-spin" /> : qtd}
+                  {isLoading ? <Loader2Icon className='animate-spin' /> : qtd}
                 </FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -171,26 +171,26 @@ export default function MoviEstoque() {
           />
 
           {/* Botão de Envio */}
-          <div className="flex flex-row justify-between">
+          <div className='flex flex-row justify-between'>
             <Button
-              type="submit"
+              type='submit'
               onClick={() => setMovEstoque('sub')}
-              className="mr-2"
+              className='mr-2'
             >
               Retirar
             </Button>
-            <Button type="submit" onClick={() => setMovEstoque('add')}>
+            <Button type='submit' onClick={() => setMovEstoque('add')}>
               Adicionar
             </Button>
           </div>
         </form>
       )}
       <DialogConfirmForm
-        title="Sucesso"
-        text="Sua movimentação de estoque foi confirmada!"
+        title='Sucesso'
+        text='Sua movimentação de estoque foi confirmada!'
         open={openDialog}
         setOpen={(open: boolean) => setOpenDialog(open)}
       />
     </Form>
-  )
+  );
 }

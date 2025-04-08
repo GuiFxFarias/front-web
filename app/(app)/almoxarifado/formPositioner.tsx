@@ -226,7 +226,6 @@ export default function PosicionadorForm() {
               <FormLabel>Modelo</FormLabel>
               <Select
                 onValueChange={(value) => {
-                  // console.log("Valor selecionado:", value);
                   field.onChange(value);
                   setModelo(value);
                 }}
