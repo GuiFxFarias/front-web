@@ -1,6 +1,8 @@
 export async function getAllPecas() {
   try {
-    const response = await fetch(`http://localhost:3001/pecas`);
+    const response = await fetch(
+      `http://${process.env.NEXT_PUBLIC_API_URL}/pecas`
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -10,7 +12,7 @@ export async function getAllPecas() {
     // Garante que o retorno seja sempre um array
     return Array.isArray(data) ? data : [];
   } catch (error) {
-    console.error("Erro ao buscar pecas:", error);
+    console.error('Erro ao buscar pecas:', error);
     return [];
   }
 }

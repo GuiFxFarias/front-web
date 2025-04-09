@@ -98,7 +98,7 @@ export function DialogVerProposta({
     async function getEquipId(codService: string) {
       try {
         const response = await fetch(
-          `http://localhost:3001/servicos/${codService}`,
+          `http://${process.env.NEXT_PUBLIC_API_URL}/servicos/${codService}`,
           {
             method: 'GET',
             headers: {
