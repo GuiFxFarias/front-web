@@ -43,13 +43,16 @@ export default function LoginPage() {
   async function onSubmit(values: IForm) {
     setLoading(true); // ← Aqui primeiro
     try {
-      const res = await fetch(`http://localhost:3001/usuarios/login`, {
-        method: 'POST',
-        body: JSON.stringify(values),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/usuarios/login`,
+        {
+          method: 'POST',
+          body: JSON.stringify(values),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       const resJson = await res.json();
 
