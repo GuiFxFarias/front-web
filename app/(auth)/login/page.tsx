@@ -41,6 +41,7 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: IForm) {
+    setLoading(true); // ← Aqui primeiro
     try {
       const res = await fetch(`http://localhost:3001/usuarios/login`, {
         method: 'POST',
@@ -51,23 +52,18 @@ export default function LoginPage() {
       });
 
       const resJson = await res.json();
-      setLoading(true);
 
-      if (res.ok) {
-        if (resJson.token) {
-          Cookies.set('token', resJson.token);
-          console.log('success');
-
-          setLoading(false);
-          router.push('/painel');
-        } else {
-          console.error('Erro no login: Token não recebido.');
-        }
+      if (res.ok && resJson.token) {
+        Cookies.set('token', resJson.token);
+        console.log('success');
+        router.push('/painel');
       } else {
-        console.error('Erro no login:', resJson);
+        console.error('Erro no login:', resJson?.erro || 'Token não recebido.');
       }
     } catch (error: any) {
       console.error('Erro no login:', error.message);
+    } finally {
+      setLoading(false); // ← Aqui sempre no final
     }
   }
 
