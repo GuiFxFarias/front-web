@@ -3,7 +3,7 @@ import { useMutation } from 'react-query';
 
 export async function postCliente(body: any) {
   const response = await fetch(
-    'http://${process.env.NEXT_PUBLIC_API_URL}/novoCliente',
+    `http://${process.env.NEXT_PUBLIC_API_URL}/novoCliente`,
     {
       method: 'POST',
       headers: {

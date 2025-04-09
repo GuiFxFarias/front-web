@@ -46,7 +46,7 @@ export async function getServicesId(id: string) {
 
 export async function postService(data: IServicePost) {
   const response = await fetch(
-    'http://${process.env.NEXT_PUBLIC_API_URL}/servicos',
+    `http://${process.env.NEXT_PUBLIC_API_URL}/servicos`,
     {
       method: 'POST',
       headers: {
@@ -60,7 +60,7 @@ export async function postService(data: IServicePost) {
 
 export async function postPecaServico(data: IServPeca) {
   const response = await fetch(
-    'http://${process.env.NEXT_PUBLIC_API_URL}/pecaServico',
+    `http://${process.env.NEXT_PUBLIC_API_URL}/pecaServico`,
     {
       method: 'POST',
       headers: {

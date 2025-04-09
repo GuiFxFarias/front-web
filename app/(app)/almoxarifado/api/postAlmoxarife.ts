@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export async function postTransmissor(data: any) {
   const response = await fetch(
-    'http://${process.env.NEXT_PUBLIC_API_URL}/prodTransmissor',
+    `http://${process.env.NEXT_PUBLIC_API_URL}/prodTransmissor`,
     {
       method: 'POST',
       headers: {
@@ -15,7 +15,7 @@ export async function postTransmissor(data: any) {
 
 export async function postPosicionador(data: any) {
   const response = await fetch(
-    'http://${process.env.NEXT_PUBLIC_API_URL}/prodPosicionador',
+    `http://${process.env.NEXT_PUBLIC_API_URL}/prodPosicionador`,
     {
       method: 'POST',
       headers: {
@@ -29,7 +29,7 @@ export async function postPosicionador(data: any) {
 
 export async function postPecas(data: any) {
   const response = await fetch(
-    'http://${process.env.NEXT_PUBLIC_API_URL}/novasPecas',
+    `http://${process.env.NEXT_PUBLIC_API_URL}/novasPecas`,
     {
       method: 'POST',
       headers: {
