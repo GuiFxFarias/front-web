@@ -10,6 +10,7 @@ import { IEquipamento } from '@/lib/interface/Iequipamento';
 import { IService } from '@/lib/interface/IService';
 import { DialogVerProposta } from '@/app/(app)/servicos/dialogVerProposta';
 import { getServices } from './novoServico/api/getService';
+import { useMemo } from 'react';
 
 export default function ServicesItens() {
   const [search, setSearch] = useState<string>('');
@@ -21,14 +22,21 @@ export default function ServicesItens() {
 
   const { data: equipamentos } = useQuery(['equipamentos'], getEquipamentos);
 
-  const filterCodService = services.filter(
-    (service: any, index: any, self: any) =>
-      index === self.findIndex((s: any) => s.codService === service.codService)
-  );
+  const filterCodService = useMemo(() => {
+    if (!Array.isArray(services) || isLoading) return [];
 
-  const filteredServivces = filterCodService.filter((service: any) =>
-    service.descCliente?.toLowerCase().includes(search.toLowerCase())
-  );
+    return services.filter(
+      (service: any, index: any, self: any) =>
+        index ===
+        self.findIndex((s: any) => s.codService === service.codService)
+    );
+  }, [services, isLoading]);
+
+  const filteredServices = useMemo(() => {
+    return filterCodService.filter((service: any) =>
+      service.descCliente?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [filterCodService, search]);
 
   return (
     <div className='flex-1 p-8'>
@@ -55,7 +63,7 @@ export default function ServicesItens() {
           'Carregando...'
         ) : (
           <>
-            {filteredServivces.map((data: IService) => {
+            {filteredServices.map((data: IService) => {
               return (
                 <Card key={data.id}>
                   <CardHeader className='flex justify-between flex-row items-center'>

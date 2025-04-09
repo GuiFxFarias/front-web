@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export async function putPecaQtd(id: string, body: any) {
   const response = await fetch(
-    `http://${process.env.NEXT_PUBLIC_API_URL}/pecas/${id}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/pecas/${id}`,
     {
       method: 'PUT',
       headers: {

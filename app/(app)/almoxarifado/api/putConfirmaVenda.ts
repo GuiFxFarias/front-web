@@ -2,7 +2,7 @@
 export async function putAttProdutoVenda(id: string, body: any) {
   try {
     const response = await fetch(
-      `http://${process.env.NEXT_PUBLIC_API_URL}/qtdProdutosTransmissor/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/qtdProdutosTransmissor/${id}`,
       {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },

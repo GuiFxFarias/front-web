@@ -2,7 +2,7 @@
 export async function putAttVendas(id: string, body: any) {
   try {
     const response = await fetch(
-      `http://${process.env.NEXT_PUBLIC_API_URL}/attStatus/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/attStatus/${id}`,
       {
         method: 'PUT',
         headers: {

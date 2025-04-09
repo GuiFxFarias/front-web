@@ -1,7 +1,7 @@
 export async function getAllPrdTransmissor() {
   try {
     const response = await fetch(
-      `http://${process.env.NEXT_PUBLIC_API_URL}/produtosTransmissor`
+      `${process.env.NEXT_PUBLIC_API_URL}/produtosTransmissor`
     );
 
     if (!response.ok) {

@@ -1,8 +1,6 @@
 export async function getClientes() {
   try {
-    const response = await fetch(
-      `http://${process.env.NEXT_PUBLIC_API_URL}/clientes`
-    );
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clientes`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -19,7 +17,7 @@ export async function getClientes() {
 
 export async function getClientesId(id: string) {
   const response = await fetch(
-    `http://${process.env.NEXT_PUBLIC_API_URL}/clientes/${id}`
+    `${process.env.NEXT_PUBLIC_API_URL}/clientes/${id}`
   );
 
   if (!response.ok) {

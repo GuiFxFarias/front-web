@@ -1,7 +1,7 @@
 export async function getTodasVendas() {
   try {
     const response = await fetch(
-      `http://${process.env.NEXT_PUBLIC_API_URL}/todasVendas`
+      `${process.env.NEXT_PUBLIC_API_URL}/todasVendas`
     );
 
     if (!response.ok) {

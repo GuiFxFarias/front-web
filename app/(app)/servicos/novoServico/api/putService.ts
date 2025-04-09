@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export async function putCodService(id: string, data: any) {
   const response = await fetch(
-    `http://${process.env.NEXT_PUBLIC_API_URL}/servicos/${id}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/servicos/${id}`,
     {
       method: 'PUT', // Corrected from "GET" to "PUT"
       headers: {

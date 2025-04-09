@@ -1,8 +1,6 @@
 export async function getAllPecas() {
   try {
-    const response = await fetch(
-      `http://${process.env.NEXT_PUBLIC_API_URL}/pecas`
-    );
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pecas`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

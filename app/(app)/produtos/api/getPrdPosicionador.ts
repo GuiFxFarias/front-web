@@ -1,7 +1,7 @@
 export async function getAllPrdPos() {
   try {
     const response = await fetch(
-      `http://${process.env.NEXT_PUBLIC_API_URL}/produtosPosicionador`
+      `${process.env.NEXT_PUBLIC_API_URL}/produtosPosicionador`
     );
 
     if (!response.ok) {

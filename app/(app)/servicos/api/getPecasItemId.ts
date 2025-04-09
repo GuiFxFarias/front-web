@@ -1,6 +1,6 @@
 export async function getPecasItemId(id: string) {
   const response = await fetch(
-    `http://${process.env.NEXT_PUBLIC_API_URL}/pecas/${id}`
+    `${process.env.NEXT_PUBLIC_API_URL}/pecas/${id}`
   );
 
   if (!response.ok) {

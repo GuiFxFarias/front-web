@@ -1,6 +1,6 @@
 export async function getServicoCodService(id: string) {
   const response = await fetch(
-    `http://${process.env.NEXT_PUBLIC_API_URL}/servicosCodService/${id}`
+    `${process.env.NEXT_PUBLIC_API_URL}/servicosCodService/${id}`
   );
 
   if (!response.ok) {

@@ -20,7 +20,7 @@ export interface IServPeca {
 
 export async function getEquipamentoId(id: string) {
   const response = await fetch(
-    `http://${process.env.NEXT_PUBLIC_API_URL}/equipamentos/${id}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/equipamentos/${id}`,
     {
       method: 'GET',
       headers: {
@@ -33,7 +33,7 @@ export async function getEquipamentoId(id: string) {
 
 export async function getServicesId(id: string) {
   const response = await fetch(
-    `http://${process.env.NEXT_PUBLIC_API_URL}/servicos/${id}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/servicos/${id}`,
     {
       method: 'GET',
       headers: {
@@ -45,22 +45,19 @@ export async function getServicesId(id: string) {
 }
 
 export async function postService(data: IServicePost) {
-  const response = await fetch(
-    `http://${process.env.NEXT_PUBLIC_API_URL}/servicos`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/servicos`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
   return response.json();
 }
 
 export async function postPecaServico(data: IServPeca) {
   const response = await fetch(
-    `http://${process.env.NEXT_PUBLIC_API_URL}/pecaServico`,
+    `${process.env.NEXT_PUBLIC_API_URL}/pecaServico`,
     {
       method: 'POST',
       headers: {
