@@ -48,9 +48,6 @@ export default function ClienteForm() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     mutate(values, {
-      onSuccess: (data) => {
-        // aqui você pode resetar o form, mostrar toast, redirecionar, etc.
-      },
       onError: (error) => {
         console.error('Erro ao salvar:', error);
       },
