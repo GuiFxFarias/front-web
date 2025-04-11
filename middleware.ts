@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getUserCookies } from './lib/getCooke';
 
 export function middleware(req: NextRequest) {
-  const token = req.cookies.get('token')?.value;
-
-  console.log(token);
+  const token = getUserCookies();
 
   if (!token) {
     console.log('Sem token, redirecionando...');
