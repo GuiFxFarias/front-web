@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import jwt from 'jsonwebtoken';
 
 interface IForm {
   Email: string;
@@ -57,6 +58,16 @@ export default function LoginPage() {
       const resJson = await res.json();
 
       if (res.ok) {
+        const usuario = resJson.usuario;
+
+        const token = jwt.sign(
+          { id: usuario.ID, email: usuario.Email },
+          process.env.NEXT_PUBLIC_JWT_SECRET!,
+          { expiresIn: '1h' }
+        );
+
+        localStorage.setItem('token', token);
+
         setTimeout(() => {
           router.replace('/painel');
         }, 1000);
@@ -66,7 +77,7 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error('Erro no login:', error.message);
     } finally {
-      setLoading(false); // ← Aqui sempre no final
+      setLoading(false);
     }
   }
 
