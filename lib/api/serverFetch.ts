@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { cookies } from "next/headers";
+import { cookies } from 'next/headers';
 
 export default async function serverFetch(
   url: string,
@@ -22,10 +22,10 @@ export default async function serverFetch(
   }
 
   const res = await fetch(apiUrl.toString(), {
-    method: method ?? "GET",
+    method: method ?? 'GET',
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${cookies().get("token")!.value}`,
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${(await cookies()).get('token')!.value}`,
     },
     body: JSON.stringify(body),
   });
