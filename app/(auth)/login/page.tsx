@@ -16,8 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-// Removida a importação do jwt, pois não será mais necessária
-// import jwt from 'jsonwebtoken';
+import { setCookie } from 'cookies-next';
 
 interface IForm {
   Email: string;
@@ -52,17 +51,24 @@ export default function LoginPage() {
           headers: {
             'Content-Type': 'application/json',
           },
-          credentials: 'include', // Importante para receber e enviar cookies
+          credentials: 'include',
         }
       );
 
       const resJson = await res.json();
 
       if (res.ok) {
-        // const usuario = resJson.usuario;
+        const usuario = resJson.usuario;
+        const { token, expiration } = resJson.value;
 
-        // // localStorage.setItem('usuarioId', usuario.ID.toString());
-        // // localStorage.setItem('usuarioEmail', usuario.Email);
+        setCookie('token', token, {
+          expires: new Date(expiration),
+          path: '/',
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'none',
+        });
+
+        localStorage.setItem('usuarioEmail', usuario.Email);
 
         router.push('/painel');
       } else {
@@ -72,7 +78,7 @@ export default function LoginPage() {
         );
       }
     } catch (error: any) {
-      console.error('Erro no login:', error.message);
+      console.log('Erro no login:', error.message);
     } finally {
       setLoading(false);
     }
