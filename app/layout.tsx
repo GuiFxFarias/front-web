@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import LoginPage from './(auth)/login/page';
-import Cookies from 'js-cookie';
 
 // const geistSans = localFont({
 //   src: "./fonts/GeistVF.woff",
@@ -88,9 +87,13 @@ export default function RootLayout({
                   <Button
                     variant='destructive'
                     className='w-full'
-                    onClick={() => {
-                      Cookies.remove('token');
-                      window.location.reload();
+                    onClick={async () => {
+                      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
+                        method: 'POST',
+                        credentials: 'include',
+                      });
+
+                      window.location.href = '/';
                     }}
                   >
                     Logout

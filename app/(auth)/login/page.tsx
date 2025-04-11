@@ -15,7 +15,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
 import { Loader2 } from 'lucide-react';
 
 interface IForm {
@@ -57,8 +56,7 @@ export default function LoginPage() {
 
       const resJson = await res.json();
 
-      if (res.ok && resJson.token) {
-        Cookies.set('token', resJson.token);
+      if (res.ok) {
         console.log('success');
         router.push('/painel');
       } else {
