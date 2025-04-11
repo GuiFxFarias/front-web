@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserCookies } from './lib/getCooke';
 
 export function middleware(req: NextRequest) {
-  const token = getUserCookies();
+  const token = req.cookies.get('token')?.value;
+
+  const publicRoutes = ['/', '/login', '/usuarios/login'];
+  if (publicRoutes.includes(req.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
 
   if (!token) {
     console.log('Sem token, redirecionando...');

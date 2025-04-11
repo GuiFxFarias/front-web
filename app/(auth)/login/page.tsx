@@ -57,8 +57,9 @@ export default function LoginPage() {
       const resJson = await res.json();
 
       if (res.ok) {
-        console.log('success');
-        router.push('/painel');
+        setTimeout(() => {
+          router.replace('/painel');
+        }, 1000);
       } else {
         console.error('Erro no login:', resJson?.erro || 'Token não recebido.');
       }
