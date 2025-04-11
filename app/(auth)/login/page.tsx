@@ -16,7 +16,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import jwt from 'jsonwebtoken';
+// Removida a importação do jwt, pois não será mais necessária
+// import jwt from 'jsonwebtoken';
 
 interface IForm {
   Email: string;
@@ -41,7 +42,7 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: IForm) {
-    setLoading(true); // ← Aqui primeiro
+    setLoading(true);
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/usuarios/login`,
@@ -51,28 +52,24 @@ export default function LoginPage() {
           headers: {
             'Content-Type': 'application/json',
           },
-          credentials: 'include',
+          credentials: 'include', // Importante para receber e enviar cookies
         }
       );
 
       const resJson = await res.json();
 
       if (res.ok) {
-        const usuario = resJson.usuario;
+        // const usuario = resJson.usuario;
 
-        const token = jwt.sign(
-          { id: usuario.ID, email: usuario.Email },
-          process.env.NEXT_PUBLIC_JWT_SECRET!,
-          { expiresIn: '1h' }
-        );
+        // // localStorage.setItem('usuarioId', usuario.ID.toString());
+        // // localStorage.setItem('usuarioEmail', usuario.Email);
 
-        localStorage.setItem('token', token);
-
-        setTimeout(() => {
-          router.replace('/painel');
-        }, 1000);
+        router.push('/painel');
       } else {
-        console.error('Erro no login:', resJson?.erro || 'Token não recebido.');
+        console.error(
+          'Erro no login:',
+          resJson?.erro || 'Autenticação falhou.'
+        );
       }
     } catch (error: any) {
       console.error('Erro no login:', error.message);
