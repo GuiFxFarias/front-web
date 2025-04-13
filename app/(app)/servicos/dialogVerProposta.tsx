@@ -328,13 +328,13 @@ export function DialogVerProposta({
             </DialogDescription>
             {desc?.map((d, i) => (
               <div key={i} className='flex flex-col'>
-                <DialogDescription key={i}>
+                <DialogDescription>
                   <strong>Peça:</strong> {d?.descricao}
                 </DialogDescription>
-                <DialogDescription key={i}>
+                <DialogDescription>
                   <strong>Quantidade requistada:</strong> {d?.requisitada}
                 </DialogDescription>
-                <DialogDescription key={i}>
+                <DialogDescription>
                   <strong>Quantidade atual:</strong> {d?.atual}
                 </DialogDescription>
               </div>

@@ -17,7 +17,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { getClientes, usePostCliente } from './api/postCliente';
 import DialogConfirmForm from '@/components/dialogConfirForm';
 import { useState } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery, useQueryClient } from 'react-query';
 import { FormattedInput } from '@/components/patternFormatComp';
 import { Badge } from '@/components/ui/badge';
 import { ICliente } from '@/lib/interface/Icliente';
@@ -50,6 +50,8 @@ export default function ClienteForm() {
     },
   });
 
+  const queryClient = useQueryClient();
+
   const [openDialog, setOpenDialog] = useState<boolean>(false);
 
   const { data: clientes } = useQuery(['clientes'], getClientes);
@@ -62,6 +64,7 @@ export default function ClienteForm() {
         console.error('Erro ao salvar:', error);
       },
       onSuccess: () => {
+        queryClient.invalidateQueries(['clientes']);
         setOpenDialog(true);
       },
     });
@@ -112,7 +115,12 @@ export default function ClienteForm() {
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                 {[
-                  { name: 'nome', label: 'Nome', type: 'text', format: '' },
+                  {
+                    name: 'nome',
+                    label: 'Nome',
+                    type: 'text',
+                    format: undefined,
+                  },
                   {
                     name: 'cnpj',
                     label: 'CNPJ',
@@ -123,9 +131,14 @@ export default function ClienteForm() {
                     name: 'nome_responsavel',
                     label: 'Responsável',
                     type: 'text',
-                    format: '',
+                    format: undefined,
                   },
-                  { name: 'email', label: 'Email', type: 'email', format: '' },
+                  {
+                    name: 'email',
+                    label: 'Email',
+                    type: 'email',
+                    format: undefined,
+                  },
                   {
                     name: 'telefone',
                     label: 'Telefone',
@@ -136,10 +149,20 @@ export default function ClienteForm() {
                     name: 'endereco',
                     label: 'Endereço',
                     type: 'text',
-                    format: '',
+                    format: undefined,
                   },
-                  { name: 'cidade', label: 'Cidade', type: 'text', format: '' },
-                  { name: 'estado', label: 'Estado', type: 'text', format: '' },
+                  {
+                    name: 'cidade',
+                    label: 'Cidade',
+                    type: 'text',
+                    format: undefined,
+                  },
+                  {
+                    name: 'estado',
+                    label: 'Estado',
+                    type: 'text',
+                    format: undefined,
+                  },
                   {
                     name: 'cep',
                     label: 'CEP',

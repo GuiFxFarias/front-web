@@ -1,6 +1,6 @@
 'use client';
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Key, useState } from 'react';
+import { Key, useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
@@ -25,7 +25,8 @@ import { putAttProdutoVenda } from '../almoxarifado/api/putConfirmaVenda';
 
 export default function ProdutoItens() {
   const queryClient = useQueryClient();
-  const [, setSearch] = useState<string>('');
+  const [search, setSearch] = useState<string>('');
+  const [proposta, setProposta] = useState<number>();
   const [openDialog, setOpenDialog] = useState<boolean>(false);
 
   const gerarPDF = (venda: IVendaComProdutoCliente[]) => {
@@ -458,6 +459,14 @@ export default function ProdutoItens() {
     );
   }
 
+  const filteredVendas = useMemo(() => {
+    return (
+      Object.entries(sameVendas) as [string, IVendaComProdutoCliente[]][]
+    ).filter(([, itens]) =>
+      itens[0]?.nomeCliente?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [sameVendas, search]);
+
   return (
     <div className='flex-1 p-8'>
       {/* Conteúdo Principal */}
@@ -477,28 +486,32 @@ export default function ProdutoItens() {
       </div>
 
       {/* Lista de Serviços */}
-      <div className='grid grid-cols-1 gap-4 overflow-y-auto max-h-[50vh]'>
+      <div className='grid grid-cols-1 gap-4 overflow-y-auto max-h-[50vh] py-2'>
         {/* Card de Serviço 1 */}
         {isLoading ? (
           'Carregando...'
         ) : (
           <>
-            {Object.entries(sameVendas).map(([idVenda, itens]) => {
+            {filteredVendas.map(([idVenda, itens]) => {
               const itensTyped = itens as IVendaComProdutoCliente[];
               const item: IVendaComProdutoCliente = itensTyped[0];
               return (
-                <Card key={idVenda}>
+                <Card
+                  key={idVenda}
+                  className={
+                    item.status == '1'
+                      ? 'border-2 border-emerald-500 bg-emerald-50'
+                      : item.status == '2'
+                      ? 'border-2 border-red-500 bg-red-50'
+                      : 'bg-zinc-50'
+                  }
+                >
                   <CardHeader className='flex justify-between flex-row items-center'>
                     <CardTitle>Cliente: {item.nomeCliente}</CardTitle>
 
                     <Dialog>
-                      <DialogTrigger>
-                        <Button
-                          variant='outline'
-                          className='bg-blue-500 text-white'
-                        >
-                          Ver proposta
-                        </Button>
+                      <DialogTrigger className='bg-blue-500 text-white p-2 rounded-md'>
+                        Ver proposta
                       </DialogTrigger>
                       <DialogContent className='w-[50vw] justify-start flex flex-col'>
                         <DialogHeader>
@@ -509,28 +522,30 @@ export default function ProdutoItens() {
                             Proposta {item.idVenda.slice(0, 8).toUpperCase()}{' '}
                             gerada no dia {item.dataProposta}
                           </DialogDescription>
-                          <DialogDescription>
-                            <p className='text-zinc-700'>
-                              Para confirmar a venda basta finalizar a proposta
-                            </p>
+                          <DialogDescription className='text-zinc-700'>
+                            Para confirmar a venda basta finalizar a proposta
                           </DialogDescription>
                         </DialogHeader>
                         <div className='flex w-full justify-between items-center mt-4'>
                           {' '}
                           <Button
                             className='bg-zinc-500 text-white hover:bg-blue-600'
-                            onClick={() =>
-                              confirmarProposta(item.idVenda, { status: '2' })
-                            }
+                            onClick={() => {
+                              setProposta(2);
+                              confirmarProposta(item.idVenda, { status: '2' });
+                            }}
                           >
                             Cancelar proposta
                           </Button>
                           <div className='flex'>
                             <Button
                               className='bg-blue-500 mr-2 text-white hover:bg-blue-600'
-                              onClick={() =>
-                                confirmarProposta(item.idVenda, { status: '1' })
-                              }
+                              onClick={() => {
+                                setProposta(1);
+                                confirmarProposta(item.idVenda, {
+                                  status: '1',
+                                });
+                              }}
                             >
                               Confirmar proposta
                             </Button>
@@ -587,14 +602,14 @@ export default function ProdutoItens() {
                   </CardContent>
                   <DialogConfirmForm
                     title={
-                      item.status == '1'
-                        ? 'Proposta confirmada'
-                        : 'Proposta cancelada'
+                      proposta == 1
+                        ? 'Sua proposta foi confirmada'
+                        : 'Sua proposta foi cancelada'
                     }
                     text={
-                      item.status == '1'
-                        ? 'Sua proposta foi cancela, mas ela está disponível para alteração ainda'
-                        : 'Proposta de venda confirmada'
+                      proposta == 1
+                        ? 'Proposta finalizada com status de vendida'
+                        : 'Sua proposta está encerrada e cancelada'
                     }
                     open={openDialog}
                     setOpen={setOpenDialog}
