@@ -188,6 +188,7 @@ export function NewSaleDialog() {
                               'ENDRES+HAUSER',
                               'ABB',
                               'SIEMENS',
+                              'SANSOM',
                               'FOXBORO',
                             ].map((marca) => (
                               <SelectItem key={marca} value={marca}>

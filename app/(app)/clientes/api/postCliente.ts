@@ -14,7 +14,7 @@ export async function postCliente(body: any) {
   );
 
   if (!response.ok) {
-    throw new Error('Erro ao cadastrar o cliente');
+    console.log('Erro ao cadastrar cliente');
   }
 
   return response.json();
@@ -24,4 +24,15 @@ export function usePostCliente() {
   return useMutation({
     mutationFn: postCliente,
   });
+}
+
+export async function getClientes() {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clientes`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  return response.json();
 }

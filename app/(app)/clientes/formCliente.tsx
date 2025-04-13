@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { z } from 'zod';
@@ -11,10 +12,15 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { usePostCliente } from './api/postCliente';
+import { getClientes, usePostCliente } from './api/postCliente';
+import DialogConfirmForm from '@/components/dialogConfirForm';
+import { useState } from 'react';
+import { useQuery } from 'react-query';
+import { FormattedInput } from '@/components/patternFormatComp';
+import { Badge } from '@/components/ui/badge';
+import { ICliente } from '@/lib/interface/Icliente';
 
 const formSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório'),
@@ -44,6 +50,10 @@ export default function ClienteForm() {
     },
   });
 
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+
+  const { data: clientes } = useQuery(['clientes'], getClientes);
+
   const { mutate } = usePostCliente();
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -51,53 +61,128 @@ export default function ClienteForm() {
       onError: (error) => {
         console.error('Erro ao salvar:', error);
       },
+      onSuccess: () => {
+        setOpenDialog(true);
+      },
     });
   }
 
+  if (!clientes || clientes.length === 0) {
+    return <p className='text-center mt-4'>Nenhum cliente cadastrado ainda.</p>;
+  }
+
   return (
-    <Card className='max-w-3xl mx-auto mt-10 h-[70vh] overflow-y-auto'>
-      <CardContent className='p-6'>
-        <h2 className='text-xl font-semibold mb-6 text-center'>
-          Cadastro de Cliente
-        </h2>
+    <div className='flex w-[70vw] h-[80vh]'>
+      <div className='w-[40%] overflow-y-auto space-y-5'>
+        {clientes.map((cliente: ICliente, index: number) => (
+          <Card key={index} className='border shadow-md'>
+            <CardContent className='p-4 space-y-2'>
+              <h3 className='text-lg font-semibold'>{cliente.nome}</h3>
+              <p>
+                <strong>CNPJ:</strong> {cliente.cnpj}
+              </p>
+              <p>
+                <strong>Responsável:</strong> {cliente.nome_responsavel}
+              </p>
+              <p>
+                <strong>Email:</strong> {cliente.email}
+              </p>
+              <p>
+                <strong>Telefone:</strong> {cliente.telefone}
+              </p>
+              <p>
+                <strong>Endereço:</strong> {cliente.endereco}
+              </p>
+              <div className='flex gap-2 flex-wrap'>
+                <Badge variant='outline'>{cliente.cidade}</Badge>
+                <Badge variant='outline'>{cliente.estado}</Badge>
+                <Badge variant='secondary'>{cliente.cep}</Badge>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <Card className='w-[40vw] mx-auto h-full overflow-y-auto'>
+        <CardContent className='p-6'>
+          <h2 className='text-xl font-semibold mb-6 text-center'>
+            Cadastro de Cliente
+          </h2>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              {[
-                { name: 'nome', label: 'Nome' },
-                { name: 'cnpj', label: 'CNPJ' },
-                { name: 'nome_responsavel', label: 'Responsável' },
-                { name: 'email', label: 'Email' },
-                { name: 'telefone', label: 'Telefone' },
-                { name: 'endereco', label: 'Endereço' },
-                { name: 'cidade', label: 'Cidade' },
-                { name: 'estado', label: 'Estado' },
-                { name: 'cep', label: 'CEP' },
-              ].map(({ name, label }) => (
-                <FormField
-                  key={name}
-                  control={form.control}
-                  name={name as keyof typeof formSchema._type}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{label}</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ))}
-            </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                {[
+                  { name: 'nome', label: 'Nome', type: 'text', format: '' },
+                  {
+                    name: 'cnpj',
+                    label: 'CNPJ',
+                    type: 'pattern',
+                    format: '##.###.###/####-##',
+                  },
+                  {
+                    name: 'nome_responsavel',
+                    label: 'Responsável',
+                    type: 'text',
+                    format: '',
+                  },
+                  { name: 'email', label: 'Email', type: 'email', format: '' },
+                  {
+                    name: 'telefone',
+                    label: 'Telefone',
+                    type: 'pattern',
+                    format: '(##) #####-####',
+                  },
+                  {
+                    name: 'endereco',
+                    label: 'Endereço',
+                    type: 'text',
+                    format: '',
+                  },
+                  { name: 'cidade', label: 'Cidade', type: 'text', format: '' },
+                  { name: 'estado', label: 'Estado', type: 'text', format: '' },
+                  {
+                    name: 'cep',
+                    label: 'CEP',
+                    type: 'pattern',
+                    format: '#####-###',
+                  },
+                ].map(({ name, label, format }) => (
+                  <FormField
+                    key={name}
+                    control={form.control}
+                    name={name as keyof typeof formSchema._type}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{label}</FormLabel>
+                        <FormControl>
+                          <FormattedInput
+                            {...field}
+                            format={format}
+                            onValueChange={(values: any) => {
+                              field.onChange(values.value);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              </div>
 
-            <Button type='submit' className='w-full mt-4'>
-              Salvar
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+              <Button type='submit' className='w-full mt-4'>
+                Salvar
+              </Button>
+            </form>
+            <DialogConfirmForm
+              title='Cliente cadastrado'
+              text='Seu novo cliente para uso foi cadastrado com sucesso!'
+              open={openDialog}
+              setOpen={setOpenDialog}
+            />
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
