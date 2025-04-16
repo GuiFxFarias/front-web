@@ -71,7 +71,115 @@ export default function ClienteForm() {
   }
 
   if (!clientes || clientes.length === 0) {
-    return 
+    return (
+      <div>
+        <p className='text-center mt-4'>Nenhum cliente cadastrado ainda.</p>;
+        <Card className='w-[40vw] mx-auto h-full overflow-y-auto'>
+          <CardContent className='p-6'>
+            <h2 className='text-xl font-semibold mb-6 text-center'>
+              Cadastro de Cliente
+            </h2>
+
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className='space-y-4'
+              >
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  {[
+                    {
+                      name: 'nome',
+                      label: 'Nome',
+                      type: 'text',
+                      format: undefined,
+                    },
+                    {
+                      name: 'cnpj',
+                      label: 'CNPJ',
+                      type: 'pattern',
+                      format: '##.###.###/####-##',
+                    },
+                    {
+                      name: 'nome_responsavel',
+                      label: 'Responsável',
+                      type: 'text',
+                      format: undefined,
+                    },
+                    {
+                      name: 'email',
+                      label: 'Email',
+                      type: 'email',
+                      format: undefined,
+                    },
+                    {
+                      name: 'telefone',
+                      label: 'Telefone',
+                      type: 'pattern',
+                      format: '(##) #####-####',
+                    },
+                    {
+                      name: 'endereco',
+                      label: 'Endereço',
+                      type: 'text',
+                      format: undefined,
+                    },
+                    {
+                      name: 'cidade',
+                      label: 'Cidade',
+                      type: 'text',
+                      format: undefined,
+                    },
+                    {
+                      name: 'estado',
+                      label: 'Estado',
+                      type: 'text',
+                      format: undefined,
+                    },
+                    {
+                      name: 'cep',
+                      label: 'CEP',
+                      type: 'pattern',
+                      format: '#####-###',
+                    },
+                  ].map(({ name, label, format }) => (
+                    <FormField
+                      key={name}
+                      control={form.control}
+                      name={name as keyof typeof formSchema._type}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{label}</FormLabel>
+                          <FormControl>
+                            <FormattedInput
+                              {...field}
+                              format={format}
+                              onValueChange={(values: any) => {
+                                field.onChange(values.value);
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+                </div>
+
+                <Button type='submit' className='w-full mt-4'>
+                  Salvar
+                </Button>
+              </form>
+              <DialogConfirmForm
+                title='Cliente cadastrado'
+                text='Seu novo cliente para uso foi cadastrado com sucesso!'
+                open={openDialog}
+                setOpen={setOpenDialog}
+              />
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
