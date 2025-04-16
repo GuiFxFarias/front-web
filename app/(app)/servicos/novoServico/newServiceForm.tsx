@@ -139,8 +139,8 @@ export default function NewServiceForm() {
                         }
                       >
                         {item.Descricao.charAt(0).toUpperCase() +
-                          item.Descricao.slice(1)}
-                        {item.nSeriePlaca ? item.nSeriePlaca : null}
+                          item.Descricao.slice(1)}{' '}
+                        - {item.nSeriePlaca ? item.nSeriePlaca : null}
                         {item.nSerieSensor ? item.nSerieSensor : null}
                       </p>
                       <span className='text-gray-500'>
