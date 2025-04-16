@@ -71,7 +71,7 @@ export default function ClienteForm() {
   }
 
   if (!clientes || clientes.length === 0) {
-    return <p className='text-center mt-4'>Nenhum cliente cadastrado ainda.</p>;
+    return 
   }
 
   return (
