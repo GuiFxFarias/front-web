@@ -22,19 +22,24 @@ export default function ServicesItens() {
 
   const { data: equipamentos } = useQuery(['equipamentos'], getEquipamentos);
 
-  const filterCodService = useMemo(() => {
-    if (!Array.isArray(services) || isLoading) return [];
+  const groupedServices = useMemo(() => {
+    if (!Array.isArray(services) || isLoading) return {};
 
-    return services.filter(
-      (service: any, index: any, self: any) =>
-        index ===
-        self.findIndex((s: any) => s.codService === service.codService)
-    );
+    return services.reduce((acc, service: IService) => {
+      if (!acc[service.codService]) {
+        acc[service.codService] = [];
+      }
+      acc[service.codService].push(service);
+      return acc;
+    }, {} as Record<string, IService[]>);
   }, [services, isLoading]);
 
-  const filteredServices = useMemo(() => {
-    return filterCodService.filter((service: any) =>
-      service.descCliente?.toLowerCase().includes(search.toLowerCase())
+  const filterCodService: [string, IService[]][] =
+    Object.entries(groupedServices);
+
+  const filteredServices: [string, IService[]][] = useMemo(() => {
+    return filterCodService.filter(([, items]) =>
+      items[0]?.descCliente?.toLowerCase().includes(search.toLowerCase())
     );
   }, [filterCodService, search]);
 
@@ -63,45 +68,51 @@ export default function ServicesItens() {
           'Carregando...'
         ) : (
           <>
-            {filteredServices.map((data: IService) => {
-              return (
-                <Card key={data.id}>
-                  <CardHeader className='flex justify-between flex-row items-center'>
-                    <CardTitle>Serviço {data.codService}</CardTitle>
-                    <div className='flex items-center space-x-2'>
-                      <DialogVerProposta
-                        status={data.status}
-                        codService={data.codService}
-                        descCliente={data.descCliente}
-                        descEquipamento={data.equipamentoDescricao}
-                      />
+            {filteredServices.map(([codService, services]) => (
+              <Card key={codService}>
+                <CardHeader className='flex justify-between flex-row items-center'>
+                  <CardTitle>Serviço {codService}</CardTitle>
+                  <div className='flex items-center space-x-2'>
+                    {/* Exibe o Dialog do primeiro item do grupo */}
+                    <DialogVerProposta
+                      // equipamentos={equipamentosRelacionados}
+                      status={services[0].status}
+                      codService={services[0].codService}
+                      descCliente={services[0].descCliente}
+                    />
+                  </div>
+                </CardHeader>
+
+                <CardContent>
+                  <p className='text-gray-800 font-semibold'>
+                    Cliente: {services[0].descCliente}
+                  </p>
+
+                  {services.map((data: IService) => (
+                    <div
+                      key={data.id}
+                      className='mt-2 p-2 border rounded-md bg-gray-50 space-y-1'
+                    >
+                      <p className='text-gray-600'>
+                        Realizado em:{' '}
+                        {new Date(data.DataCadastro)
+                          .toLocaleString('pt-BR')
+                          .slice(0, -3)}
+                      </p>
+
+                      {equipamentos?.map(
+                        (equip: IEquipamento) =>
+                          data.equipamentoId == String(equip.ID) && (
+                            <p key={equip.ID} className='text-gray-600'>
+                              Equipamento: {equip.Descricao}
+                            </p>
+                          )
+                      )}
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className='text-gray-800 font-semibold'>
-                      Cliente: {data.descCliente}
-                    </p>
-                    <p className='text-gray-600'>
-                      Realizado em:{' '}
-                      {new Date(data.DataCadastro)
-                        .toLocaleString('pt-BR')
-                        .slice(0, -3)}
-                    </p>
-                    {equipamentos?.map((equip: IEquipamento) => {
-                      return (
-                        <div key={equip.ID}>
-                          <p>
-                            {data.equipamentoID == String(equip.ID)
-                              ? `Equipamento: ${equip.Descricao}`
-                              : null}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </CardContent>
-                </Card>
-              );
-            })}
+                  ))}
+                </CardContent>
+              </Card>
+            ))}
           </>
         )}
       </div>

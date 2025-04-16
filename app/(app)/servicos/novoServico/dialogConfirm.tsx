@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Item } from '@/lib/interface/Ipecas';
 import { DialogDescription } from '@radix-ui/react-dialog';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import {
   getEquipamentoId,
@@ -42,10 +42,12 @@ export function DialogConfirm({
   cliente: ICliente;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [inspVisu, setInspVisu] = useState<string>();
   const [manuPrev, setManuPrev] = useState<boolean>(false);
   const [manuPrevTomada, setManuPrevTomada] = useState<boolean>(false);
   const [itemService, setItemService] = useState<number>(0);
+  const itemIdEquip = searchParams.get('itemId');
 
   const queryClient = useQueryClient();
 
@@ -107,25 +109,23 @@ export function DialogConfirm({
       return;
     }
 
-    // const lastItems = serviceId
-    //   .map((service) => service.itemService.at(-1))
-    //   .filter(Boolean)
-    //   .at(-1);
-    // console.log(Number(lastItems) + 1);
-
+    // Inseri na tabela servicos
     const valueService = {
       modelo: model,
       categoria: category,
-      equipamentoID: equipId.ID,
+      itemIdEquip: itemIdEquip,
       equipamentoDescricao: equipId.Descricao,
       codService: codService,
       idCliente: String(cliente.id),
       descCliente: cliente.nome,
       itemService: String(itemService),
+      equipamentoId: String(equipId.ID),
     };
 
     mutateService.mutate(valueService);
+    // console.log(valueService);
 
+    // Inseri na tabela servicos_pecas
     services.map((value: Item) => {
       const pecaServ: IServPeca = {
         codService: codService,
@@ -136,9 +136,11 @@ export function DialogConfirm({
         manuPreventiva: manuPrev,
         manuPrevTomada: manuPrevTomada,
         itemService: String(itemService),
+        equipamentoId: String(equipId.ID),
       };
 
       mutatePecaServ.mutate(pecaServ);
+      // console.log(pecaServ);
     });
 
     router.push(

@@ -1,7 +1,8 @@
 export interface IServicePost {
   modelo: string;
   categoria: string;
-  equipamentoID: string;
+  equipamentoId: string;
+  itemIdEquip: string | null;
   equipamentoDescricao: string;
   codService: string;
   idCliente: string;
@@ -9,6 +10,7 @@ export interface IServicePost {
 
 export interface IServPeca {
   codService: string;
+  equipamentoId: string;
   peca_id: number;
   quantidade_peca: number;
   idCliente: string;

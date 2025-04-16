@@ -517,110 +517,104 @@ export default function Relatorio() {
         {servicoCodService?.map((serv: IService, index: number) => {
           return (
             <Card key={index} className='mt-4'>
-              <>
-                <CardHeader className='flex justify-between flex-row items-center'>
-                  <CardTitle>Item do serviço: {serv.itemService}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>
-                    Equipamento: <strong>{serv.equipamentoDescricao}</strong>
-                  </p>
+              <CardHeader className='flex justify-between flex-row items-center'>
+                <CardTitle>Item do serviço: {serv.itemService}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>
+                  Equipamento: <strong>{serv.equipamentoDescricao}</strong>
+                </p>
 
+                {serviceId
+                  .filter(
+                    (value: IServiceID, index: number, self: any) =>
+                      value.codService === serv.codService &&
+                      value.itemService === serv.itemService &&
+                      self.findIndex(
+                        (v: any) =>
+                          v.Visor === value.Visor &&
+                          v.Carcaca === value.Carcaca &&
+                          v.codService === value.codService &&
+                          v.itemService === value.itemService
+                      ) === index
+                  )
+                  .map((peca: IServiceID, i: number) => {
+                    return (
+                      <div key={i} className='w-[100%] h-[8vh] flex flex-col'>
+                        <p>
+                          Visor ou carcaça:{' '}
+                          <strong>
+                            {peca.Visor == '1' && peca.Carcaca == '1'
+                              ? 'Visor e Carcaça'
+                              : null}
+                            {peca.Visor == '1' && peca.Carcaca == '0'
+                              ? 'Visor'
+                              : null}
+                            {peca.Carcaca == '1' && peca.Visor == '0'
+                              ? 'Carcaça'
+                              : null}
+                          </strong>
+                        </p>
+                        <p>
+                          Inspeção visual:{' '}
+                          <strong>
+                            {peca.insVisual
+                              ? peca.insVisual
+                              : 'Não foi adicionado a inspeção visual'}
+                          </strong>
+                        </p>
+                        <p>
+                          Tomada de nível:{' '}
+                          <strong>{peca.manuPrevTomada ? 'Sim' : 'Não'}</strong>
+                        </p>
+                        <p>
+                          Manutenção preventiva:{' '}
+                          <strong>
+                            {' '}
+                            {peca.manuPreventiva ? 'Sim' : 'Não'}
+                          </strong>
+                        </p>
+                      </div>
+                    );
+                  })}
+
+                <p className='text-gray-800 font-semibold mt-8 '>
+                  Peças de serviço:
+                </p>
+
+                <div className='ring-1 rounded-md ring-zinc-500'>
+                  <div className='w-[100%] rounded-t-md px-4 py-2 bg-blue-400 h-[5vh] flex'>
+                    <div className='font-semibold w-[25%]'>Descrição</div>
+                    <div className='font-semibold w-[25%]'>Valor</div>
+                    <div className='font-semibold w-[25%]'>Quantidade</div>
+                  </div>
                   {serviceId
                     .filter(
-                      (value: IServiceID, index: number, self: any) =>
-                        value.codService === serv.codService &&
-                        value.itemService === serv.itemService &&
-                        self.findIndex(
-                          (v: any) =>
-                            v.Visor === value.Visor &&
-                            v.Carcaca === value.Carcaca &&
-                            v.codService === value.codService &&
-                            v.itemService === value.itemService
-                        ) === index
+                      (value: IServiceID) =>
+                        value.codService == serv.codService &&
+                        value.itemService == serv.itemService
                     )
-                    .map((peca: IServiceID, i: number) => {
-                      return (
-                        <div key={i} className='w-[100%] h-[8vh] flex flex-col'>
-                          <p>
-                            Visor ou carcaça:{' '}
-                            <strong>
-                              {peca.Visor == '1' && peca.Carcaca == '1'
-                                ? 'Visor e Carcaça'
-                                : null}
-                              {peca.Visor == '1' && peca.Carcaca == '0'
-                                ? 'Visor'
-                                : null}
-                              {peca.Carcaca == '1' && peca.Visor == '0'
-                                ? 'Carcaça'
-                                : null}
-                            </strong>
-                          </p>
-                          <p>
-                            Inspeção visual:{' '}
-                            <strong>
-                              {peca.insVisual
-                                ? peca.insVisual
-                                : 'Não foi adicionado a inspeção visual'}
-                            </strong>
-                          </p>
-                          <p>
-                            Tomada de nível:{' '}
-                            <strong>
-                              {peca.manuPrevTomada ? 'Sim' : 'Não'}
-                            </strong>
-                          </p>
-                          <p>
-                            Manutenção preventiva:{' '}
-                            <strong>
-                              {' '}
-                              {peca.manuPreventiva ? 'Sim' : 'Não'}
-                            </strong>
-                          </p>
-                        </div>
-                      );
-                    })}
-
-                  <p className='text-gray-800 font-semibold mt-8 '>
-                    Peças de serviço:
-                  </p>
-
-                  <div className='ring-1 rounded-md ring-zinc-500'>
-                    <div className='w-[100%] rounded-t-md px-4 py-2 bg-blue-400 h-[5vh] flex'>
-                      <div className='font-semibold w-[25%]'>Descrição</div>
-                      <div className='font-semibold w-[25%]'>Valor</div>
-                      <div className='font-semibold w-[25%]'>Quantidade</div>
-                    </div>
-                    {serviceId
-                      .filter(
-                        (value: IServiceID) =>
-                          value.codService == serv.codService &&
-                          value.itemService == serv.itemService
-                      )
-                      .map((peca: IServiceID) => (
-                        <>
-                          <div className='w-[100%] rounded-b-md px-4 py-2 bg-zinc-100 h-[5vh] flex'>
-                            <div
-                              className=' w-[25%] truncate hover:cursor-pointer'
-                              title={peca.Descricao}
-                            >
-                              {peca.Descricao}
-                            </div>
-                            <div className=' w-[25%]'>
-                              {new Intl.NumberFormat('pt-BR', {
-                                style: 'currency',
-                                currency: 'BRL',
-                              }).format(Number(peca.valorPeca))}
-                            </div>
-                            <div className=' w-[25%]'>
-                              {peca.quantidade_peca}
-                            </div>
+                    .map((peca: IServiceID) => (
+                      <>
+                        <div className='w-[100%] rounded-b-md px-4 py-2 bg-zinc-100 h-[5vh] flex'>
+                          <div
+                            className=' w-[25%] truncate hover:cursor-pointer'
+                            title={peca.peca_Descricao}
+                          >
+                            {peca.peca_Descricao}
                           </div>
-                        </>
-                      ))}
-                  </div>
-                </CardContent>
-              </>
+                          <div className=' w-[25%]'>
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL',
+                            }).format(Number(peca.valorPeca))}
+                          </div>
+                          <div className=' w-[25%]'>{peca.quantidade_peca}</div>
+                        </div>
+                      </>
+                    ))}
+                </div>
+              </CardContent>
             </Card>
           );
         })}

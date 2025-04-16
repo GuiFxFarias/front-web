@@ -50,13 +50,11 @@ const formSchema = z.object({
 export function DialogVerProposta({
   codService,
   descCliente,
-  descEquipamento,
   status,
 }: {
   codService: string;
   status: string;
   descCliente: string;
-  descEquipamento: string;
 }) {
   const [pecaService, setPecaService] = useState<IServiceID[]>([]);
   const [alert, setAlert] = useState<boolean>();
@@ -187,6 +185,17 @@ export function DialogVerProposta({
     }
   }
 
+  const grouped = pecaService.reduce((acc, item) => {
+    if (!acc[item.codService]) {
+      acc[item.codService] = {};
+    }
+    if (!acc[item.codService][item.itemService]) {
+      acc[item.codService][item.itemService] = [];
+    }
+    acc[item.codService][item.itemService].push(item);
+    return acc;
+  }, {} as Record<string, Record<string, IServiceID[]>>);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -205,29 +214,40 @@ export function DialogVerProposta({
         </DialogDescription>
         <div className='h-[40vh]'>
           <h1 className='text-2xl font-light mb-4 text-start'>
-            Tabela de Peças | {descEquipamento}
+            Tabela de Peças
           </h1>
 
-          <div className='bg-white shadow-md rounded-lg overflow-y-scroll h-[30vh]'>
-            {pecaService.map((serviceId: IServiceID, index) => {
-              return (
-                <div
-                  className='px-4 py-2 border-b border-gray-200 '
-                  key={index}
-                >
-                  <div className='flex justify-between items-center'>
-                    <p className='text-lg text-gray-800'>
-                      {serviceId.Descricao}
-                    </p>
-                    <p className='text-gray-600'>
-                      Quantidade: {serviceId.quantidade_peca}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+          <div className='bg-white shadow-md rounded-lg overflow-y-scroll h-[30vh] p-4'>
+            {Object.entries(grouped).map(([codService, itemGroups]) => (
+              <div key={codService} className='mb-6'>
+                {Object.entries(itemGroups).map(([itemService, pecas]) => {
+                  return (
+                    <div key={itemService} className='mb-4 pl-4'>
+                      <div className='px-4 py-2 border-b border-gray-200'>
+                        {pecas.map((peca, index) => (
+                          <div key={index}>
+                            <h3 className='text-lg font-semibold text-gray-800'>
+                              Equipamento: {peca.equipamento_Descricao}
+                            </h3>
+                            <p className='text-gray-800'>
+                              <strong>Descrição:</strong> {peca.peca_ItemID} |
+                              Valor da peça {peca.valorPeca}
+                            </p>
+                            <p className='text-gray-600'>
+                              <strong>Quantidade:</strong>{' '}
+                              {peca.quantidade_peca}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
+
         <Form {...form}>
           <form className='flex space-x-2'>
             <FormField

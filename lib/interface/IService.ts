@@ -2,8 +2,9 @@ export interface IService {
   id: number;
   modelo: string;
   categoria: string;
-  equipamentoID: string;
+  itemIdEquip: string;
   equipamentoDescricao: string;
+  equipamentoId: string;
   codService: string;
   DataCadastro: string;
   idCliente: string;
