@@ -53,12 +53,14 @@ export default function AlmoxarifadoItens() {
                 <Card key={data.ID} className='h-[5vh]'>
                   <CardContent className='p-2'>
                     <div className='flex justify-between'>
-                      <p className='w-[40%] truncate'>{data.Descricao}</p>
+                      <p className='w-[40%] truncate'>
+                        {data.Descricao}-
+                        {data.nSeriePlaca ? data.nSeriePlaca : null}
+                        {data.nSerieSensor ? data.nSerieSensor : null}
+                      </p>
                       <p className='text-gray-600 w-[45%]'>
                         Valor da peça (única):
                         {data.valorPeca}
-                        {data.nSeriePlaca ? data.nSeriePlaca : null}
-                        {data.nSerieSensor ? data.nSerieSensor : null}
                       </p>
                       <p className='text-gray-800 w-[15%] font-semibold'>
                         Quantidade: {data.Quantidade}
