@@ -230,8 +230,8 @@ export function DialogVerProposta({
                               Equipamento: {peca.equipamento_Descricao}
                             </h3>
                             <p className='text-gray-800'>
-                              <strong>Descrição:</strong> {peca.peca_ItemID} |
-                              Valor da peça {peca.valorPeca}
+                              <strong>Descrição:</strong> {peca.peca_Descricao}{' '}
+                              | Valor da peça {peca.valorPeca}
                             </p>
                             <p className='text-gray-600'>
                               <strong>Quantidade:</strong>{' '}
