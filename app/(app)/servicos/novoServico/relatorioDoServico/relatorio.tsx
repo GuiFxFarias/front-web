@@ -190,7 +190,7 @@ export default function Relatorio() {
             tempBody.push([
               `${data.quantidade_peca}`,
               `${data.itemService}`,
-              `${serv.equipamentoDescricao} - ${data.Descricao}`,
+              `${serv.equipamentoDescricao} - ${data.peca_Descricao}`,
               `${new Intl.NumberFormat('pt-BR', {
                 style: 'currency',
                 currency: 'BRL',
