@@ -53,7 +53,7 @@ export default function RootLayout({
                     </Link> */}
                     <Link href='/servicos' className='w-full block'>
                       <Button className='w-full justify-start' variant='ghost'>
-                        Serviços
+                        Propostas comerciais
                       </Button>
                     </Link>
                     <Link href='/produtos' className='w-full block'>

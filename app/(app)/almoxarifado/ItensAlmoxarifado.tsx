@@ -14,6 +14,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { getAllPrdPos } from './api/getPrdPosicionador';
+import { getAllPrdTransmissor } from './api/getPrdTransmissor';
+import { IAllProducts } from '@/lib/interface/IallProducts';
 
 export default function AlmoxarifadoItens() {
   const [search, setSearch] = useState<string>('');
@@ -21,6 +24,16 @@ export default function AlmoxarifadoItens() {
   const { data: allPecas = [], isLoading: loading } = useQuery(
     ['allPecas'],
     getAllPecas
+  );
+
+  const { data: allPos = [] } = useQuery(
+    ['produtos_posicionador'],
+    getAllPrdPos
+  );
+
+  const { data: allTrm = [] } = useQuery(
+    ['produtos_transmissor'],
+    getAllPrdTransmissor
   );
 
   const filteredPecas = allPecas.filter((item: Item) =>
@@ -34,6 +47,8 @@ export default function AlmoxarifadoItens() {
   const outros = filteredPecas.filter(
     (item: Item) => item.sensorPlaca != '1' && item.sensorPlaca != '2'
   );
+
+  const allProducts = [...(allPos || []), ...(allTrm || [])];
 
   return (
     <div className='flex-1 p-8'>
@@ -155,6 +170,32 @@ export default function AlmoxarifadoItens() {
                           </p>
                           <p className='text-gray-800 w-[15%] font-semibold'>
                             Quantidade: {outro.Quantidade}
+                          </p>
+                        </div>
+                      ))}
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className='p-2'>
+                <Accordion type='single' collapsible>
+                  <AccordionItem value='item-3'>
+                    <AccordionTrigger>
+                      Equipamentos | Quantidade:{' '}
+                      {allProducts.reduce((sum, _, index) => sum + index, 1)}
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      {allProducts.map((outro: IAllProducts, index) => (
+                        <div key={index} className='flex justify-between'>
+                          <p className='w-[40%] truncate'>
+                            {outro.descricaoProduto} | Nº de Série:{' '}
+                            {outro.nSerieEquipamento}
+                          </p>
+                          <p className='text-gray-600 w-[45%]'>
+                            Valor da peça (única): {outro.preco}
                           </p>
                         </div>
                       ))}
