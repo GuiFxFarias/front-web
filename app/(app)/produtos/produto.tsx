@@ -492,131 +492,144 @@ export default function ProdutoItens() {
           'Carregando...'
         ) : (
           <>
-            {filteredVendas.map(([idVenda, itens]) => {
-              const itensTyped = itens as IVendaComProdutoCliente[];
-              const item: IVendaComProdutoCliente = itensTyped[0];
-              return (
-                <Card
-                  key={idVenda}
-                  className={
-                    item.status == '1'
-                      ? 'border-2 border-emerald-500 bg-emerald-50'
-                      : item.status == '2'
-                      ? 'border-2 border-red-500 bg-red-50'
-                      : 'bg-zinc-50'
-                  }
-                >
-                  <CardHeader className='flex justify-between flex-row items-center'>
-                    <CardTitle>Cliente: {item.nomeCliente}</CardTitle>
+            {filteredVendas
+              .filter(([_, itens]) => {
+                const itensTyped = itens as IVendaComProdutoCliente[];
+                const item: IVendaComProdutoCliente = itensTyped[0];
+                return item.status !== '2'; // only keep items where status is NOT '2'
+              })
+              .map(([idVenda, itens]) => {
+                const itensTyped = itens as IVendaComProdutoCliente[];
+                const item: IVendaComProdutoCliente = itensTyped[0];
+                return (
+                  <Card
+                    key={idVenda}
+                    className={
+                      item.status == '1'
+                        ? 'border-2 border-emerald-500 bg-emerald-50'
+                        : item.status == '2'
+                        ? 'border-2 border-red-500 bg-red-50'
+                        : 'bg-zinc-50'
+                    }
+                  >
+                    <CardHeader className='flex justify-between flex-row items-center'>
+                      <CardTitle>Cliente: {item.nomeCliente}</CardTitle>
 
-                    <Dialog>
-                      <DialogTrigger className='bg-blue-500 text-white p-2 rounded-md'>
-                        Ver proposta
-                      </DialogTrigger>
-                      <DialogContent className='w-[50vw] justify-start flex flex-col'>
-                        <DialogHeader>
-                          <DialogTitle>
-                            Proposta de venda para a(o) {item.nomeCliente}
-                          </DialogTitle>
-                          <DialogDescription>
-                            Proposta {item.idVenda.slice(0, 8).toUpperCase()}{' '}
-                            gerada no dia {item.dataProposta}
-                          </DialogDescription>
-                          <DialogDescription className='text-zinc-700'>
-                            Para confirmar a venda basta finalizar a proposta
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className='flex w-full justify-between items-center mt-4'>
-                          {' '}
-                          <Button
-                            className='bg-zinc-500 text-white hover:bg-blue-600'
-                            onClick={() => {
-                              setProposta(2);
-                              confirmarProposta(item.idVenda, { status: '2' });
-                            }}
-                          >
-                            Cancelar proposta
-                          </Button>
-                          <div className='flex'>
+                      <Dialog>
+                        <DialogTrigger className='bg-blue-500 text-white p-2 rounded-md'>
+                          Ver proposta
+                        </DialogTrigger>
+                        <DialogContent className='w-[50vw] justify-start flex flex-col'>
+                          <DialogHeader>
+                            <DialogTitle>
+                              Proposta de venda para a(o) {item.nomeCliente}
+                            </DialogTitle>
+                            <DialogDescription>
+                              Proposta {item.idVenda.slice(0, 8).toUpperCase()}{' '}
+                              gerada no dia{' '}
+                              {new Date(item.dataProposta).toLocaleDateString(
+                                'pt-BR'
+                              )}
+                            </DialogDescription>
+                            <DialogDescription className='text-zinc-700'>
+                              Para confirmar a venda basta finalizar a proposta
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className='flex w-full justify-between items-center mt-4'>
+                            {' '}
                             <Button
-                              className='bg-blue-500 mr-2 text-white hover:bg-blue-600'
+                              className='bg-zinc-500 text-white hover:bg-blue-600'
                               onClick={() => {
-                                setProposta(1);
+                                setProposta(2);
                                 confirmarProposta(item.idVenda, {
-                                  status: '1',
+                                  status: '2',
                                 });
                               }}
                             >
-                              Confirmar proposta
+                              Cancelar proposta
                             </Button>
-                            <Button onClick={() => gerarPDF(itensTyped)}>
-                              Gerar PDF
-                            </Button>
+                            <div className='flex'>
+                              <Button
+                                className='bg-blue-500 mr-2 text-white hover:bg-blue-600'
+                                onClick={() => {
+                                  setProposta(1);
+                                  confirmarProposta(item.idVenda, {
+                                    status: '1',
+                                  });
+                                }}
+                              >
+                                Confirmar proposta
+                              </Button>
+                              <Button onClick={() => gerarPDF(itensTyped)}>
+                                Gerar PDF
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </CardHeader>
+                        </DialogContent>
+                      </Dialog>
+                    </CardHeader>
 
-                  <CardContent className=' space-y-4'>
-                    {itensTyped.map(
-                      (
-                        item: {
-                          descricaoProduto: any;
-                          nSerieEquipamento: any;
-                          nSerieSensor: any;
-                          dataProposta: any;
-                          preco: any;
-                        },
-                        index: Key | null | undefined
-                      ) => (
-                        <div key={index} className='mb-4 border-b pb-2'>
-                          <p className='text-gray-800 font-semibold'>
-                            Descrição do produto:{' '}
-                            {item.descricaoProduto || 'Não possui'}
-                          </p>
-                          <p className='text-gray-800'>
-                            Número de série:{' '}
-                            {item.nSerieEquipamento || 'Não possui'}
-                          </p>
-                          <p className='text-gray-800'>
-                            Número de série do sensor:{' '}
-                            {item.nSerieSensor || 'Não possui'}
-                          </p>
-                          <p className='text-gray-600'>
-                            Data criação proposta:{' '}
-                            {item.dataProposta || 'Não possui'}
-                          </p>
-                          <p className='text-gray-600'>
-                            Valor da proposta:{' '}
-                            {item.preco
-                              ? new Intl.NumberFormat('pt-BR', {
-                                  style: 'currency',
-                                  currency: 'BRL',
-                                }).format(Number(item.preco))
-                              : 'Não possui'}
-                          </p>
-                        </div>
-                      )
-                    )}
-                  </CardContent>
-                  <DialogConfirmForm
-                    title={
-                      proposta == 1
-                        ? 'Sua proposta foi confirmada'
-                        : 'Sua proposta foi cancelada'
-                    }
-                    text={
-                      proposta == 1
-                        ? 'Proposta finalizada com status de vendida'
-                        : 'Sua proposta está encerrada e cancelada'
-                    }
-                    open={openDialog}
-                    setOpen={setOpenDialog}
-                  />
-                </Card>
-              );
-            })}
+                    <CardContent className=' space-y-4'>
+                      {itensTyped.map(
+                        (
+                          item: {
+                            descricaoProduto: any;
+                            nSerieEquipamento: any;
+                            nSerieSensor: any;
+                            dataProposta: any;
+                            preco: any;
+                          },
+                          index: Key | null | undefined
+                        ) => (
+                          <div key={index} className='mb-4 border-b pb-2'>
+                            <p className='text-gray-800 font-semibold'>
+                              Descrição do produto:{' '}
+                              {item.descricaoProduto || 'Não possui'}
+                            </p>
+                            <p className='text-gray-800'>
+                              Número de série:{' '}
+                              {item.nSerieEquipamento || 'Não possui'}
+                            </p>
+                            <p className='text-gray-800'>
+                              Número de série do sensor:{' '}
+                              {item.nSerieSensor || 'Não possui'}
+                            </p>
+                            <p className='text-gray-600'>
+                              Data criação proposta:{' '}
+                              {new Date(item.dataProposta).toLocaleDateString(
+                                'pt-BR'
+                              ) || 'Não possui'}
+                            </p>
+                            <p className='text-gray-600'>
+                              Valor da proposta:{' '}
+                              {item.preco
+                                ? new Intl.NumberFormat('pt-BR', {
+                                    style: 'currency',
+                                    currency: 'BRL',
+                                  }).format(Number(item.preco))
+                                : 'Não possui'}
+                            </p>
+                          </div>
+                        )
+                      )}
+                    </CardContent>
+                    <DialogConfirmForm
+                      title={
+                        proposta == 1
+                          ? 'Sua proposta foi confirmada'
+                          : 'Sua proposta foi cancelada'
+                      }
+                      text={
+                        proposta == 1
+                          ? 'Proposta finalizada com status de vendida'
+                          : 'Sua proposta está encerrada e cancelada'
+                      }
+                      open={openDialog}
+                      setOpen={setOpenDialog}
+                    />
+                  </Card>
+                );
+              })}
           </>
         )}
       </div>

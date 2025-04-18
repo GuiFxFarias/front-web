@@ -136,7 +136,8 @@ export default function MoviEstoque() {
           },
         });
         setAlert(false);
-      } else if (qtd > Number(values.quantidade) && movEstoque === 'sub') {
+      }
+      if (qtd >= Number(values.quantidade) && movEstoque === 'sub') {
         mutatePutPecaQtd.mutate({
           id: values.idProduto,
           body: {
@@ -271,15 +272,13 @@ export default function MoviEstoque() {
 
           {/* Botão de Envio */}
           <div className='flex flex-row justify-between'>
-            {!tipoPeca ? (
-              <Button
-                type='submit'
-                onClick={() => setMovEstoque('sub')}
-                className='mr-2'
-              >
-                Retirar
-              </Button>
-            ) : null}
+            <Button
+              type='submit'
+              onClick={() => setMovEstoque('sub')}
+              className='mr-2'
+            >
+              Retirar
+            </Button>
             <Button type='submit' onClick={() => setMovEstoque('add')}>
               Adicionar
             </Button>

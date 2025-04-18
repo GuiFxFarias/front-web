@@ -86,25 +86,27 @@ export default function AlmoxarifadoItens() {
                       {placas.reduce((sum, item) => sum + item.Quantidade, 0)}
                     </AccordionTrigger>
                     <AccordionContent>
-                      {placas.map((pecasTipos: Item, index) => (
-                        <div key={index} className='flex justify-between'>
-                          <p className='w-[40%] truncate'>
-                            {pecasTipos.Descricao}
-                            {pecasTipos.nSeriePlaca
-                              ? ` - ${pecasTipos.nSeriePlaca}`
-                              : null}
-                            {pecasTipos.nSerieSensor
-                              ? ` - ${pecasTipos.nSerieSensor}`
-                              : null}
-                          </p>
-                          <p className='text-gray-600 w-[45%]'>
-                            Valor da peça (única): {pecasTipos.valorPeca}
-                          </p>
-                          <p className='text-gray-800 w-[15%] font-semibold'>
-                            Quantidade: {pecasTipos.Quantidade}
-                          </p>
-                        </div>
-                      ))}
+                      {placas
+                        .filter((peca) => peca.Quantidade > 0)
+                        .map((pecasTipos: Item, index) => (
+                          <div key={index} className='flex justify-between'>
+                            <p className='w-[40%] truncate'>
+                              {pecasTipos.Descricao}
+                              {pecasTipos.nSeriePlaca
+                                ? ` - ${pecasTipos.nSeriePlaca}`
+                                : null}
+                              {pecasTipos.nSerieSensor
+                                ? ` - ${pecasTipos.nSerieSensor}`
+                                : null}
+                            </p>
+                            <p className='text-gray-600 w-[45%]'>
+                              Valor da peça (única): {pecasTipos.valorPeca}
+                            </p>
+                            <p className='text-gray-800 w-[15%] font-semibold'>
+                              Quantidade: {pecasTipos.Quantidade}
+                            </p>
+                          </div>
+                        ))}
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
@@ -120,25 +122,27 @@ export default function AlmoxarifadoItens() {
                       {sensores.reduce((sum, item) => sum + item.Quantidade, 0)}
                     </AccordionTrigger>
                     <AccordionContent>
-                      {sensores.map((sensor: Item, index) => (
-                        <div key={index} className='flex justify-between'>
-                          <p className='w-[40%] truncate'>
-                            {sensor.Descricao}
-                            {sensor.nSeriePlaca
-                              ? ` - ${sensor.nSeriePlaca}`
-                              : null}
-                            {sensor.nSerieSensor
-                              ? ` - ${sensor.nSerieSensor}`
-                              : null}
-                          </p>
-                          <p className='text-gray-600 w-[45%]'>
-                            Valor da peça (única): {sensor.valorPeca}
-                          </p>
-                          <p className='text-gray-800 w-[15%] font-semibold'>
-                            Quantidade: {sensor.Quantidade}
-                          </p>
-                        </div>
-                      ))}
+                      {sensores
+                        .filter((peca) => peca.Quantidade > 0)
+                        .map((sensor: Item, index) => (
+                          <div key={index} className='flex justify-between'>
+                            <p className='w-[40%] truncate'>
+                              {sensor.Descricao}
+                              {sensor.nSeriePlaca
+                                ? ` - ${sensor.nSeriePlaca}`
+                                : null}
+                              {sensor.nSerieSensor
+                                ? ` - ${sensor.nSerieSensor}`
+                                : null}
+                            </p>
+                            <p className='text-gray-600 w-[45%]'>
+                              Valor da peça (única): {sensor.valorPeca}
+                            </p>
+                            <p className='text-gray-800 w-[15%] font-semibold'>
+                              Quantidade: {sensor.Quantidade}
+                            </p>
+                          </div>
+                        ))}
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
@@ -154,25 +158,27 @@ export default function AlmoxarifadoItens() {
                       {outros.reduce((sum, item) => sum + item.Quantidade, 0)}
                     </AccordionTrigger>
                     <AccordionContent>
-                      {outros.map((outro: Item, index) => (
-                        <div key={index} className='flex justify-between'>
-                          <p className='w-[40%] truncate'>
-                            {outro.Descricao}
-                            {outro.nSeriePlaca
-                              ? ` - ${outro.nSeriePlaca}`
-                              : null}
-                            {outro.nSerieSensor
-                              ? ` - ${outro.nSerieSensor}`
-                              : null}
-                          </p>
-                          <p className='text-gray-600 w-[45%]'>
-                            Valor da peça (única): {outro.valorPeca}
-                          </p>
-                          <p className='text-gray-800 w-[15%] font-semibold'>
-                            Quantidade: {outro.Quantidade}
-                          </p>
-                        </div>
-                      ))}
+                      {outros
+                        .filter((peca) => peca.Quantidade > 0)
+                        .map((outro: Item, index) => (
+                          <div key={index} className='flex justify-between'>
+                            <p className='w-[40%] truncate'>
+                              {outro.Descricao}
+                              {outro.nSeriePlaca
+                                ? ` - ${outro.nSeriePlaca}`
+                                : null}
+                              {outro.nSerieSensor
+                                ? ` - ${outro.nSerieSensor}`
+                                : null}
+                            </p>
+                            <p className='text-gray-600 w-[45%]'>
+                              Valor da peça (única): {outro.valorPeca}
+                            </p>
+                            <p className='text-gray-800 w-[15%] font-semibold'>
+                              Quantidade: {outro.Quantidade}
+                            </p>
+                          </div>
+                        ))}
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
@@ -188,17 +194,19 @@ export default function AlmoxarifadoItens() {
                       {allProducts.reduce((sum, _, index) => sum + index, 1)}
                     </AccordionTrigger>
                     <AccordionContent>
-                      {allProducts.map((outro: IAllProducts, index) => (
-                        <div key={index} className='flex justify-between'>
-                          <p className='w-[40%] truncate'>
-                            {outro.descricaoProduto} | Nº de Série:{' '}
-                            {outro.nSerieEquipamento}
-                          </p>
-                          <p className='text-gray-600 w-[45%]'>
-                            Valor da peça (única): {outro.preco}
-                          </p>
-                        </div>
-                      ))}
+                      {allProducts
+                        .filter((outro: IAllProducts) => outro.quantidade > 0)
+                        .map((outro: IAllProducts, index) => (
+                          <div key={index} className='flex justify-between'>
+                            <p className='w-[40%] truncate'>
+                              {outro.descricaoProduto} | Nº de Série:{' '}
+                              {outro.nSerieEquipamento}
+                            </p>
+                            <p className='text-gray-600 w-[45%]'>
+                              Valor da peça (única): {outro.preco}
+                            </p>
+                          </div>
+                        ))}
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
