@@ -2,6 +2,7 @@ export interface Item {
   ID: number;
   ItemID: number;
   Carcaca: string;
+  sensorPlaca: string;
   Visor: string;
   NumeroItem: number;
   Quantidade: number;

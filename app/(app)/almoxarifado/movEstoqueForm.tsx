@@ -29,15 +29,18 @@ import { Item } from '@/lib/interface/Ipecas';
 import { useEffect, useState } from 'react';
 import { putPecaQtd } from './api/putPecaQtd';
 import DialogConfirmForm from '@/components/dialogConfirForm';
+import { postPecas } from './api/postAlmoxarife';
 
 interface movEstoque {
-  descProduto: string;
+  idProduto: string;
   quantidade: string;
+  tipoPeca: string;
 }
 
 const formSchema = z.object({
-  descProduto: z.string(),
-  quantidade: z.string(),
+  idProduto: z.string(),
+  quantidade: z.string().optional(),
+  tipoPeca: z.string().optional(),
 });
 
 export default function MoviEstoque() {
@@ -47,6 +50,7 @@ export default function MoviEstoque() {
   const [alert, setAlert] = useState<boolean>(false);
   const [qtd, setQtd] = useState<number>(0);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [tipoPeca, setTipoPeca] = useState<string>();
 
   const { data: allPecas = [], isLoading } = useQuery(
     ['allPecas'],
@@ -76,29 +80,72 @@ export default function MoviEstoque() {
     },
   });
 
-  function onSubmit(values: movEstoque) {
-    if (qtd < Number(values.quantidade) && movEstoque === 'sub') {
-      setAlert(true);
-    }
+  const mutatePecas = useMutation({
+    mutationFn: postPecas,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['allPecas']);
+    },
+  });
 
-    if (movEstoque === 'add') {
-      mutatePutPecaQtd.mutate({
-        id: values.descProduto,
-        body: {
-          ID: Number(values.descProduto),
-          Quantidade: qtd + Number(values.quantidade),
+  function onSubmit(values: movEstoque) {
+    // if (qtd < Number(values.quantidade) && movEstoque === 'sub') {
+    //   setAlert(true);
+    // }
+
+    const filteredPecas = allPecas.filter((pecas: Item) => {
+      return String(pecas.ID) == values.idProduto;
+    });
+
+    if (tipoPeca == '1') {
+      const pecaWithoutID = { ...filteredPecas[0] };
+      delete pecaWithoutID.ID;
+
+      const newValue = {
+        ...pecaWithoutID,
+        nSeriePlaca: values.tipoPeca,
+        Quantidade: 1,
+      };
+
+      mutatePecas.mutate(newValue, {
+        onSuccess: () => {
+          setOpenDialog(true);
         },
       });
-      setAlert(false);
-    } else if (qtd > Number(values.quantidade) && movEstoque === 'sub') {
-      mutatePutPecaQtd.mutate({
-        id: values.descProduto,
-        body: {
-          ID: Number(values.descProduto),
-          Quantidade: qtd - Number(values.quantidade),
+    } else if (tipoPeca == '2') {
+      const pecaWithoutID = { ...filteredPecas[0] };
+      delete pecaWithoutID.ID;
+
+      const newValue = {
+        ...pecaWithoutID,
+        nSeriePlaca: values.tipoPeca,
+        Quantidade: 1,
+      };
+
+      mutatePecas.mutate(newValue, {
+        onSuccess: () => {
+          setOpenDialog(true);
         },
       });
-      setAlert(false);
+    } else {
+      if (movEstoque === 'add') {
+        mutatePutPecaQtd.mutate({
+          id: values.idProduto,
+          body: {
+            ID: Number(values.idProduto),
+            Quantidade: qtd + Number(values.quantidade),
+          },
+        });
+        setAlert(false);
+      } else if (qtd > Number(values.quantidade) && movEstoque === 'sub') {
+        mutatePutPecaQtd.mutate({
+          id: values.idProduto,
+          body: {
+            ID: Number(values.idProduto),
+            Quantidade: qtd - Number(values.quantidade),
+          },
+        });
+        setAlert(false);
+      }
     }
   }
 
@@ -122,10 +169,40 @@ export default function MoviEstoque() {
               Não é possivel retirar mais itens do que os cadastrados.
             </AlertDescription>
           </Alert>
+          <div className='flex space-x-4 flex-col'>
+            <p>
+              Se for adicionar uma placa ou sensor selecione uma dessas opções
+            </p>
+            <label className='flex items-center space-x-2 mt-2'>
+              <input
+                type='radio'
+                value='1'
+                checked={tipoPeca === '1'}
+                onChange={() => {
+                  setTipoPeca('1');
+                }}
+                className='w-5 h-5'
+              />
+              <span>Placa eletrônica</span>
+            </label>
+
+            <label className='flex items-center space-x-2'>
+              <input
+                type='radio'
+                value='2'
+                checked={tipoPeca === '2'}
+                onChange={() => {
+                  setTipoPeca('2');
+                }}
+                className='w-5 h-5'
+              />
+              <span>Sensor</span>
+            </label>
+          </div>
           {/* Campo: Número de Série do Equipamento */}
           <FormField
             control={form.control}
-            name='descProduto'
+            name='idProduto'
             render={({ field }) => (
               <FormItem>
                 <Select
@@ -143,7 +220,9 @@ export default function MoviEstoque() {
                   <SelectContent>
                     {allPecas.map((item: Item) => (
                       <SelectItem key={item.ID} value={String(item.ID)}>
-                        {item.Descricao}
+                        {item.Descricao}{' '}
+                        {item.sensorPlaca ? `${item.nSeriePlaca} ` : null}
+                        {item.nSerieSensor ? `${item.nSerieSensor} ` : null}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -152,33 +231,55 @@ export default function MoviEstoque() {
             )}
           />
 
-          {/* Campo: Descrição do Produto */}
-          <FormField
-            control={form.control}
-            name='quantidade'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Quantidade em estoque:{' '}
-                  {isLoading ? <Loader2Icon className='animate-spin' /> : qtd}
-                </FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {tipoPeca ? null : (
+            <FormField
+              control={form.control}
+              name='quantidade'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Quantidade em estoque:{' '}
+                    {isLoading ? <Loader2Icon className='animate-spin' /> : qtd}
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {tipoPeca ? (
+            <FormField
+              control={form.control}
+              name='tipoPeca'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Adicione o número de série{' '}
+                    {tipoPeca == '1' ? ' da Placa eletrônica' : ' do Sensor'}
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
 
           {/* Botão de Envio */}
           <div className='flex flex-row justify-between'>
-            <Button
-              type='submit'
-              onClick={() => setMovEstoque('sub')}
-              className='mr-2'
-            >
-              Retirar
-            </Button>
+            {!tipoPeca ? (
+              <Button
+                type='submit'
+                onClick={() => setMovEstoque('sub')}
+                className='mr-2'
+              >
+                Retirar
+              </Button>
+            ) : null}
             <Button type='submit' onClick={() => setMovEstoque('add')}>
               Adicionar
             </Button>

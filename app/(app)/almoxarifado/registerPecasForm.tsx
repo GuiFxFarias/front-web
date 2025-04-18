@@ -43,6 +43,7 @@ interface ItemFormData {
   dataFabricacao: string;
   protocolo: string;
   modeloPlaca: string;
+  sensorPlaca: string;
 }
 
 interface IModel {
@@ -67,6 +68,7 @@ export const formSchema = z.object({
   dataFabricacao: z.string().optional(),
   protocolo: z.string().optional(),
   modeloPlaca: z.string().optional(),
+  sensorPlaca: z.string(),
 });
 
 export function RegisterPecasForm() {
@@ -87,6 +89,7 @@ export function RegisterPecasForm() {
       dataFabricacao: '',
       protocolo: '',
       modeloPlaca: '',
+      sensorPlaca: '1',
     },
   });
 
@@ -192,85 +195,123 @@ export function RegisterPecasForm() {
           )}
         />
 
-        {/* Campo: Carcaça (Checkboxes) */}
-        <FormField
-          control={form.control}
-          name='carcaca'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Carcaça</FormLabel>
-              <FormControl>
-                <div className='flex space-x-4'>
-                  <label className='flex items-center space-x-2'>
-                    <input
-                      type='radio'
-                      value='1'
-                      checked={field.value === '1'}
-                      onChange={() => {
-                        field.onChange('1');
-                        setCarcaca('1');
-                      }}
-                      className='w-5 h-5'
-                    />
-                    <span>Sim</span>
-                  </label>
+        <div className='flex space-x-4'>
+          {/* Campo: Carcaça (Checkboxes) */}
+          <FormField
+            control={form.control}
+            name='carcaca'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Carcaça</FormLabel>
+                <FormControl>
+                  <div className='flex space-x-4'>
+                    <label className='flex items-center space-x-2'>
+                      <input
+                        type='radio'
+                        value='1'
+                        checked={field.value === '1'}
+                        onChange={() => {
+                          field.onChange('1');
+                          setCarcaca('1');
+                        }}
+                        className='w-5 h-5'
+                      />
+                      <span>Sim</span>
+                    </label>
 
-                  <label className='flex items-center space-x-2'>
-                    <input
-                      type='radio'
-                      value='0'
-                      checked={field.value === '0'}
-                      onChange={() => {
-                        setCarcaca('0');
-                        field.onChange('0');
-                      }}
-                      className='w-5 h-5'
-                    />
-                    <span>Não</span>
-                  </label>
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                    <label className='flex items-center space-x-2'>
+                      <input
+                        type='radio'
+                        value='0'
+                        checked={field.value === '0'}
+                        onChange={() => {
+                          setCarcaca('0');
+                          field.onChange('0');
+                        }}
+                        className='w-5 h-5'
+                      />
+                      <span>Não</span>
+                    </label>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {/* Campo: Visor (Checkboxes) */}
-        <FormField
-          control={form.control}
-          name='visor'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Visor</FormLabel>
-              <FormControl>
-                <div className='flex space-x-4'>
-                  <label className='flex items-center space-x-2'>
-                    <input
-                      type='radio'
-                      value='1'
-                      checked={field.value === '1'}
-                      onChange={() => field.onChange('1')}
-                      className='w-5 h-5'
-                    />
-                    <span>Sim</span>
-                  </label>
+          {/* Campo: Visor (Checkboxes) */}
+          <FormField
+            control={form.control}
+            name='visor'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Visor</FormLabel>
+                <FormControl>
+                  <div className='flex space-x-4'>
+                    <label className='flex items-center space-x-2'>
+                      <input
+                        type='radio'
+                        value='1'
+                        checked={field.value === '1'}
+                        onChange={() => field.onChange('1')}
+                        className='w-5 h-5'
+                      />
+                      <span>Sim</span>
+                    </label>
 
-                  <label className='flex items-center space-x-2'>
-                    <input
-                      type='radio'
-                      value='0'
-                      checked={field.value === '0'}
-                      onChange={() => field.onChange('0')}
-                      className='w-5 h-5'
-                    />
-                    <span>Não</span>
-                  </label>
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                    <label className='flex items-center space-x-2'>
+                      <input
+                        type='radio'
+                        value='0'
+                        checked={field.value === '0'}
+                        onChange={() => field.onChange('0')}
+                        className='w-5 h-5'
+                      />
+                      <span>Não</span>
+                    </label>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='sensorPlaca'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de peça</FormLabel>
+                <FormControl>
+                  <div className='flex space-x-4'>
+                    <label className='flex items-center space-x-2'>
+                      <input
+                        type='radio'
+                        value='1'
+                        checked={field.value === '1'}
+                        onChange={() => field.onChange('1')}
+                        className='w-5 h-5'
+                      />
+                      <span>Placa Eletrônica</span>
+                    </label>
+
+                    <label className='flex items-center space-x-2'>
+                      <input
+                        type='radio'
+                        value='2'
+                        checked={field.value === '0'}
+                        onChange={() => field.onChange('0')}
+                        className='w-5 h-5'
+                      />
+                      <span>Sensor</span>
+                    </label>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         {/* Campo: Número do Item */}
         <FormField
