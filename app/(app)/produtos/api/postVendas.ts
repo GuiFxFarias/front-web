@@ -9,7 +9,7 @@ export async function postVendas(body: any) {
   });
 
   if (!response.ok) {
-    throw new Error('Erro ao cadastrar a venda');
+    console.log('Erro ao cadastrar a venda');
   }
 
   return response.json();

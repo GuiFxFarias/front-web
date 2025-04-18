@@ -11,6 +11,9 @@ import { IService } from '@/lib/interface/IService';
 import { DialogVerProposta } from '@/app/(app)/servicos/dialogVerProposta';
 import { getServices } from './novoServico/api/getService';
 import { useMemo } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NewSalePecasDialog } from './newSaleDialog';
+import PecasVenda from './salvePecaAvulsa';
 
 export default function ServicesItens() {
   const [search, setSearch] = useState<string>('');
@@ -45,74 +48,84 @@ export default function ServicesItens() {
 
   return (
     <div className='flex-1 p-8'>
-      {/* Conteúdo Principal */}
       <div className='flex justify-between items-center mb-6'>
         <h1 className='text-3xl font-bold text-gray-800'>Lista de Serviços</h1>
-        <NewServiceDialog />
+        <div className='flex space-x-4'>
+          <NewServiceDialog />
+          <NewSalePecasDialog />
+        </div>
       </div>
-
-      {/* Barra de Pesquisa */}
-      <div className='flex items-center mb-6'>
-        <Input
-          type='text'
-          placeholder='Pesquisar cliente...'
-          className='w-full max-w-md'
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      {/* Lista de Serviços */}
       <div className='grid grid-cols-1 gap-4 overflow-y-scroll max-h-[50vh]'>
         {/* Card de Serviço 1 */}
         {isLoading ? (
           'Carregando...'
         ) : (
           <>
-            {filteredServices.map(([codService, services]) => (
-              <Card key={codService}>
-                <CardHeader className='flex justify-between flex-row items-center'>
-                  <CardTitle>Serviço {codService}</CardTitle>
-                  <div className='flex items-center space-x-2'>
-                    {/* Exibe o Dialog do primeiro item do grupo */}
-                    <DialogVerProposta
-                      // equipamentos={equipamentosRelacionados}
-                      status={services[0].status}
-                      codService={services[0].codService}
-                      descCliente={services[0].descCliente}
-                    />
-                  </div>
-                </CardHeader>
+            <Tabs defaultValue='account' className='w-full'>
+              <TabsList>
+                <TabsTrigger value='serv'>Serviços</TabsTrigger>
+                <TabsTrigger value='pecas'>Venda de peças</TabsTrigger>
+              </TabsList>
+              <TabsContent value='serv'>
+                {/* Barra de Pesquisa */}
+                <div className='flex items-center mb-6'>
+                  <Input
+                    type='text'
+                    placeholder='Pesquisar cliente...'
+                    className='w-full max-w-md'
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+                {filteredServices.map(([codService, services]) => (
+                  <Card key={codService}>
+                    <CardHeader className='flex justify-between flex-row items-center'>
+                      <CardTitle>Serviço {codService}</CardTitle>
+                      <div className='flex items-center space-x-2'>
+                        {/* Exibe o Dialog do primeiro item do grupo */}
+                        <DialogVerProposta
+                          // equipamentos={equipamentosRelacionados}
+                          status={services[0].status}
+                          codService={services[0].codService}
+                          descCliente={services[0].descCliente}
+                        />
+                      </div>
+                    </CardHeader>
 
-                <CardContent>
-                  <p className='text-gray-800 font-semibold'>
-                    Cliente: {services[0].descCliente}
-                  </p>
-
-                  {services.map((data: IService) => (
-                    <div
-                      key={data.id}
-                      className='mt-2 p-2 border rounded-md bg-gray-50 space-y-1'
-                    >
-                      <p className='text-gray-600'>
-                        Realizado em:{' '}
-                        {new Date(data.DataCadastro)
-                          .toLocaleString('pt-BR')
-                          .slice(0, -3)}
+                    <CardContent>
+                      <p className='text-gray-800 font-semibold'>
+                        Cliente: {services[0].descCliente}
                       </p>
 
-                      {equipamentos?.map(
-                        (equip: IEquipamento) =>
-                          data.equipamentoId == String(equip.ID) && (
-                            <p key={equip.ID} className='text-gray-600'>
-                              Equipamento: {equip.Descricao}
-                            </p>
-                          )
-                      )}
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            ))}
+                      {services.map((data: IService) => (
+                        <div
+                          key={data.id}
+                          className='mt-2 p-2 border rounded-md bg-gray-50 space-y-1'
+                        >
+                          <p className='text-gray-600'>
+                            Realizado em:{' '}
+                            {new Date(data.DataCadastro)
+                              .toLocaleString('pt-BR')
+                              .slice(0, -3)}
+                          </p>
+
+                          {equipamentos?.map(
+                            (equip: IEquipamento) =>
+                              data.equipamentoId == String(equip.ID) && (
+                                <p key={equip.ID} className='text-gray-600'>
+                                  Equipamento: {equip.Descricao}
+                                </p>
+                              )
+                          )}
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </TabsContent>
+              <TabsContent value='pecas'>
+                <PecasVenda />
+              </TabsContent>
+            </Tabs>
           </>
         )}
       </div>

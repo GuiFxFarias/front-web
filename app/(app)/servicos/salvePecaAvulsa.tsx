@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import Img from '@/assets/img/CocertLogo.png';
-import { NewSaleDialog } from './newProdutoDialog';
 import {
   Dialog,
   DialogContent,
@@ -18,12 +17,14 @@ import { Button } from '@/components/ui/button';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { IVendaComProdutoCliente } from '@/lib/interface/todasVendas';
-import { getTodasVendas } from './api/getTodasVendas';
-import { putAttVendas } from './api/putVendas';
 import DialogConfirmForm from '@/components/dialogConfirForm';
-import { putAttProdutoVenda } from '../almoxarifado/api/putConfirmaVenda';
+import { getTodasVendas } from '../produtos/api/getTodasVendas';
+import { putAttVendas } from '../produtos/api/putVendas';
+import { getAllPecas } from '../almoxarifado/api/getAllPecas';
+import { putPecaQtd } from '../almoxarifado/api/putPecaQtd';
+import { Item } from '@/lib/interface/Ipecas';
 
-export default function ProdutoItens() {
+export default function PecasVenda() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState<string>('');
   const [proposta, setProposta] = useState<number>();
@@ -409,6 +410,8 @@ export default function ProdutoItens() {
     getTodasVendas
   );
 
+  const { data: allPecas = [] } = useQuery(['allPecas'], getAllPecas);
+
   const sameVendas = allVendas.reduce((acc, venda) => {
     acc[venda.idVenda] = acc[venda.idVenda] || [];
     acc[venda.idVenda].push(venda);
@@ -427,36 +430,97 @@ export default function ProdutoItens() {
     },
   });
 
-  const mutateTrmVenda = useMutation({
-    mutationFn: ({ id, quantidade }: { id: string; quantidade: number }) =>
-      putAttProdutoVenda(id, { quantidade }),
-
+  const mutatePutPecaQtd = useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: { ID: number; Quantidade: number };
+    }) => putPecaQtd(id, body),
     onSuccess: () => {
-      queryClient.invalidateQueries(['produtos_transmissor']); // refresh data
+      queryClient.invalidateQueries(['allPecas']);
     },
   });
 
-  function confirmarProposta(id: any, campoStatus: { status: string }) {
+  function confirmarPropostaPecas(
+    idVenda: string,
+    campoStatus: { status: string }
+  ) {
+    const venda = sameVendas[idVenda] as IVendaComProdutoCliente[];
+
+    if (!venda || venda.length === 0) {
+      console.error('Venda não encontrada!');
+      return;
+    }
+
+    const itemsGoingNegative: any[] = [];
+
+    for (const item of venda) {
+      const pecaId = item.idProduto;
+      const quantidadeVendida = item.quantidade;
+
+      const peca = allPecas.find((p: Item) => String(p.ID) === String(pecaId));
+
+      if (!peca) {
+        console.error(`Peça ${pecaId} não encontrada no almoxarifado!`);
+        continue;
+      }
+
+      if (peca.Quantidade === undefined) {
+        console.error(`Quantidade da peça ${pecaId} não definida!`);
+        continue;
+      }
+
+      if (peca.Quantidade < quantidadeVendida) {
+        itemsGoingNegative.push({
+          id: pecaId,
+          descricao: peca.Descricao,
+          atual: peca.Quantidade,
+          requisitada: quantidadeVendida,
+        });
+      }
+    }
+
+    if (itemsGoingNegative.length > 0) {
+      console.log('Itens sem estoque:', itemsGoingNegative);
+      // setAlertItem(true);
+      // setDesc(itemsGoingNegative);
+      return;
+    }
+
+    // Se passou todas as validações, confirmar venda
+    for (const item of venda) {
+      const pecaId = item.idProduto;
+      const quantidadeVendida = item.quantidade;
+
+      const peca = allPecas.find((p) => String(p.ID) === String(pecaId));
+
+      if (peca) {
+        console.log(
+          'Atualizando peça:',
+          peca,
+          'Quantidade retirada:',
+          quantidadeVendida
+        );
+        mutatePutPecaQtd.mutate({
+          id: String(pecaId),
+          body: {
+            ID: peca.ID,
+            Quantidade: peca.Quantidade - quantidadeVendida,
+          },
+        });
+      }
+    }
+
     mutateStatus.mutate({
-      id,
+      id: idVenda,
       campo: {
         status: campoStatus.status,
       },
     });
-    mutateTrmVenda.mutate(
-      {
-        id: id,
-        quantidade: 0,
-      },
-      {
-        onSuccess: () => {
-          setOpenDialog(true);
-        },
-        onError: (error) => {
-          console.error('Erro ao atualizar status:', error);
-        },
-      }
-    );
+
+    setOpenDialog(true);
   }
 
   const filteredVendas = useMemo(() => {
@@ -468,12 +532,8 @@ export default function ProdutoItens() {
   }, [sameVendas, search]);
 
   return (
-    <div className='flex-1 p-8'>
+    <div className='flex-1'>
       {/* Conteúdo Principal */}
-      <div className='flex justify-between items-center mb-6'>
-        <h1 className='text-3xl font-bold text-gray-800'>Lista de Vendas</h1>
-        <NewSaleDialog />
-      </div>
 
       {/* Barra de Pesquisa */}
       <div className='flex items-center mb-6'>
@@ -496,9 +556,7 @@ export default function ProdutoItens() {
               .filter(([, itens]) => {
                 const itensTyped = itens as IVendaComProdutoCliente[];
                 const item: IVendaComProdutoCliente = itensTyped[0];
-                return (
-                  item.status !== '2' && item.tipoProduto !== 'Peça Avulsa'
-                );
+                return item.status !== '2' && item.tipoProduto == 'Peça Avulsa';
               })
               .map(([idVenda, itens]) => {
                 const itensTyped = itens as IVendaComProdutoCliente[];
@@ -524,7 +582,8 @@ export default function ProdutoItens() {
                         <DialogContent className='w-[50vw] justify-start flex flex-col'>
                           <DialogHeader>
                             <DialogTitle>
-                              Proposta de venda para a(o) {item.nomeCliente}
+                              Proposta de venda de peças para a(o){' '}
+                              {item.nomeCliente}
                             </DialogTitle>
                             <DialogDescription>
                               Proposta {item.idVenda.slice(0, 8).toUpperCase()}{' '}
@@ -534,16 +593,18 @@ export default function ProdutoItens() {
                               )}
                             </DialogDescription>
                             <DialogDescription className='text-zinc-700'>
-                              Para confirmar a venda basta finalizar a proposta
+                              Para confirmar a venda, é necessário verificar o
+                              estoque das peças.
                             </DialogDescription>
                           </DialogHeader>
+
+                          {/* Botões */}
                           <div className='flex w-full justify-between items-center mt-4'>
-                            {' '}
                             <Button
                               className='bg-zinc-500 text-white hover:bg-blue-600'
                               onClick={() => {
                                 setProposta(2);
-                                confirmarProposta(item.idVenda, {
+                                confirmarPropostaPecas(item.idVenda, {
                                   status: '2',
                                 });
                               }}
@@ -555,7 +616,7 @@ export default function ProdutoItens() {
                                 className='bg-blue-500 mr-2 text-white hover:bg-blue-600'
                                 onClick={() => {
                                   setProposta(1);
-                                  confirmarProposta(item.idVenda, {
+                                  confirmarPropostaPecas(item.idVenda, {
                                     status: '1',
                                   });
                                 }}
