@@ -72,7 +72,7 @@ export function NewServiceDialog({ title }: { title?: string }) {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     const equipItemId = equipamentos?.filter((item: IEquipamento) => {
       return item.ID === Number(values.equipment);
     });

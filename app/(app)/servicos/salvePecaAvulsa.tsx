@@ -426,8 +426,6 @@ export default function PecasVenda() {
     getTodasVendasPecas
   );
 
-  console.log(allVendas);
-
   const { data: allPecas = [] } = useQuery(['allPecas'], getAllPecas);
 
   const sameVendas = allVendas.reduce((acc, venda) => {
@@ -586,8 +584,6 @@ export default function PecasVenda() {
               .map(([idVenda, itens]) => {
                 const itensTyped = itens as IVendaComProdutoCliente[];
                 const item: IVendaComProdutoCliente = itensTyped[0];
-                console.log(itensTyped);
-
                 return (
                   <Card key={idVenda}>
                     <CardHeader className='flex justify-between flex-row items-center'>
@@ -604,8 +600,7 @@ export default function PecasVenda() {
                               {item.nomeCliente}
                             </DialogTitle>
                             <DialogDescription>
-                              Proposta {item.idVenda.slice(0, 8).toUpperCase()}{' '}
-                              gerada no dia{' '}
+                              Proposta {item.idVenda} gerada no dia{' '}
                               {new Date(item.dataProposta).toLocaleDateString(
                                 'pt-BR'
                               )}

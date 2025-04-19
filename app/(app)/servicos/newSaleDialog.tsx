@@ -35,6 +35,8 @@ import DialogConfirmForm from '@/components/dialogConfirForm';
 import { getAllPecas } from '../almoxarifado/api/getAllPecas';
 import { postVendas } from '../produtos/api/postVendas';
 import { Item } from '@/lib/interface/Ipecas';
+import { getVendasHoje } from './api/getVendasHoje';
+import { IVenda } from '@/lib/interface/Isale';
 
 // New Schema for Peças
 const formSchema = z.object({
@@ -78,14 +80,27 @@ export function NewSalePecasDialog() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const sharedId = crypto.randomUUID();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const vendasHoje = await getVendasHoje();
+
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+
+    const baseId = `${day}${month}${year}`;
+
+    const sequence =
+      vendasHoje.filter((sale: IVenda) => sale.idVenda.startsWith(baseId))
+        .length + 1;
+
+    const sharedId = `${baseId}_${sequence}`;
     const sharedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
     const vendas = values.itens.map((item) => ({
       idCliente: Number(values.idCliente),
       idVenda: sharedId,
-      idProduto: item.idPeca, // id da peça vendida
+      idProduto: item.idPeca,
       itemVenda: `${item.idPeca}`,
       tipoProduto: 'Peça Avulsa',
       quantidade: Number(item.quantidade),

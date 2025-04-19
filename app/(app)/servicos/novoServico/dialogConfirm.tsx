@@ -103,7 +103,7 @@ export function DialogConfirm({
     }
   }, [codService, itemService, serviceId]);
 
-  function handleSaveService() {
+  async function handleSaveService() {
     if (!codService) {
       console.log('CodeService Undefined');
       return;

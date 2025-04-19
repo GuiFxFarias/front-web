@@ -9,9 +9,10 @@ import { useQuery } from 'react-query';
 import { getPecasItemId } from '../api/getPecasItemId';
 import { Item } from '@/lib/interface/Ipecas';
 import { DialogConfirm } from './dialogConfirm';
-import { v4 as uuidv4 } from 'uuid';
 import { getClientesId } from '../api/clientes';
 import { ICliente } from '@/lib/interface/Icliente';
+import { getVendasHoje } from '../api/getVendasHoje';
+import { IVenda } from '@/lib/interface/Isale';
 
 export default function NewServiceForm() {
   const searchParams = useSearchParams();
@@ -64,17 +65,32 @@ export default function NewServiceForm() {
   };
 
   useEffect(() => {
-    const storedCode = localStorage.getItem('serviceCode');
-    if (storedCode) {
-      setUniqueCode(storedCode);
-    } else {
-      const now = new Date();
-      const day = String(now.getDate()).padStart(2, '0');
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const code = `CCR-${day}${month}${uuidv4().slice(0, 4).toUpperCase()}`;
-      setUniqueCode(code);
-      localStorage.setItem('serviceCode', code);
+    async function generateCode() {
+      const storedCode = localStorage.getItem('serviceCode');
+      if (storedCode) {
+        setUniqueCode(storedCode);
+      } else {
+        const vendasHoje = await getVendasHoje();
+
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, '0');
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const year = today.getFullYear();
+
+        const baseId = `${day}${month}${year}`;
+
+        const sequence =
+          vendasHoje.filter((sale: IVenda) => sale.idVenda.startsWith(baseId))
+            .length + 1;
+
+        const sharedId = `${baseId}_${sequence}`;
+
+        setUniqueCode(sharedId);
+        localStorage.setItem('serviceCode', sharedId);
+      }
     }
+
+    generateCode(); // Chama a função assíncrona dentro do useEffect
   }, []);
 
   if (!itemID) return <p>Nenhum item selecionado.</p>;
