@@ -140,7 +140,7 @@ export function DialogConfirm({
       };
 
       mutatePecaServ.mutate(pecaServ);
-      // console.log(pecaServ);
+      // console.log(services);
     });
 
     router.push(

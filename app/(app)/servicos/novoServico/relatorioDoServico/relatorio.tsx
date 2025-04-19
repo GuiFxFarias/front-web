@@ -14,6 +14,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getServicoCodService } from './api/servicoCodService';
 import { IService } from '@/lib/interface/IService';
 
+interface IServiceItemDisplay {
+  descricao: string;
+  valor: number;
+  quantidade: number;
+  isExtra: boolean;
+  itemService: number | string;
+}
+
 export default function Relatorio() {
   // const reportRef = useRef(null);
   const searchParams = useSearchParams();
@@ -48,11 +56,11 @@ export default function Relatorio() {
     getServicesId(codService || '')
   );
 
+  console.log(serviceId);
+
   const { data: clienteID, isLoading } = useQuery(['clientes'], () =>
     getClientesId(idCliente || '')
   );
-
-  console.log(clienteID);
 
   const { data: servicoCodService } = useQuery(['servicesCodService'], () =>
     getServicoCodService(codService || '')
@@ -209,28 +217,41 @@ export default function Relatorio() {
           styles: { fontSize: 10 },
         });
 
-        // Calcular total por itemService
-        const totalValor = dataList.reduce(
-          (sum: number, data: any) => sum + Number(data.valorPeca),
-          0
-        );
+        const itemServicesAdded = new Set();
 
-        autoTable(doc, {
-          startY: (doc as any).lastAutoTable.finalY + 5,
-          body: [
-            [
-              '',
-              'TOTAL',
-              new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-              }).format(totalValor),
+        const totalValor = dataList.reduce((sum: number, data: any) => {
+          let valor = Number(data.valorPeca);
+
+          if (!itemServicesAdded.has(data.itemService)) {
+            if (data.manuPreventiva) {
+              valor += 450;
+            }
+            if (data.manuPrevTomada) {
+              valor += 1500;
+            }
+            itemServicesAdded.add(data.itemService);
+          }
+
+          return sum + valor;
+        }, 0);
+
+        if (serviceId)
+          autoTable(doc, {
+            startY: (doc as any).lastAutoTable.finalY + 5,
+            body: [
+              [
+                '',
+                'TOTAL',
+                new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                }).format(totalValor),
+              ],
             ],
-          ],
-          theme: 'grid',
-          styles: { fontSize: 12, fontStyle: 'bold' },
-          columnStyles: { 2: { textColor: [0, 0, 0] } },
-        });
+            theme: 'grid',
+            styles: { fontSize: 12, fontStyle: 'bold' },
+            columnStyles: { 2: { textColor: [0, 0, 0] } },
+          });
 
         const uniqueInspecao = Array.from(
           new Set(tempInspecao.map((a) => String(a).trim()))
@@ -521,7 +542,7 @@ export default function Relatorio() {
               <CardHeader className='flex justify-between flex-row items-center'>
                 <CardTitle>Item do serviço: {serv.itemService}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className='px-8'>
                 <p>
                   Equipamento: <strong>{serv.equipamentoDescricao}</strong>
                 </p>
@@ -566,13 +587,15 @@ export default function Relatorio() {
                         </p>
                         <p>
                           Tomada de nível:{' '}
-                          <strong>{peca.manuPrevTomada ? 'Sim' : 'Não'}</strong>
+                          <strong>
+                            {peca.manuPrevTomada ? 'Sim - R$1.500,00' : 'Não'}
+                          </strong>
                         </p>
                         <p>
                           Manutenção preventiva:{' '}
                           <strong>
                             {' '}
-                            {peca.manuPreventiva ? 'Sim' : 'Não'}
+                            {peca.manuPreventiva ? 'Sim - R$450,00' : 'Não'}
                           </strong>
                         </p>
                       </div>
@@ -583,7 +606,7 @@ export default function Relatorio() {
                   Peças de serviço:
                 </p>
 
-                <div className='ring-1 rounded-md ring-zinc-500'>
+                <div className='ring-1 rounded-md ring-zinc-500 '>
                   <div className='w-[100%] rounded-t-md px-4 py-2 bg-blue-400 h-[5vh] flex'>
                     <div className='font-semibold w-[25%]'>Descrição</div>
                     <div className='font-semibold w-[25%]'>Valor</div>
@@ -595,24 +618,57 @@ export default function Relatorio() {
                         value.codService == serv.codService &&
                         value.itemService == serv.itemService
                     )
-                    .map((peca: IServiceID) => (
-                      <>
-                        <div className='w-[100%] rounded-b-md px-4 py-2 bg-zinc-100 h-[5vh] flex'>
-                          <div
-                            className=' w-[25%] truncate hover:cursor-pointer'
-                            title={peca.peca_Descricao}
-                          >
-                            {peca.peca_Descricao}
-                          </div>
-                          <div className=' w-[25%]'>
-                            {new Intl.NumberFormat('pt-BR', {
-                              style: 'currency',
-                              currency: 'BRL',
-                            }).format(Number(peca.valorPeca))}
-                          </div>
-                          <div className=' w-[25%]'>{peca.quantidade_peca}</div>
+                    .reduce((acc: any[], peca: IServiceID) => {
+                      const alreadyExists = acc.find(
+                        (item) =>
+                          item.itemService === peca.itemService && item.isExtra
+                      );
+
+                      acc.push({
+                        descricao: peca.peca_Descricao,
+                        valor: Number(peca.valorPeca),
+                        quantidade: peca.quantidade_peca,
+                        isExtra: false,
+                        itemService: peca.itemService,
+                      });
+
+                      if (!alreadyExists) {
+                        let extraValue = 0;
+                        if (peca.manuPreventiva) extraValue += 450;
+                        if (peca.manuPrevTomada) extraValue += 1500;
+
+                        if (extraValue > 0) {
+                          acc.push({
+                            descricao: 'Manutenção preventiva',
+                            valor: extraValue,
+                            quantidade: 1,
+                            isExtra: true,
+                            itemService: peca.itemService,
+                          });
+                        }
+                      }
+
+                      return acc;
+                    }, [])
+                    .map((item: IServiceItemDisplay, index: number) => (
+                      <div
+                        key={index}
+                        className='w-[100%] rounded-b-md px-4 py-2 bg-zinc-100 h-[5vh] flex'
+                      >
+                        <div
+                          className='w-[25%] truncate hover:cursor-pointer'
+                          title={item.descricao}
+                        >
+                          {item.descricao}
                         </div>
-                      </>
+                        <div className='w-[25%]'>
+                          {new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
+                          }).format(item.valor)}
+                        </div>
+                        <div className='w-[25%]'>{item.quantidade}</div>
+                      </div>
                     ))}
                 </div>
               </CardContent>
