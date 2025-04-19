@@ -18,17 +18,25 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { IVendaComProdutoCliente } from '@/lib/interface/todasVendas';
 import DialogConfirmForm from '@/components/dialogConfirForm';
-import { getTodasVendas } from '../produtos/api/getTodasVendas';
+import { getTodasVendasPecas } from '../produtos/api/getTodasVendas';
 import { putAttVendas } from '../produtos/api/putVendas';
 import { getAllPecas } from '../almoxarifado/api/getAllPecas';
 import { putPecaQtd } from '../almoxarifado/api/putPecaQtd';
 import { Item } from '@/lib/interface/Ipecas';
 
+interface IDesc {
+  id: string;
+  descricao: string;
+  atual: number;
+  requisitada: number;
+}
 export default function PecasVenda() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState<string>('');
   const [proposta, setProposta] = useState<number>();
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [desc, setDesc] = useState<IDesc[]>();
+  const [alertItem, setAlertItem] = useState<boolean>();
 
   const gerarPDF = (venda: IVendaComProdutoCliente[]) => {
     const doc = new jsPDF();
@@ -160,7 +168,15 @@ export default function PecasVenda() {
 
         autoTable(doc, {
           startY: (doc as any).lastAutoTable.finalY + 5,
-          body: [['', 'TOTAL', '', `R$ ${total.toFixed(2)}`]],
+          body: [
+            [
+              'TOTAL',
+              `${new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              }).format(Number(total))}`,
+            ],
+          ],
           theme: 'grid',
           styles: { fontSize: 12, fontStyle: 'bold' },
           columnStyles: { 3: { textColor: [0, 0, 0] } },
@@ -407,8 +423,10 @@ export default function PecasVenda() {
 
   const { data: allVendas = [], isLoading } = useQuery(
     ['vendas'],
-    getTodasVendas
+    getTodasVendasPecas
   );
+
+  console.log(allVendas);
 
   const { data: allPecas = [] } = useQuery(['allPecas'], getAllPecas);
 
@@ -484,12 +502,11 @@ export default function PecasVenda() {
 
     if (itemsGoingNegative.length > 0) {
       console.log('Itens sem estoque:', itemsGoingNegative);
-      // setAlertItem(true);
-      // setDesc(itemsGoingNegative);
+      setAlertItem(true);
+      setDesc(itemsGoingNegative);
       return;
     }
 
-    // Se passou todas as validações, confirmar venda
     for (const item of venda) {
       const pecaId = item.idProduto;
       const quantidadeVendida = item.quantidade;
@@ -512,14 +529,22 @@ export default function PecasVenda() {
         });
       }
     }
-
     mutateStatus.mutate({
       id: idVenda,
       campo: {
         status: campoStatus.status,
       },
     });
+    setOpenDialog(true);
+  }
 
+  function cancelarProposta(idVenda: string, campoStatus: { status: string }) {
+    mutateStatus.mutate({
+      id: idVenda,
+      campo: {
+        status: campoStatus.status,
+      },
+    });
     setOpenDialog(true);
   }
 
@@ -561,17 +586,10 @@ export default function PecasVenda() {
               .map(([idVenda, itens]) => {
                 const itensTyped = itens as IVendaComProdutoCliente[];
                 const item: IVendaComProdutoCliente = itensTyped[0];
+                console.log(itensTyped);
+
                 return (
-                  <Card
-                    key={idVenda}
-                    className={
-                      item.status == '1'
-                        ? 'border-2 border-emerald-500 bg-emerald-50'
-                        : item.status == '2'
-                        ? 'border-2 border-red-500 bg-red-50'
-                        : 'bg-zinc-50'
-                    }
-                  >
+                  <Card key={idVenda}>
                     <CardHeader className='flex justify-between flex-row items-center'>
                       <CardTitle>Cliente: {item.nomeCliente}</CardTitle>
 
@@ -604,9 +622,7 @@ export default function PecasVenda() {
                               className='bg-zinc-500 text-white hover:bg-blue-600'
                               onClick={() => {
                                 setProposta(2);
-                                confirmarPropostaPecas(item.idVenda, {
-                                  status: '2',
-                                });
+                                cancelarProposta(item.idVenda, { status: '2' });
                               }}
                             >
                               Cancelar proposta
@@ -690,6 +706,43 @@ export default function PecasVenda() {
                       open={openDialog}
                       setOpen={setOpenDialog}
                     />
+                    <Dialog open={alertItem}>
+                      <DialogContent className='w-[50vw]'>
+                        <DialogHeader>
+                          <DialogTitle>Zero estoque</DialogTitle>
+                          <DialogDescription>
+                            Movimentação bloqueada - itens que ficariam com
+                            estoque negativo:
+                          </DialogDescription>
+                          {desc?.map((d, i) => (
+                            <div key={i} className='flex flex-col'>
+                              <DialogDescription>
+                                <strong>Peça:</strong> {d?.descricao}
+                              </DialogDescription>
+                              <DialogDescription>
+                                <strong>Quantidade requistada:</strong>{' '}
+                                {d?.requisitada}
+                              </DialogDescription>
+                              <DialogDescription>
+                                <strong>Quantidade atual:</strong> {d?.atual}
+                              </DialogDescription>
+                            </div>
+                          ))}
+                          <div className='flex justify-between'>
+                            <Button
+                              className='bg-zinc-200 text-black hover:bg-zinc-100'
+                              onClick={() => {
+                                setAlertItem(false);
+
+                                setDesc([]);
+                              }}
+                            >
+                              Ok
+                            </Button>
+                          </div>
+                        </DialogHeader>
+                      </DialogContent>
+                    </Dialog>
                   </Card>
                 );
               })}

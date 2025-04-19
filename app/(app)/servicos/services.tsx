@@ -49,13 +49,13 @@ export default function ServicesItens() {
   return (
     <div className='flex-1 p-8'>
       <div className='flex justify-between items-center mb-6'>
-        <h1 className='text-3xl font-bold text-gray-800'>Lista de Serviços</h1>
+        <h1 className='text-3xl font-bold text-gray-800'>Lista de Propostas</h1>
         <div className='flex space-x-4'>
           <NewServiceDialog />
           <NewSalePecasDialog />
         </div>
       </div>
-      <div className='grid grid-cols-1 gap-4 overflow-y-scroll max-h-[50vh]'>
+      <div className='grid grid-cols-1 gap-4 '>
         {/* Card de Serviço 1 */}
         {isLoading ? (
           'Carregando...'
@@ -66,8 +66,7 @@ export default function ServicesItens() {
                 <TabsTrigger value='serv'>Serviços</TabsTrigger>
                 <TabsTrigger value='pecas'>Venda de peças</TabsTrigger>
               </TabsList>
-              <TabsContent value='serv'>
-                {/* Barra de Pesquisa */}
+              <TabsContent value='serv' className=''>
                 <div className='flex items-center mb-6'>
                   <Input
                     type='text'
@@ -76,51 +75,53 @@ export default function ServicesItens() {
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
-                {filteredServices.map(([codService, services]) => (
-                  <Card key={codService}>
-                    <CardHeader className='flex justify-between flex-row items-center'>
-                      <CardTitle>Serviço {codService}</CardTitle>
-                      <div className='flex items-center space-x-2'>
-                        {/* Exibe o Dialog do primeiro item do grupo */}
-                        <DialogVerProposta
-                          // equipamentos={equipamentosRelacionados}
-                          status={services[0].status}
-                          codService={services[0].codService}
-                          descCliente={services[0].descCliente}
-                        />
-                      </div>
-                    </CardHeader>
-
-                    <CardContent>
-                      <p className='text-gray-800 font-semibold'>
-                        Cliente: {services[0].descCliente}
-                      </p>
-
-                      {services.map((data: IService) => (
-                        <div
-                          key={data.id}
-                          className='mt-2 p-2 border rounded-md bg-gray-50 space-y-1'
-                        >
-                          <p className='text-gray-600'>
-                            Realizado em:{' '}
-                            {new Date(data.DataCadastro)
-                              .toLocaleString('pt-BR')
-                              .slice(0, -3)}
-                          </p>
-
-                          {equipamentos?.map(
-                            (equip: IEquipamento) =>
-                              data.equipamentoId == String(equip.ID) && (
-                                <p key={equip.ID} className='text-gray-600'>
-                                  Equipamento: {equip.Descricao}
-                                </p>
-                              )
-                          )}
+                <div className='overflow-y-auto max-h-[60vh] space-y-2'>
+                  {filteredServices.map(([codService, services]) => (
+                    <Card key={codService}>
+                      <CardHeader className='flex justify-between flex-row items-center'>
+                        <CardTitle>Serviço {codService}</CardTitle>
+                        <div className='flex items-center space-x-2'>
+                          {/* Exibe o Dialog do primeiro item do grupo */}
+                          <DialogVerProposta
+                            // equipamentos={equipamentosRelacionados}
+                            status={services[0].status}
+                            codService={services[0].codService}
+                            descCliente={services[0].descCliente}
+                          />
                         </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardHeader>
+
+                      <CardContent>
+                        <p className='text-gray-800 font-semibold'>
+                          Cliente: {services[0].descCliente}
+                        </p>
+
+                        {services.map((data: IService) => (
+                          <div
+                            key={data.id}
+                            className='mt-2 p-2 border rounded-md bg-gray-50 space-y-1'
+                          >
+                            <p className='text-gray-600'>
+                              Realizado em:{' '}
+                              {new Date(data.DataCadastro)
+                                .toLocaleString('pt-BR')
+                                .slice(0, -3)}
+                            </p>
+
+                            {equipamentos?.map(
+                              (equip: IEquipamento) =>
+                                data.equipamentoId == String(equip.ID) && (
+                                  <p key={equip.ID} className='text-gray-600'>
+                                    Equipamento: {equip.Descricao}
+                                  </p>
+                                )
+                            )}
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </TabsContent>
               <TabsContent value='pecas'>
                 <PecasVenda />
