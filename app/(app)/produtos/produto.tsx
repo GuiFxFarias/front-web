@@ -43,11 +43,7 @@ export default function ProdutoItens() {
       doc.text('CONCERT - INSTRUMENTAÇÃO INDUSTRIAL', 14, 15);
       doc.addImage(Img.src, 'PNG', 170, 5, 25, 25);
       doc.setFontSize(12);
-      doc.text(
-        `Proposta Nº ${cliente.idVenda.slice(0, 8).toUpperCase()} - Revisão 0`,
-        14,
-        22
-      );
+      doc.text(`Proposta Nº ${cliente.idVenda} - Revisão 0`, 14, 22);
 
       doc.setFontSize(10);
       doc.text(`Data: ${dataFormatada}`, 14, 28);
@@ -77,9 +73,7 @@ export default function ProdutoItens() {
       doc.setFontSize(12);
       doc.text(`AT.: ${cliente.nomeCliente}`, 14, 40);
       doc.text(
-        `Fone: (${cliente.telefone?.slice(0, 2)}) ${cliente.telefone?.slice(
-          2
-        )}`,
+        `Fone: ${cliente.telefone?.slice(0, 4)} ${cliente.telefone?.slice(4)}`,
         14,
         46
       );
@@ -401,7 +395,7 @@ export default function ProdutoItens() {
     addFooter();
 
     // Salva o documento
-    doc.save(`proposta_${cliente.nomeCliente}.pdf`);
+    doc.save(`proposta_${cliente.nomeCliente}_${cliente.idVenda}.pdf`);
   };
 
   const { data: allVendas = [], isLoading } = useQuery(

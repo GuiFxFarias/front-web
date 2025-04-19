@@ -52,6 +52,8 @@ export default function Relatorio() {
     getClientesId(idCliente || '')
   );
 
+  console.log(clienteID);
+
   const { data: servicoCodService } = useQuery(['servicesCodService'], () =>
     getServicoCodService(codService || '')
   );
@@ -107,10 +109,9 @@ export default function Relatorio() {
       doc.setFontSize(12);
       doc.text(`AT.: ${clienteID?.nome}`, 14, 40);
       doc.text(
-        `Fone: (${clienteID?.telefone?.slice(
-          0,
-          2
-        )}) ${clienteID?.telefone?.slice(2)}`,
+        `Fone: ${clienteID.telefone?.slice(0, 4)} ${clienteID.telefone?.slice(
+          4
+        )}`,
         14,
         46
       );
@@ -500,7 +501,7 @@ export default function Relatorio() {
     addFooter();
 
     // Salva o documento
-    doc.save('proposta_tecnica.pdf');
+    doc.save(`proposta_${clienteID.nome}_${codService}.pdf`);
   };
 
   return (
