@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { CheckCircle, Circle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { useQuery } from 'react-query';
 import { getPecasItemId } from '../api/getPecasItemId';
@@ -13,6 +12,12 @@ import { getClientesId } from '../api/clientes';
 import { ICliente } from '@/lib/interface/Icliente';
 import { getVendasHoje } from '../api/getVendasHoje';
 import { IVenda } from '@/lib/interface/Isale';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 export default function NewServiceForm() {
   const searchParams = useSearchParams();
@@ -22,9 +27,6 @@ export default function NewServiceForm() {
   const cliente = searchParams.get('cliente');
   const model = searchParams.get('model');
   const [uniqueCode, setUniqueCode] = useState('');
-
-  const [visor, setVisor] = useState<string>('1');
-  const [, setCarcaça] = useState<string>('0');
 
   const { data: pecasItemId = [] } = useQuery(['pecasItemId'], () =>
     getPecasItemId(String(itemID))
@@ -97,6 +99,19 @@ export default function NewServiceForm() {
 
   const imagePath = `/img/${itemID}.png`; // ou .jpg
 
+  const visorPlacas: Item[] = pecasItemId.filter(
+    (item: Item) => item.Visor === '1' && item.sensorPlaca === '1'
+  );
+  const carcacaSensores: Item[] = pecasItemId.filter(
+    (item: Item) => item.Visor === '0' && item.sensorPlaca === '2'
+  );
+  const visorOutros: Item[] = pecasItemId.filter(
+    (item: Item) => item.Visor === '1' && item.sensorPlaca !== '1'
+  );
+  const carcacaOutros: Item[] = pecasItemId.filter(
+    (item: Item) => item.Visor === '0' && item.sensorPlaca !== '2'
+  );
+
   return (
     <div className='p-6 space-y-6'>
       <div>
@@ -107,73 +122,158 @@ export default function NewServiceForm() {
         </p>
       </div>
 
-      <Button
-        className='mr-2'
-        onClick={() => {
-          setVisor('1');
-          setCarcaça('0');
-        }}
-      >
-        Visor
-      </Button>
-      <Button
-        onClick={() => {
-          setCarcaça('1');
-          setVisor('0');
-        }}
-      >
-        Carcaça
-      </Button>
+      <div className='flex flex-row h-[70vh]'>
+        <div className='grid gap-2 w-2/3 overflow-y-auto px-4 h-[70vh] mr-4'>
+          {/* Visor Part */}
+          <h2 className='text-xl font-bold'>Visor</h2>
 
-      <div className='flex flex-row overflow-y-scroll h-[70vh]'>
-        <div className='grid gap-4 w-2/3 overflow-y-auto mr-4'>
-          {pecasItemId
-            .filter((item: Item) => item.Visor === visor)
-            .map((item: Item) => {
-              return (
-                <div
-                  key={item.ID}
-                  className={`flex items-start gap-2 p-4 border rounded-lg ${
-                    selectedItems.includes(item.ID)
-                      ? 'bg-blue-100 border-blue-500'
-                      : ''
-                  }`}
-                  onClick={() => toggleItemSelection(item.ID)}
-                >
-                  {selectedItems.includes(item.ID) ? (
-                    <CheckCircle className='h-5 w-5 text-blue-500' />
-                  ) : (
-                    <Circle className='h-5 w-5 text-gray-400' />
-                  )}
-                  <div className='flex-1 h-full'>
-                    <Label className='flex justify-between items-center h-full'>
-                      <p
-                        className='truncate w-1/2 cursor-pointer hover:text-blue-500 duration-200 transition-all ease-in-out'
-                        title={
-                          item.Descricao.charAt(0).toUpperCase() +
-                          item.Descricao.slice(1)
-                        }
+          {visorPlacas.length > 0 && (
+            <Accordion type='single' collapsible>
+              <AccordionItem value='visor-placas'>
+                <AccordionTrigger className='justify-between flex'>
+                  Placas Eletrônicas (Qtd:{' '}
+                  {visorPlacas.reduce((sum, item) => sum + item.Quantidade, 0)})
+                </AccordionTrigger>
+                <AccordionContent>
+                  {visorPlacas
+                    .filter((item) => item.Quantidade > 0)
+                    .map((item) => (
+                      <div
+                        key={item.ID}
+                        className={`flex items-start gap-2 p-4 border rounded-lg ${
+                          selectedItems.includes(item.ID)
+                            ? 'bg-blue-100 border-blue-500'
+                            : ''
+                        }`}
+                        onClick={() => toggleItemSelection(item.ID)}
                       >
-                        {item.Descricao.charAt(0).toUpperCase() +
-                          item.Descricao.slice(1)}{' '}
-                        - {item.nSeriePlaca ? item.nSeriePlaca : null}
-                        {item.nSerieSensor ? item.nSerieSensor : null}
-                      </p>
-                      <span className='text-gray-500'>
-                        Num. Image - {item.NumeroItem}
-                      </span>
-                    </Label>
-                  </div>
-                </div>
-              );
-            })}
+                        {selectedItems.includes(item.ID) ? (
+                          <CheckCircle className='h-5 w-5 text-blue-500' />
+                        ) : (
+                          <Circle className='h-5 w-5 text-gray-400' />
+                        )}
+                        <Label className='flex justify-between w-full'>
+                          <span className='truncate'>{item.Descricao}</span>
+                          <span className='text-gray-500'>
+                            Qtd: {item.Quantidade}
+                          </span>
+                          <span className='text-gray-500'>
+                            Num. Image - {item.NumeroItem}
+                          </span>
+                        </Label>
+                      </div>
+                    ))}
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          )}
+
+          {/* Other Visor Items */}
+          {visorOutros.length > 0 &&
+            visorOutros.map((item) => (
+              <div
+                key={item.ID}
+                className={`flex items-start gap-2 p-4 border rounded-lg ${
+                  selectedItems.includes(item.ID)
+                    ? 'bg-blue-100 border-blue-500'
+                    : ''
+                }`}
+                onClick={() => toggleItemSelection(item.ID)}
+              >
+                {selectedItems.includes(item.ID) ? (
+                  <CheckCircle className='h-5 w-5 text-blue-500' />
+                ) : (
+                  <Circle className='h-5 w-5 text-gray-400' />
+                )}
+                <Label className='flex justify-between w-full'>
+                  <span className='truncate'>{item.Descricao}</span>
+                  <span className='text-gray-500'>Qtd: {item.Quantidade}</span>
+                  <span className='text-gray-500'>
+                    Num. Image - {item.NumeroItem}
+                  </span>
+                </Label>
+              </div>
+            ))}
+
+          {/* Carcaça Part */}
+          <h2 className='text-xl font-bold'>Carcaça</h2>
+
+          {carcacaSensores.length > 0 && (
+            <Accordion type='single' collapsible>
+              <AccordionItem value='carcaca-sensores'>
+                <AccordionTrigger className='justify-between flex'>
+                  Sensores (Qtd:{' '}
+                  {carcacaSensores.reduce(
+                    (sum, item) => sum + item.Quantidade,
+                    0
+                  )}
+                  )
+                </AccordionTrigger>
+                <AccordionContent>
+                  {carcacaSensores
+                    .filter((item) => item.Quantidade > 0)
+                    .map((item) => (
+                      <div
+                        key={item.ID}
+                        className={`flex items-start gap-2 p-4 border rounded-lg ${
+                          selectedItems.includes(item.ID)
+                            ? 'bg-blue-100 border-blue-500'
+                            : ''
+                        }`}
+                        onClick={() => toggleItemSelection(item.ID)}
+                      >
+                        {selectedItems.includes(item.ID) ? (
+                          <CheckCircle className='h-5 w-5 text-blue-500' />
+                        ) : (
+                          <Circle className='h-5 w-5 text-gray-400' />
+                        )}
+                        <Label className='flex justify-between w-full'>
+                          <span className='truncate'>{item.Descricao}</span>
+                          <span className='text-gray-500'>
+                            Qtd: {item.Quantidade}
+                          </span>
+                          <span className='text-gray-500'>
+                            Num. Image - {item.NumeroItem}
+                          </span>
+                        </Label>
+                      </div>
+                    ))}
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          )}
+
+          {/* Other Carcaça Items */}
+          {carcacaOutros.length > 0 &&
+            carcacaOutros.map((item) => (
+              <div
+                key={item.ID}
+                className={`flex items-start gap-2 p-4 border rounded-lg ${
+                  selectedItems.includes(item.ID)
+                    ? 'bg-blue-100 border-blue-500'
+                    : ''
+                }`}
+                onClick={() => toggleItemSelection(item.ID)}
+              >
+                {selectedItems.includes(item.ID) ? (
+                  <CheckCircle className='h-5 w-5 text-blue-500' />
+                ) : (
+                  <Circle className='h-5 w-5 text-gray-400' />
+                )}
+                <Label className='flex justify-between w-full'>
+                  <span className='truncate'>{item.Descricao}</span>
+                  <span className='text-gray-500'>Qtd: {item.Quantidade}</span>
+                  <span className='text-gray-500'>
+                    Num. Image - {item.NumeroItem}
+                  </span>
+                </Label>
+              </div>
+            ))}
         </div>
+
+        {/* Right Side: Image Viewer (unchanged) */}
         <div>
-          {/* Imagem Principal */}
-          <div
-            className='relative cursor-pointer'
-            onClick={toggleZoom} // Abre o zoom ao clicar
-          >
+          <div className='relative cursor-pointer' onClick={toggleZoom}>
             <Image
               src={imagePath}
               alt={`Imagem do item ${itemID}`}
@@ -183,18 +283,17 @@ export default function NewServiceForm() {
             />
           </div>
 
-          {/* Modal de Zoom */}
           {isZoomed && (
             <div
-              className='fixed inset-0 flex items-center  justify-center bg-black bg-opacity-75 z-50'
-              onClick={toggleZoom} // Fecha o zoom ao clicar fora da imagem
+              className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50'
+              onClick={toggleZoom}
             >
               <div className='relative h-[70vh] w-[60vw] overflow-y-auto'>
                 <Image
                   src={imagePath}
                   alt='Imagem ampliada'
-                  width={1800} // Largura personalizada para o zoom
-                  height={700} // Altura personalizada para o zoom
+                  width={1800}
+                  height={700}
                   className='rounded-lg shadow-lg scale-100'
                 />
                 <button

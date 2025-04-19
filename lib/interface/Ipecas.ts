@@ -9,8 +9,8 @@ export interface Item {
   Descricao: string;
   Codigo: string;
   Observacao: string | null;
-  DataCadastro: string; // Use Date if parsing to a Date object
-  valorPeca: string; // Use number if converting it
+  DataCadastro: string;
+  valorPeca: string;
   nSeriePlaca: string | null;
   protocolo: string | null;
   nSerieSensor: string | null;
