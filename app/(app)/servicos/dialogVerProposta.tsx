@@ -231,7 +231,11 @@ export function DialogVerProposta({
                             </h3>
                             <p className='text-gray-800'>
                               <strong>Descrição:</strong> {peca.peca_Descricao}{' '}
-                              | Valor da peça {peca.valorPeca}
+                              | Valor da peça{' '}
+                              {new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
+                              }).format(Number(peca.valorPeca))}
                             </p>
                             <p className='text-gray-600'>
                               <strong>Quantidade:</strong>{' '}
