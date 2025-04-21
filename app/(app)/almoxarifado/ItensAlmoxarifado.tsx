@@ -100,7 +100,11 @@ export default function AlmoxarifadoItens() {
                                 : null}
                             </p>
                             <p className='text-gray-600 w-[45%]'>
-                              Valor da peça (única): {pecasTipos.valorPeca}
+                              Valor da peça (única):{' '}
+                              {new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
+                              }).format(Number(pecasTipos.valorPeca))}
                             </p>
                             <p className='text-gray-800 w-[15%] font-semibold'>
                               Quantidade: {pecasTipos.Quantidade}
@@ -136,7 +140,11 @@ export default function AlmoxarifadoItens() {
                                 : null}
                             </p>
                             <p className='text-gray-600 w-[45%]'>
-                              Valor da peça (única): {sensor.valorPeca}
+                              Valor da peça (única):{' '}
+                              {new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
+                              }).format(Number(sensor.valorPeca))}
                             </p>
                             <p className='text-gray-800 w-[15%] font-semibold'>
                               Quantidade: {sensor.Quantidade}
@@ -172,7 +180,11 @@ export default function AlmoxarifadoItens() {
                                 : null}
                             </p>
                             <p className='text-gray-600 w-[45%]'>
-                              Valor da peça (única): {outro.valorPeca}
+                              Valor da peça (única):{' '}
+                              {new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
+                              }).format(Number(outro.valorPeca))}
                             </p>
                             <p className='text-gray-800 w-[15%] font-semibold'>
                               Quantidade: {outro.Quantidade}
@@ -203,7 +215,11 @@ export default function AlmoxarifadoItens() {
                               {outro.nSerieEquipamento}
                             </p>
                             <p className='text-gray-600 w-[45%]'>
-                              Valor da peça (única): {outro.preco}
+                              Valor da peça (única):{' '}
+                              {new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
+                              }).format(Number(outro.preco))}
                             </p>
                           </div>
                         ))}

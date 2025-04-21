@@ -61,10 +61,10 @@ export default function ServicesItens() {
           'Carregando...'
         ) : (
           <>
-            <Tabs defaultValue='account' className='w-full'>
+            <Tabs defaultValue='pecas' className='w-full'>
               <TabsList>
-                <TabsTrigger value='serv'>Serviços</TabsTrigger>
                 <TabsTrigger value='pecas'>Venda de peças</TabsTrigger>
+                <TabsTrigger value='serv'>Serviços</TabsTrigger>
               </TabsList>
               <TabsContent value='serv' className=''>
                 <div className='flex items-center mb-6'>

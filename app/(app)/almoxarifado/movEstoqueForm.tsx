@@ -219,13 +219,15 @@ export default function MoviEstoque() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {allPecas.map((item: Item) => (
-                      <SelectItem key={item.ID} value={String(item.ID)}>
-                        {item.Descricao}{' '}
-                        {item.sensorPlaca ? `${item.nSeriePlaca} ` : null}
-                        {item.nSerieSensor ? `${item.nSerieSensor} ` : null}
-                      </SelectItem>
-                    ))}
+                    {allPecas
+                      .filter((item: Item) => item.Quantidade > 0)
+                      .map((item: Item) => (
+                        <SelectItem key={item.ID} value={String(item.ID)}>
+                          {item.Descricao}{' '}
+                          {item.sensorPlaca ? `${item.nSeriePlaca} ` : null}
+                          {item.nSerieSensor ? `${item.nSerieSensor} ` : null}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </FormItem>

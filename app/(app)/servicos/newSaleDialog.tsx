@@ -112,6 +112,7 @@ export function NewSalePecasDialog() {
     mutateVenda.mutate(vendas, {
       onSuccess: () => {
         setOpenDialog(true);
+        queryClient.invalidateQueries(['vendas']);
       },
     });
     form.reset();
