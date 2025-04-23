@@ -125,6 +125,8 @@ export function RegisterPecasForm() {
   const { data: equipamentos } = useQuery(['equipamentos'], getEquipamentos);
 
   function onSubmit(values: ItemFormData) {
+    console.log(values);
+
     equipamentos
       .filter((itens: IEquipamento) => itens.ID == Number(values.ItemID))
       .map((item: IEquipamento) => {
@@ -138,6 +140,7 @@ export function RegisterPecasForm() {
           mutatePecas.mutate(newValue, {
             onSuccess: () => {
               setOpenDialog(true);
+              queryClient.invalidateQueries(['allPecas']);
             },
           });
           // console.log(newValue);
@@ -150,6 +153,7 @@ export function RegisterPecasForm() {
           mutatePecas.mutate(newValue, {
             onSuccess: () => {
               setOpenDialog(true);
+              queryClient.invalidateQueries(['allPecas']);
             },
           });
           // console.log(newValue);
@@ -239,7 +243,6 @@ export function RegisterPecasForm() {
             )}
           />
 
-          {/* Campo: Visor (Checkboxes) */}
           <FormField
             control={form.control}
             name='visor'
@@ -299,8 +302,8 @@ export function RegisterPecasForm() {
                       <input
                         type='radio'
                         value='2'
-                        checked={field.value === '0'}
-                        onChange={() => field.onChange('0')}
+                        checked={field.value === '2'}
+                        onChange={() => field.onChange('2')}
                         className='w-5 h-5'
                       />
                       <span>Sensor</span>

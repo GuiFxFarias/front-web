@@ -225,7 +225,15 @@ export default function MoviEstoque() {
                         <SelectItem key={item.ID} value={String(item.ID)}>
                           {item.Descricao}{' '}
                           {item.sensorPlaca ? `${item.nSeriePlaca} ` : null}
-                          {item.nSerieSensor ? `${item.nSerieSensor} ` : null}
+                          {item.nSerieSensor
+                            ? `${item.nSerieSensor} `
+                            : null}{' '}
+                          {item.protocolo && <span>{item.protocolo}</span>}{' '}
+                          {item.faixaSensor && <span>{item.faixaSensor}</span>}{' '}
+                          {item.dataFabricacao && (
+                            <span>{item.dataFabricacao}</span>
+                          )}{' '}
+                          {item.modeloPlaca && <span>{item.modeloPlaca}</span>}
                         </SelectItem>
                       ))}
                   </SelectContent>

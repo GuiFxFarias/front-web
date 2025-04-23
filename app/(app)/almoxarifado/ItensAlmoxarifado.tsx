@@ -89,26 +89,52 @@ export default function AlmoxarifadoItens() {
                       {placas
                         .filter((peca) => peca.Quantidade > 0)
                         .map((pecasTipos: Item, index) => (
-                          <div key={index} className='flex justify-between'>
-                            <p className='w-[40%] truncate'>
-                              {pecasTipos.Descricao}
-                              {pecasTipos.nSeriePlaca
-                                ? ` - ${pecasTipos.nSeriePlaca}`
-                                : null}
-                              {pecasTipos.nSerieSensor
-                                ? ` - ${pecasTipos.nSerieSensor}`
-                                : null}
-                            </p>
-                            <p className='text-gray-600 w-[45%]'>
-                              Valor da peça (única):{' '}
-                              {new Intl.NumberFormat('pt-BR', {
-                                style: 'currency',
-                                currency: 'BRL',
-                              }).format(Number(pecasTipos.valorPeca))}
-                            </p>
-                            <p className='text-gray-800 w-[15%] font-semibold'>
-                              Quantidade: {pecasTipos.Quantidade}
-                            </p>
+                          <div key={index} className='flex flex-col my-2'>
+                            <div className='flex justify-between my-1'>
+                              <p className='w-[40%] truncate'>
+                                {pecasTipos.Descricao}
+                                {pecasTipos.nSeriePlaca
+                                  ? ` - ${pecasTipos.nSeriePlaca}`
+                                  : ''}
+                                {pecasTipos.nSerieSensor
+                                  ? ` - ${pecasTipos.nSerieSensor}`
+                                  : ''}
+                              </p>
+                              <p className='text-gray-600 w-[45%]'>
+                                Valor da peça (única):{' '}
+                                {new Intl.NumberFormat('pt-BR', {
+                                  style: 'currency',
+                                  currency: 'BRL',
+                                }).format(Number(pecasTipos.valorPeca))}
+                              </p>
+                              <p className='text-gray-800 w-[15%] font-semibold'>
+                                Quantidade: {pecasTipos.Quantidade}
+                              </p>
+                            </div>
+
+                            <div className='flex flex-wrap gap-4 text-sm text-gray-500 border-b'>
+                              {pecasTipos.protocolo && (
+                                <span>Protocolo: {pecasTipos.protocolo}</span>
+                              )}
+                              {pecasTipos.faixaSensor && (
+                                <span>
+                                  Faixa Sensor: {pecasTipos.faixaSensor}
+                                </span>
+                              )}
+                              {pecasTipos.dataFabricacao && (
+                                <span>
+                                  Data Fabricação:{' '}
+                                  {new Date(
+                                    pecasTipos.dataFabricacao
+                                  ).toLocaleDateString('pt-BR')}
+                                </span>
+                              )}
+                              {pecasTipos.modeloPlaca && (
+                                <span>
+                                  Modelo Placa: {pecasTipos.modeloPlaca}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         ))}
                     </AccordionContent>
@@ -129,26 +155,47 @@ export default function AlmoxarifadoItens() {
                       {sensores
                         .filter((peca) => peca.Quantidade > 0)
                         .map((sensor: Item, index) => (
-                          <div key={index} className='flex justify-between'>
-                            <p className='w-[40%] truncate'>
-                              {sensor.Descricao}
-                              {sensor.nSeriePlaca
-                                ? ` - ${sensor.nSeriePlaca}`
-                                : null}
-                              {sensor.nSerieSensor
-                                ? ` - ${sensor.nSerieSensor}`
-                                : null}
-                            </p>
-                            <p className='text-gray-600 w-[45%]'>
-                              Valor da peça (única):{' '}
-                              {new Intl.NumberFormat('pt-BR', {
-                                style: 'currency',
-                                currency: 'BRL',
-                              }).format(Number(sensor.valorPeca))}
-                            </p>
-                            <p className='text-gray-800 w-[15%] font-semibold'>
-                              Quantidade: {sensor.Quantidade}
-                            </p>
+                          <div key={index} className='flex flex-col my-2'>
+                            <div className='flex justify-between'>
+                              <p className='w-[40%] truncate'>
+                                {sensor.Descricao}
+                                {sensor.nSeriePlaca
+                                  ? ` - ${sensor.nSeriePlaca}`
+                                  : ''}
+                                {sensor.nSerieSensor
+                                  ? ` - ${sensor.nSerieSensor}`
+                                  : ''}
+                              </p>
+                              <p className='text-gray-600 w-[45%]'>
+                                Valor da peça (única):{' '}
+                                {new Intl.NumberFormat('pt-BR', {
+                                  style: 'currency',
+                                  currency: 'BRL',
+                                }).format(Number(sensor.valorPeca))}
+                              </p>
+                              <p className='text-gray-800 w-[15%] font-semibold'>
+                                Quantidade: {sensor.Quantidade}
+                              </p>
+                            </div>
+                            <div className='flex flex-wrap gap-4 text-sm text-gray-500 border-b'>
+                              {sensor.protocolo && (
+                                <span>Protocolo: {sensor.protocolo}</span>
+                              )}
+                              {sensor.faixaSensor && (
+                                <span>Faixa Sensor: {sensor.faixaSensor}</span>
+                              )}
+                              {sensor.dataFabricacao && (
+                                <span>
+                                  Data Fabricação:{' '}
+                                  {new Date(
+                                    sensor.dataFabricacao
+                                  ).toLocaleDateString('pt-BR')}
+                                </span>
+                              )}
+                              {sensor.modeloPlaca && (
+                                <span>Modelo Placa: {sensor.modeloPlaca}</span>
+                              )}
+                            </div>
                           </div>
                         ))}
                     </AccordionContent>
