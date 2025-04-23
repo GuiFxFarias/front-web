@@ -34,7 +34,7 @@ export default function PecasVenda() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState<string>('');
   const [proposta, setProposta] = useState<number>();
-  const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [openDialog, setOpen] = useState<boolean>(false);
   const [desc, setDesc] = useState<IDesc[]>();
   const [alertItem, setAlertItem] = useState<boolean>();
 
@@ -512,32 +512,58 @@ export default function PecasVenda() {
           'Quantidade retirada:',
           quantidadeVendida
         );
-        mutatePutPecaQtd.mutate({
-          id: String(pecaId),
-          body: {
-            ID: peca.ID,
-            Quantidade: peca.Quantidade - quantidadeVendida,
+
+        mutatePutPecaQtd.mutate(
+          {
+            id: String(pecaId),
+            body: {
+              ID: peca.ID,
+              Quantidade: peca.Quantidade - quantidadeVendida,
+            },
           },
-        });
+          {
+            onSuccess: () => {
+              queryClient.invalidateQueries(['vendas']);
+            },
+          }
+        );
       }
     }
-    mutateStatus.mutate({
-      id: idVenda,
-      campo: {
-        status: campoStatus.status,
+
+    mutateStatus.mutate(
+      {
+        id: idVenda,
+        campo: {
+          status: campoStatus.status,
+        },
       },
-    });
-    setOpenDialog(true);
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries(['vendas']);
+        },
+      }
+    );
+    setOpen(true);
   }
 
   function cancelarProposta(idVenda: string, campoStatus: { status: string }) {
-    mutateStatus.mutate({
-      id: idVenda,
-      campo: {
-        status: campoStatus.status,
+    mutateStatus.mutate(
+      {
+        id: idVenda,
+        campo: {
+          status: campoStatus.status,
+        },
       },
-    });
-    setOpenDialog(true);
+      {
+        onSuccess: () => {
+          setOpen(true);
+          setTimeout(() => {
+            setOpen(false);
+            queryClient.invalidateQueries(['vendas']);
+          }, 2000);
+        },
+      }
+    );
   }
 
   const filteredVendas = useMemo(() => {
@@ -693,7 +719,7 @@ export default function PecasVenda() {
                           : 'Sua proposta está encerrada e cancelada'
                       }
                       open={openDialog}
-                      setOpen={setOpenDialog}
+                      setOpen={setOpen}
                     />
                     <Dialog open={alertItem}>
                       <DialogContent className='w-[50vw]'>

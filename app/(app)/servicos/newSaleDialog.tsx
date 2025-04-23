@@ -188,7 +188,7 @@ export function NewSalePecasDialog() {
                             .filter((peca: Item) => peca.Quantidade > 0)
                             .map((peca: Item) => (
                               <SelectItem key={peca.ID} value={String(peca.ID)}>
-                                {peca.Descricao} - {peca.nSeriePlaca}{' '}
+                                {peca.Descricao} {peca.nSeriePlaca}{' '}
                                 {peca.nSerieSensor}
                               </SelectItem>
                             ))}

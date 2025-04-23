@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Button } from './ui/button';
 
 export default function DialogConfirmForm({
   open,
@@ -23,6 +24,14 @@ export default function DialogConfirmForm({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{text}</DialogDescription>
+          <div className='flex justify-end pt-4'>
+            <Button
+              onClick={() => setOpen(false)}
+              className='bg-blue-500 text-white hover:bg-blue-600'
+            >
+              Fechar
+            </Button>
+          </div>
         </DialogHeader>
       </DialogContent>
     </Dialog>
