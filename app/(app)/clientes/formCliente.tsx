@@ -213,8 +213,8 @@ export default function ClienteForm() {
           </Card>
         ))}
       </div>
-      <Card className='w-[40vw] mx-auto h-full overflow-y-auto'>
-        <CardContent className='p-6'>
+      <Card className='w-[40vw] mx-auto h-full overflow-y-auto flex items-center justify-center'>
+        <CardContent className='p-6 w-full'>
           <h2 className='text-xl font-semibold mb-6 text-center'>
             Cadastro de Cliente
           </h2>
