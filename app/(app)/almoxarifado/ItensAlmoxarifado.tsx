@@ -250,7 +250,9 @@ export default function AlmoxarifadoItens() {
                   <AccordionItem value='item-3'>
                     <AccordionTrigger>
                       Equipamentos | Quantidade:{' '}
-                      {allProducts.reduce((sum, _, index) => sum + index, 1)}
+                      {allProducts.length > 1
+                        ? allProducts.reduce((sum, _, index) => sum + index, 1)
+                        : 0}
                     </AccordionTrigger>
                     <AccordionContent>
                       {allProducts
