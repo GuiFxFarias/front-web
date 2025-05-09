@@ -281,7 +281,7 @@ export default function NewServiceForm() {
           </div>
 
           {/* Right Side: Image Viewer (unchanged) */}
-          <div>
+          <div className='max-md:hidden'>
             <div className='relative cursor-pointer' onClick={toggleZoom}>
               <Image
                 src={imagePath}

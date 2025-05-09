@@ -155,56 +155,67 @@ export function DialogConfirm({
           Salvar
         </Button>
       </DialogTrigger>
-      <DialogContent className='sm:max-w-[725px] h-[70vh] overflow-auto'>
+
+      <DialogContent className='w-[95vw] sm:max-w-[725px] max-h-[90vh] overflow-y-auto p-4'>
         <DialogHeader>
-          <DialogTitle>Peças | Cliente: {cliente.nome}</DialogTitle>
+          <DialogTitle className='text-base sm:text-xl'>
+            Peças | Cliente: {cliente.nome}
+          </DialogTitle>
         </DialogHeader>
-        <DialogDescription className='border-b border-gray-700 pb-1 mb-5'>
+
+        <DialogDescription className='border-b border-gray-300 pb-1 mb-4 text-sm'>
           Peças que serão utilizadas nesse serviço
         </DialogDescription>
-        {services.map((service) => (
-          <div key={service.ID}>
-            <p className='border-b border-gray-300 pb-2'>{service.Descricao}</p>
+
+        <div className='space-y-3'>
+          {services.map((service) => (
+            <div key={service.ID}>
+              <p className='border-b border-gray-300 pb-2 text-sm'>
+                {service.Descricao}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className='mt-4'>
+          <Textarea
+            placeholder='Adicione a inspeção visual.'
+            className='resize-none w-full min-h-[100px] sm:min-h-[140px]'
+            onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+              setInspVisu(e.target.value)
+            }
+          />
+        </div>
+
+        <div className='mt-4 space-y-2'>
+          <div className='flex items-start gap-2'>
+            <Checkbox
+              id='manuPrev'
+              className='mt-1'
+              onCheckedChange={(check: boolean) => setManuPrev(check)}
+            />
+            <label htmlFor='manuPrev' className='text-sm'>
+              Manutenção preventiva (desmontagem, jateamento, pintura, troca de
+              orings e parafuso, nova calibração)
+            </label>
           </div>
-        ))}
-        <Textarea
-          placeholder='Adicione a inspeção visual.'
-          className='resize-none h-[20vh]'
-          onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-            setInspVisu(e.target.value)
-          }
-        />
-        <div className='flex items-center'>
-          <Checkbox
-            id='manuPrev'
-            className='mr-4'
-            onCheckedChange={(check: boolean) => setManuPrev(check)}
-          />
-          <label
-            htmlFor='manuPrev'
-            className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-          >
-            Manutenção preventiva (desmontagem, jateamento, pintura, troca de
-            orings e parafuso, nova calibração)
-          </label>
+
+          <div className='flex items-start gap-2'>
+            <Checkbox
+              id='manuPrevTomada'
+              className='mt-1'
+              onCheckedChange={(check: boolean) => setManuPrevTomada(check)}
+            />
+            <label htmlFor='manuPrevTomada' className='text-sm'>
+              Manutenção preventiva tomada de nível (desmontagem, jateamento,
+              pintura, assepsia, reusinagem da tomada de nível, solda de lamida
+              de aço inox 316L, fornecimento com certificado de calibração com
+              reastrabilidade RBC)
+            </label>
+          </div>
         </div>
-        <div className='flex items-center'>
-          <Checkbox
-            id='manuPrevTomada'
-            className='mr-4'
-            onCheckedChange={(check: boolean) => setManuPrevTomada(check)}
-          />
-          <label
-            htmlFor='manuPrevTomada'
-            className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-          >
-            Manutenção preventiva tomada de nível (desmontagem, jateamento,
-            pintura, assepsia, reusinagem da tomada de nível, solda de lamida de
-            aço inox 316L, fornecimento com certificado de calibração com
-            reastrabilidade RBC)
-          </label>
-        </div>
-        <DialogFooter>
+
+        <DialogFooter className='mt-4'>
           <Button onClick={() => handleSaveService()} type='button'>
             Enviar Serviço
           </Button>
