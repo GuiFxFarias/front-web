@@ -526,164 +526,133 @@ export default function Relatorio() {
   };
 
   return (
-    <div className='p-6 bg-gray-100 min-h-screen'>
-      <h1 className='text-3xl font-normal mb-4'>
+    <div className='p-4 sm:p-6 bg-gray-100 min-h-screen'>
+      <h1 className='text-2xl sm:text-3xl font-normal mb-4'>
         Proposta Técnica: {codService} | Cliente:{' '}
         {!isLoading ? clienteID?.nome : 'Carregando...'}
       </h1>
-      <h1 className='text-2xl font-light mb-4 mt-10 text-start'>
+
+      <h2 className='text-xl sm:text-2xl font-light mb-4 mt-10 text-start'>
         Tabela de Peças
-      </h1>
+      </h2>
 
-      <div className='h-[50vh] overflow-scroll'>
-        {servicoCodService?.map((serv: IService, index: number) => {
-          return (
-            <Card key={index} className='mt-4'>
-              <CardHeader className='flex justify-between flex-row items-center'>
-                <CardTitle>Item do serviço: {serv.itemService}</CardTitle>
-              </CardHeader>
-              <CardContent className='px-8'>
-                <p>
-                  Equipamento: <strong>{serv.equipamentoDescricao}</strong>
-                </p>
+      <div className='max-h-[60vh] overflow-y-auto space-y-4'>
+        {servicoCodService?.map((serv: IService, index: number) => (
+          <Card key={index} className='mt-2'>
+            <CardHeader className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2'>
+              <CardTitle className='text-base sm:text-lg'>
+                Item do serviço: {serv.itemService}
+              </CardTitle>
+            </CardHeader>
 
+            <CardContent className='px-4 sm:px-8 text-sm space-y-2'>
+              <p>
+                <strong>Equipamento:</strong> {serv.equipamentoDescricao}
+              </p>
+              {serviceId
+                .filter(
+                  (value: IServiceID) =>
+                    value.codService === serv.codService &&
+                    value.itemService === serv.itemService
+                )
+                .map((peca: IServiceID, i: number) => (
+                  <div key={i} className='border p-2 rounded-md bg-white'>
+                    <p>
+                      <strong>Visor ou carcaça:</strong>{' '}
+                      {peca.Visor === '1' && peca.Carcaca === '1'
+                        ? 'Visor e Carcaça'
+                        : peca.Visor === '1'
+                        ? 'Visor'
+                        : peca.Carcaca === '1'
+                        ? 'Carcaça'
+                        : 'Nenhum'}
+                    </p>
+                    <p>
+                      <strong>Inspeção visual:</strong>{' '}
+                      {peca.insVisual || 'Não foi adicionado a inspeção visual'}
+                    </p>
+                    <p>
+                      <strong>Tomada de nível:</strong>{' '}
+                      {peca.manuPrevTomada ? 'Sim - R$1.500,00' : 'Não'}
+                    </p>
+                    <p>
+                      <strong>Manutenção preventiva:</strong>{' '}
+                      {peca.manuPreventiva ? 'Sim - R$450,00' : 'Não'}
+                    </p>
+                  </div>
+                ))}
+
+              <p className='font-semibold mt-4'>Peças de serviço:</p>
+
+              <div className='ring-1 rounded-md ring-zinc-500 overflow-x-auto'>
+                <div className='min-w-[500px] grid grid-cols-3 bg-blue-400 px-4 py-2 rounded-t-md text-white font-semibold text-sm'>
+                  <div>Descrição</div>
+                  <div>Valor</div>
+                  <div>Quantidade</div>
+                </div>
                 {serviceId
                   .filter(
-                    (value: IServiceID, index: number, self: any) =>
+                    (value: IServiceID) =>
                       value.codService === serv.codService &&
-                      value.itemService === serv.itemService &&
-                      self.findIndex(
-                        (v: any) =>
-                          v.Visor === value.Visor &&
-                          v.Carcaca === value.Carcaca &&
-                          v.codService === value.codService &&
-                          v.itemService === value.itemService
-                      ) === index
+                      value.itemService === serv.itemService
                   )
-                  .map((peca: IServiceID, i: number) => {
-                    return (
-                      <div key={i} className='w-[100%] h-[8vh] flex flex-col'>
-                        <p>
-                          Visor ou carcaça:{' '}
-                          <strong>
-                            {peca.Visor == '1' && peca.Carcaca == '1'
-                              ? 'Visor e Carcaça'
-                              : null}
-                            {peca.Visor == '1' && peca.Carcaca == '0'
-                              ? 'Visor'
-                              : null}
-                            {peca.Carcaca == '1' && peca.Visor == '0'
-                              ? 'Carcaça'
-                              : null}
-                          </strong>
-                        </p>
-                        <p>
-                          Inspeção visual:{' '}
-                          <strong>
-                            {peca.insVisual
-                              ? peca.insVisual
-                              : 'Não foi adicionado a inspeção visual'}
-                          </strong>
-                        </p>
-                        <p>
-                          Tomada de nível:{' '}
-                          <strong>
-                            {peca.manuPrevTomada ? 'Sim - R$1.500,00' : 'Não'}
-                          </strong>
-                        </p>
-                        <p>
-                          Manutenção preventiva:{' '}
-                          <strong>
-                            {' '}
-                            {peca.manuPreventiva ? 'Sim - R$450,00' : 'Não'}
-                          </strong>
-                        </p>
-                      </div>
+                  .reduce((acc: any[], peca: IServiceID) => {
+                    const alreadyExists = acc.find(
+                      (item) =>
+                        item.itemService === peca.itemService && item.isExtra
                     );
-                  })}
 
-                <p className='text-gray-800 font-semibold mt-8 '>
-                  Peças de serviço:
-                </p>
+                    acc.push({
+                      descricao: peca.peca_Descricao,
+                      valor: Number(peca.valorPeca),
+                      quantidade: peca.quantidade_peca,
+                      isExtra: false,
+                      itemService: peca.itemService,
+                    });
 
-                <div className='ring-1 rounded-md ring-zinc-500 '>
-                  <div className='w-[100%] rounded-t-md px-4 py-2 bg-blue-400 h-[5vh] flex'>
-                    <div className='font-semibold w-[25%]'>Descrição</div>
-                    <div className='font-semibold w-[25%]'>Valor</div>
-                    <div className='font-semibold w-[25%]'>Quantidade</div>
-                  </div>
-                  {serviceId
-                    .filter(
-                      (value: IServiceID) =>
-                        value.codService == serv.codService &&
-                        value.itemService == serv.itemService
-                    )
-                    .reduce((acc: any[], peca: IServiceID) => {
-                      const alreadyExists = acc.find(
-                        (item) =>
-                          item.itemService === peca.itemService && item.isExtra
-                      );
+                    if (!alreadyExists) {
+                      let extraValue = 0;
+                      if (peca.manuPreventiva) extraValue += 450;
+                      if (peca.manuPrevTomada) extraValue += 1500;
 
-                      acc.push({
-                        descricao: peca.peca_Descricao,
-                        valor: Number(peca.valorPeca),
-                        quantidade: peca.quantidade_peca,
-                        isExtra: false,
-                        itemService: peca.itemService,
-                      });
-
-                      if (!alreadyExists) {
-                        let extraValue = 0;
-                        if (peca.manuPreventiva) extraValue += 450;
-                        if (peca.manuPrevTomada) extraValue += 1500;
-
-                        if (extraValue > 0) {
-                          acc.push({
-                            descricao: 'Manutenção preventiva',
-                            valor: extraValue,
-                            quantidade: 1,
-                            isExtra: true,
-                            itemService: peca.itemService,
-                          });
-                        }
+                      if (extraValue > 0) {
+                        acc.push({
+                          descricao: 'Manutenção preventiva',
+                          valor: extraValue,
+                          quantidade: 1,
+                          isExtra: true,
+                          itemService: peca.itemService,
+                        });
                       }
+                    }
 
-                      return acc;
-                    }, [])
-                    .map((item: IServiceItemDisplay, index: number) => (
-                      <div
-                        key={index}
-                        className='w-[100%] rounded-b-md px-4 py-2 bg-zinc-100 h-[5vh] flex'
-                      >
-                        <div
-                          className='w-[25%] truncate hover:cursor-pointer'
-                          title={item.descricao}
-                        >
-                          {item.descricao}
-                        </div>
-                        <div className='w-[25%]'>
-                          {new Intl.NumberFormat('pt-BR', {
-                            style: 'currency',
-                            currency: 'BRL',
-                          }).format(item.valor)}
-                        </div>
-                        <div className='w-[25%]'>{item.quantidade}</div>
+                    return acc;
+                  }, [])
+                  .map((item: IServiceItemDisplay, idx: number) => (
+                    <div
+                      key={idx}
+                      className='min-w-[500px] grid grid-cols-3 px-4 py-2 bg-zinc-100 text-sm border-t border-zinc-300'
+                    >
+                      <div className='truncate' title={item.descricao}>
+                        {item.descricao}
                       </div>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                      <div>
+                        {new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL',
+                        }).format(item.valor)}
+                      </div>
+                      <div>{item.quantidade}</div>
+                    </div>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-      {/* Botão para adicionar mais um item a proposta */}
 
-      <div className='mt-6 flex justify-end'>
+      <div className='mt-6 flex flex-col sm:flex-row justify-end gap-4'>
         <MoreItensDialog title='Adicionar mais itens' cliente={clienteID} />
-      </div>
-
-      {/* Botão para gerar PDF */}
-      <div className='mt-6 flex justify-end'>
         <Button onClick={gerarPDF} className='bg-blue-500 text-white'>
           Gerar PDF
         </Button>
