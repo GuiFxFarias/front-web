@@ -87,18 +87,19 @@ export function NewServiceDialog({ title }: { title?: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className='bg-blue-500 hover:bg-blue-600'>
+        <Button className='bg-blue-500 hover:bg-blue-600 w-full sm:w-auto'>
           {title ? title : '+ Novo Serviço'}
         </Button>
       </DialogTrigger>
-      <DialogContent className='w-[50vw]'>
+
+      <DialogContent className='w-[95vw] sm:w-[80vw] md:w-[60vw] lg:w-[50vw] max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Novo Serviço</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            {/* Select de Equipamento */}
+            {/* Cliente */}
             <FormField
               control={form.control}
               name='cliente'
@@ -129,7 +130,7 @@ export function NewServiceDialog({ title }: { title?: string }) {
               )}
             />
 
-            {/* Select de Categoria */}
+            {/* Modelo */}
             <FormField
               control={form.control}
               name='modelo'
@@ -150,22 +151,18 @@ export function NewServiceDialog({ title }: { title?: string }) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categories.map((category) => {
-                        return (
-                          <SelectItem
-                            key={category.value}
-                            value={category.value}
-                          >
-                            {category.label}
-                          </SelectItem>
-                        );
-                      })}
+                      {categories.map((category) => (
+                        <SelectItem key={category.value} value={category.value}>
+                          {category.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </FormItem>
               )}
             />
 
+            {/* Categoria */}
             <FormField
               control={form.control}
               name='category'
@@ -174,7 +171,6 @@ export function NewServiceDialog({ title }: { title?: string }) {
                   <FormLabel>Categoria</FormLabel>
                   <Select
                     onValueChange={(value) => {
-                      // console.log("Valor selecionado:", value);
                       setCategoryEquip(value);
                       setValueItem(' ');
                       field.onChange(value);
@@ -198,11 +194,9 @@ export function NewServiceDialog({ title }: { title?: string }) {
                           </SelectItem>
                         </>
                       ) : category == 'Posicionador' ? (
-                        <>
-                          <SelectItem value='Posicionador'>
-                            Posicionador
-                          </SelectItem>
-                        </>
+                        <SelectItem value='Posicionador'>
+                          Posicionador
+                        </SelectItem>
                       ) : (
                         <>
                           <SelectItem value='Absoluto'>Absoluto</SelectItem>
@@ -223,7 +217,7 @@ export function NewServiceDialog({ title }: { title?: string }) {
               )}
             />
 
-            {/* Select de Equipamento */}
+            {/* Equipamento */}
             <FormField
               control={form.control}
               name='equipment'
@@ -232,14 +226,13 @@ export function NewServiceDialog({ title }: { title?: string }) {
                   <FormLabel>Equipamento</FormLabel>
                   <Select
                     onValueChange={(value) => {
-                      // console.log("Valor selecionado:", value);
                       field.onChange(value);
                       setValueItem(value);
                     }}
                     value={valueItem}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className='max-[400px]:w-[81vw] max-[500px]:w-[84vw] max-[600px]:w-[88vw] max-md:w-full w-full overflow-hidden text-ellipsis whitespace-nowrap'>
                         <SelectValue placeholder='Selecione o equipamento' />
                       </SelectTrigger>
                     </FormControl>
@@ -250,7 +243,11 @@ export function NewServiceDialog({ title }: { title?: string }) {
                             categoryEquip === item.Categoria
                         )
                         .map((item: IEquipamento) => (
-                          <SelectItem key={item.ID} value={String(item.ID)}>
+                          <SelectItem
+                            key={item.ID}
+                            value={String(item.ID)}
+                            title={item.Descricao}
+                          >
                             {item.Descricao}
                           </SelectItem>
                         ))}
@@ -260,16 +257,19 @@ export function NewServiceDialog({ title }: { title?: string }) {
               )}
             />
 
-            {/* Botões de Ação */}
-            <div className='flex justify-end gap-2'>
+            {/* Botões */}
+            <div className='flex flex-col sm:flex-row justify-end gap-2'>
               <Button
                 variant='outline'
                 type='button'
                 onClick={() => setOpen(false)}
+                className='w-full sm:w-auto'
               >
                 Cancelar
               </Button>
-              <Button type='submit'>Cadastrar Serviço</Button>
+              <Button type='submit' className='w-full sm:w-auto'>
+                Cadastrar Serviço
+              </Button>
             </div>
           </form>
         </Form>

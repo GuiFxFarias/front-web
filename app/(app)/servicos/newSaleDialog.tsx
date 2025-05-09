@@ -121,17 +121,20 @@ export function NewSalePecasDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className='bg-blue-500 hover:bg-blue-600'>
+        <Button className='bg-blue-500 hover:bg-blue-600 w-full sm:w-auto'>
           + Nova venda de peças
         </Button>
       </DialogTrigger>
-      <DialogContent className='w-[50vw] overflow-y-auto max-h-[80vh]'>
+
+      <DialogContent className='w-[95vw] sm:w-[80vw] md:w-[60vw] lg:w-[50vw] overflow-y-auto max-h-[90vh]'>
         <DialogHeader>
           <DialogTitle>Nova venda de peças</DialogTitle>
         </DialogHeader>
+
         <DialogDescription className='text-xs text-zinc-400'>
           Preencha os dados para realizar a nova venda de peças.
         </DialogDescription>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
             {/* Cliente */}
@@ -162,6 +165,7 @@ export function NewSalePecasDialog() {
               )}
             />
 
+            {/* Lista de Peças */}
             {fields.map((field, index) => (
               <div
                 key={field.id}
@@ -210,6 +214,7 @@ export function NewSalePecasDialog() {
                           type='number'
                           placeholder='Quantidade'
                           {...field}
+                          className='w-full'
                         />
                       </FormControl>
                     </FormItem>
@@ -254,11 +259,12 @@ export function NewSalePecasDialog() {
             />
 
             {/* Botões */}
-            <div className='flex justify-end gap-2'>
+            <div className='flex flex-col sm:flex-row justify-end gap-2'>
               <Button
                 type='button'
                 variant='outline'
                 onClick={() => append({ idPeca: '', quantidade: '' })}
+                className='w-full sm:w-auto'
               >
                 + Adicionar Peça
               </Button>
@@ -266,12 +272,16 @@ export function NewSalePecasDialog() {
                 type='button'
                 variant='outline'
                 onClick={() => setOpen(false)}
+                className='w-full sm:w-auto'
               >
                 Cancelar
               </Button>
-              <Button type='submit'>Cadastrar</Button>
+              <Button type='submit' className='w-full sm:w-auto'>
+                Cadastrar
+              </Button>
             </div>
           </form>
+
           <DialogConfirmForm
             title='Venda cadastrada'
             text='Sua venda foi cadastrada com sucesso!'

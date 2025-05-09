@@ -47,48 +47,51 @@ export default function ServicesItens() {
   }, [filterCodService, search]);
 
   return (
-    <div className='flex-1 p-8'>
-      <div className='flex justify-between items-center mb-6'>
-        <h1 className='text-3xl font-bold text-gray-800'>Lista de Propostas</h1>
-        <div className='flex space-x-4'>
+    <div className='flex-1 p-4 sm:p-8'>
+      {/* Header com Título e Botões */}
+      <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6'>
+        <h1 className='text-2xl sm:text-3xl font-bold text-gray-800'>
+          Lista de Propostas
+        </h1>
+        <div className='flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto'>
           <NewServiceDialog />
           <NewSalePecasDialog />
         </div>
       </div>
-      <div className='grid grid-cols-1 gap-4 '>
-        {/* Card de Serviço 1 */}
+
+      {/* Tabs com Cards */}
+      <div className='grid grid-cols-1 gap-4'>
         {isLoading ? (
           'Carregando...'
         ) : (
           <>
             <Tabs defaultValue='pecas' className='w-full'>
-              <TabsList>
+              <TabsList className='flex flex-wrap justify-start gap-2 mb-4'>
                 <TabsTrigger value='pecas'>Venda de peças</TabsTrigger>
                 <TabsTrigger value='serv'>Serviços</TabsTrigger>
               </TabsList>
-              <TabsContent value='serv' className=''>
-                <div className='flex items-center mb-6'>
+
+              {/* Tab de Serviços */}
+              <TabsContent value='serv'>
+                <div className='flex flex-col sm:flex-row items-center gap-4 mb-6'>
                   <Input
                     type='text'
                     placeholder='Pesquisar cliente...'
-                    className='w-full max-w-md'
+                    className='w-full sm:max-w-md'
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
+
                 <div className='overflow-y-auto max-h-[60vh] space-y-2'>
                   {filteredServices.map(([codService, services]) => (
                     <Card key={codService}>
-                      <CardHeader className='flex justify-between flex-row items-center'>
+                      <CardHeader className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2'>
                         <CardTitle>Serviço {codService}</CardTitle>
-                        <div className='flex items-center space-x-2'>
-                          {/* Exibe o Dialog do primeiro item do grupo */}
-                          <DialogVerProposta
-                            // equipamentos={equipamentosRelacionados}
-                            status={services[0].status}
-                            codService={services[0].codService}
-                            descCliente={services[0].descCliente}
-                          />
-                        </div>
+                        <DialogVerProposta
+                          status={services[0].status}
+                          codService={services[0].codService}
+                          descCliente={services[0].descCliente}
+                        />
                       </CardHeader>
 
                       <CardContent>
@@ -123,6 +126,8 @@ export default function ServicesItens() {
                   ))}
                 </div>
               </TabsContent>
+
+              {/* Tab de Peças */}
               <TabsContent value='pecas'>
                 <PecasVenda />
               </TabsContent>
