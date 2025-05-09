@@ -110,15 +110,20 @@ export function NewSaleDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className='bg-blue-500 hover:bg-blue-600'>+ Nova venda</Button>
+        <Button className='bg-blue-500 hover:bg-blue-600 w-full sm:w-auto'>
+          + Nova venda
+        </Button>
       </DialogTrigger>
-      <DialogContent className='w-[50vw] overflow-y-auto max-h-[80vh]'>
+
+      <DialogContent className='w-[95vw] sm:w-[80vw] md:w-[60vw] lg:w-[50vw] max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Nova venda</DialogTitle>
         </DialogHeader>
+
         <DialogDescription className='text-xs text-zinc-400'>
           Preencha os dados para realizar a nova venda.
         </DialogDescription>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
             {/* Cliente */}
@@ -152,7 +157,6 @@ export function NewSaleDialog() {
             {fields.map((field, index) => {
               const tipoSelecionado = form.watch(`itens.${index}.tipoProduto`);
               const marcaSelecionada = form.watch(`itens.${index}.marca`);
-
               const produtosFiltrados =
                 tipoSelecionado === 'Transmissor'
                   ? prdTrm.filter((item) => item.modelo == marcaSelecionada)
@@ -165,6 +169,7 @@ export function NewSaleDialog() {
                   key={field.id}
                   className='border p-3 rounded-md space-y-2 relative'
                 >
+                  {/* Marca */}
                   <FormField
                     control={form.control}
                     name={`itens.${index}.marca`}
@@ -201,7 +206,7 @@ export function NewSaleDialog() {
                     )}
                   />
 
-                  {/* tipoProduto */}
+                  {/* Tipo Produto */}
                   <FormField
                     control={form.control}
                     name={`itens.${index}.tipoProduto`}
@@ -230,7 +235,7 @@ export function NewSaleDialog() {
                     )}
                   />
 
-                  {/* itemVenda */}
+                  {/* Item de Venda */}
                   <FormField
                     control={form.control}
                     name={`itens.${index}.itemVenda`}
@@ -238,13 +243,17 @@ export function NewSaleDialog() {
                       <FormItem>
                         <FormLabel>Item de Venda</FormLabel>
                         <FormControl>
-                          <Input placeholder='Ex: 1' {...field} />
+                          <Input
+                            placeholder='Ex: 1'
+                            {...field}
+                            className='w-full'
+                          />
                         </FormControl>
                       </FormItem>
                     )}
                   />
 
-                  {/* idProduto */}
+                  {/* Produto */}
                   <FormField
                     control={form.control}
                     name={`itens.${index}.idProduto`}
@@ -279,7 +288,7 @@ export function NewSaleDialog() {
                     )}
                   />
 
-                  {/* botão de remover */}
+                  {/* Botão de remover */}
                   <Button
                     type='button'
                     variant='destructive'
@@ -318,7 +327,7 @@ export function NewSaleDialog() {
             />
 
             {/* Botões */}
-            <div className='flex justify-end gap-2'>
+            <div className='flex flex-col sm:flex-row justify-end gap-2'>
               <Button
                 type='button'
                 variant='outline'
@@ -330,6 +339,7 @@ export function NewSaleDialog() {
                     idProduto: '',
                   })
                 }
+                className='w-full sm:w-auto'
               >
                 + Adicionar Item
               </Button>
@@ -337,12 +347,16 @@ export function NewSaleDialog() {
                 type='button'
                 variant='outline'
                 onClick={() => setOpen(false)}
+                className='w-full sm:w-auto'
               >
                 Cancelar
               </Button>
-              <Button type='submit'>Cadastrar</Button>
+              <Button type='submit' className='w-full sm:w-auto'>
+                Cadastrar
+              </Button>
             </div>
           </form>
+
           <DialogConfirmForm
             title='Venda cadastrada'
             text='Sua venda foi cadastrada com sucesso!'
