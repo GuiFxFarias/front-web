@@ -74,10 +74,7 @@ export default function LoginPage() {
 
         router.push('/painel');
       } else {
-        console.error(
-          'Erro no login:',
-          resJson?.erro || 'Autenticação falhou.'
-        );
+        console.log('Erro no login:', resJson?.erro || 'Autenticação falhou.');
       }
     } catch (error: any) {
       console.log('Erro no login:', error.message);
