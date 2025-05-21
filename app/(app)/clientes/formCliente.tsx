@@ -73,7 +73,7 @@ export default function ClienteForm() {
   if (!clientes || clientes.length === 0) {
     return (
       <div>
-        <p className='text-center mt-4'>Nenhum cliente cadastrado ainda.</p>;
+        <p className='text-center mt-4'>Nenhum cliente cadastrado ainda.</p>
         <Card className='w-[40vw] mx-auto h-full overflow-y-auto'>
           <CardContent className='p-6'>
             <h2 className='text-xl font-semibold mb-6 text-center'>

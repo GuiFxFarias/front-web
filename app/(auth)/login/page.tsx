@@ -64,10 +64,10 @@ export default function LoginPage() {
         setCookie('token', token, {
           expires: new Date(expiration),
           path: '/',
-          // secure: process.env.NODE_ENV === 'production',
-          secure: false,
-          // sameSite: 'none',
-          sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production',
+          // secure: false,
+          sameSite: 'none',
+          // sameSite: 'lax',
         });
 
         localStorage.setItem('usuarioEmail', usuario.Email);
