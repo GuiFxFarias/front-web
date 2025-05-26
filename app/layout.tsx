@@ -54,6 +54,11 @@ export default function RootLayout({
           Propostas comerciais
         </Button>
       </Link>
+      <Link href='/manutencao' className='w-full block' onClick={closeDrawer}>
+        <Button className='w-full justify-start' variant='ghost'>
+          Serviço de manutenção
+        </Button>
+      </Link>
       <Link href='/produtos' className='w-full block' onClick={closeDrawer}>
         <Button className='w-full justify-start' variant='ghost'>
           Produtos
