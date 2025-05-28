@@ -30,7 +30,7 @@ import {
   FormControl,
   FormMessage,
 } from '@/components/ui/form';
-import { postNovaOS } from '@/app/(app)/manutencao/api/postNovaOs';
+// import { postNovaOS } from '@/app/(app)/manutencao/api/postNovaOs';
 
 const tiposServico = ['Fornecimento', 'Manutenção', 'Pintura', 'Outros'];
 
@@ -60,15 +60,14 @@ export function DialogNovaOS() {
 
   const { data: dataCliente = [] } = useQuery(['clientes'], getClientes);
 
-  const onSubmit = async (data: FormSchema) => {
-    const response = await postNovaOS({
-      data_abertura: data.data_abertura,
-      tipo_servico: data.tipo_servico,
-      cliente_id: data.cliente_id,
-      anexo_doc: data.anexo_doc,
-    });
-
-    console.log('Resposta da API:', response);
+  const onSubmit = async () => {
+    // const response = await postNovaOS({
+    //   data_abertura: data.data_abertura,
+    //   tipo_servico: data.tipo_servico,
+    //   cliente_id: data.cliente_id,
+    //   anexo_doc: data.anexo_doc,
+    // });
+    // console.log('Resposta da API:', response);
   };
 
   return (
